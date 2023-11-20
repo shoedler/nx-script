@@ -7,4 +7,18 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec
+      Command="call antlr -visitor -no-listener -Dlanguage=CSharp -o $(ProjectDir)\\src $(ProjectDir)\\src\\Nx.g4" />
+  </Target>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec
+      Command="del $(ProjectDir)\\src\\NxLexer.interp&#xD;&#xA;del $(ProjectDir)\\src\\NxLexer.tokens&#xD;&#xA;del $(ProjectDir)\\src\\Nx.interp&#xD;&#xA;del $(ProjectDir)\\src\\Nx.tokens" />
+  </Target>
+
 </Project>
