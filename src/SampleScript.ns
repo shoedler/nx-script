@@ -27,7 +27,7 @@ x = true + 0;  print(x, typeof(x));  // 1 Number
 x = false + 0; print(x, typeof(x));  // 0 Number
 print();
 
-print("String to number:"); Number
+print("String to number:");
 x = 1234 + "";          print(x, typeof(x)); // 1234 Number
 x = 0 + "";             print(x, typeof(x)); // 0 Number
 x = -1 + "1";           print(x, typeof(x)); // 0 Number
@@ -43,7 +43,22 @@ x = "0" + 0;    print(x, typeof(x)); // 00 String
 x = "-1" + 0;   print(x, typeof(x)); // -10 String
 print();
 
-print("While-Loops and If-Statements:")
+print("Nil:");
+x = nil; print(x, typeof(x)); // nil Nil
+print();
+
+print("Arithmetic shenanigans:");
+x = 1 + 2 * 3;     print(x, typeof(x)); // 7 Number
+x = 1 + 2 * 3 + 4; print(x, typeof(x)); // 11 Number
+x = 10 / 3;        print(x, typeof(x)); // 3.333333 Number
+x = 10 % 3;        print(x, typeof(x)); // 1 Number
+x = 10 % 3 + 1;    print(x, typeof(x)); // 2 Number
+x = 2^3;           print(x, typeof(x)); // 8 Number
+x = 2^3 + 1;       print(x, typeof(x)); // 9 Number
+x = 2^3 + 1 * 2;   print(x, typeof(x)); // 10 Number
+print();
+
+print("While-Loops and If-Statements:");
 a = true;
 while (a) {
     a = a + 1;

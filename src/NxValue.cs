@@ -4,19 +4,26 @@ namespace NxScript;
 
 internal class NxValue
 {
-    private const string NIL_STRING = "nil";
-    private const bool NIL_BOOLEAN = false;
-    private const float NIL_NUMBER = float.NaN;
+    private const string NilString = "nil";
+
+    private const bool NilBoolean = false;
+
+    private const float NilNumber = float.NaN;
 
     private readonly float? _numberValue = null;
+
     private readonly string? _stringValue = null;
+
     private readonly bool? _booleanValue = null;
 
     public bool IsString => this._stringValue is not null;
+
     public bool IsNumber => this._numberValue is not null;
+
     public bool IsBoolean => this._booleanValue is not null;
 
     public NxValue() { }
+
     public NxValue(float value)
     {
         this._numberValue = value;
@@ -65,7 +72,7 @@ internal class NxValue
         return this._numberValue ??
                this.StringToNumber() ??
                this.BooleanToNumber() ??
-               NIL_NUMBER;
+               NilNumber;
     }
 
     public string AsString()
@@ -73,7 +80,7 @@ internal class NxValue
         return this._stringValue ??
                this.NumberToString() ??
                this.BooleanToString() ??
-               NIL_STRING;
+               NilString;
     }
 
     public bool AsBoolean()
@@ -81,7 +88,7 @@ internal class NxValue
         return this._booleanValue ??
                this.NumberToBoolean() ??
                this.StringToBoolean() ??
-               NIL_BOOLEAN;
+               NilBoolean;
     }
 
     private float? StringToNumber()
@@ -89,7 +96,7 @@ internal class NxValue
         if (this._stringValue is null)
             return null;
 
-        var ret = NIL_NUMBER;
+        var ret = NilNumber;
         float.TryParse(this._stringValue, CultureInfo.InvariantCulture, out ret);
         return ret;
     }

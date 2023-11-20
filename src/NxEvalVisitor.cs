@@ -1,18 +1,19 @@
-﻿using Antlr4.Runtime.Misc;
+﻿using Antlr4.Runtime;
+using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
 
 namespace NxScript
 {
     internal class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxValue>
     {
+        internal NxEvalVisitor? Upper = null;
+
         internal Dictionary<string, NxValue> Variables = new();
         internal Dictionary<string, Func<List<NxValue>, NxValue>> Functions = new();
 
-        public NxEvalVisitor(NxEvalVisitor upperScope)
+        public NxEvalVisitor(NxEvalVisitor upper)
         {
-            // TODO: Scopable Blocks - currently, we do nothing with the "upperScope"
-            this.Variables = upperScope.Variables;
-            this.Functions = upperScope.Functions;
+            this.Upper = upper;
         }
 
         public NxEvalVisitor()
@@ -50,7 +51,7 @@ namespace NxScript
             {
                 var type = args[0].IsBoolean ? "Boolean" :
                     args[0].IsString ? "String" :
-                    args[0].IsNumber ? "Number" : throw new Exception("Types exhausted. Don't know this NxValue type");
+                    args[0].IsNumber ? "Number" : "Nil";
                 return new NxValue(type);
             }));
         }
@@ -78,7 +79,7 @@ namespace NxScript
 
         public NxValue VisitAssignment([NotNull] NxParser.AssignmentContext context)
         {
-            this.Variables[context.ID().GetText()] = Visit(context.expr());
+            this.SetVariable(context.ID().GetText(), Visit(context.expr()));
             return new NxValue();
         }
 
@@ -127,10 +128,7 @@ namespace NxScript
         {
             var key = context.ID().GetText();
 
-            if (!this.Functions.ContainsKey(key))
-                throw NxEvalException.FromContext($"Function '{key}' is not defined", context);
-
-            var function = this.Functions[key];
+            var function = this.GetFunction(key, context);
             var args = context.expr().Select(base.Visit).ToList();
             return function.Invoke(args);
         }
@@ -230,14 +228,52 @@ namespace NxScript
         public NxValue VisitStringAtom([NotNull] NxParser.StringAtomContext context) { return new NxValue(context); }
         public NxValue VisitBooleanAtom([NotNull] NxParser.BooleanAtomContext context) { return new NxValue(context); }
         public NxValue VisitNilAtom([NotNull] NxParser.NilAtomContext context) { return new NxValue(); }
-        public NxValue VisitIdAtom([NotNull] NxParser.IdAtomContext context)
-        {
-            var key = context.ID().GetText();
+        public NxValue VisitIdAtom([NotNull] NxParser.IdAtomContext context) { return this.GetVariable(context.ID().GetText(), context); }
 
-            if (!this.Variables.ContainsKey(key))
+        internal NxValue GetVariable(string key, ParserRuleContext context)
+        {
+            if (this.Variables.ContainsKey(key))
+                return this.Variables[key];
+
+            if (this.Upper is null)
                 throw NxEvalException.FromContext($"Variable '{key}' is not defined", context);
 
-            return this.Variables[key];
+            return this.Upper.GetVariable(key, context);
         }
+
+        internal void SetVariable(string key, NxValue value)
+        {
+            if (this.UpdateVariable(key, value))
+                return;
+
+            this.Variables[key] = value;
+        }
+
+
+        internal bool UpdateVariable(string key, NxValue value)
+        {
+            if (this.Variables.ContainsKey(key))
+            {
+                this.Variables[key] = value;
+                return true;
+            }
+
+            if (this.Upper is null)
+                return false;
+
+            return this.Upper.UpdateVariable(key, value);
+        }
+
+        internal Func<List<NxValue>, NxValue> GetFunction(string key, ParserRuleContext context)
+        {
+            if (this.Functions.ContainsKey(key))
+                return this.Functions[key];
+
+            if (this.Upper is null)
+                throw NxEvalException.FromContext($"Function '{key}' is not defined", context);
+
+            return this.Upper.GetFunction(key, context);
+        }
+
     }
 }
