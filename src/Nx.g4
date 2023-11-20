@@ -8,26 +8,23 @@ stat:
     assignment
     | if_stat
     | while_stat
+    | expr SCOL
     | OTHER { throw new System.Exception("Unknown Character: " + $OTHER.text); };
 
 assignment: ID ASSIGN expr SCOL;
 
 if_stat:
-    IF condition_block 
-    ( ELSE IF condition_block )*
+    IF expr stat_block 
+    ( ELSE IF expr stat_block )*
     ( ELSE stat_block )?;
-
-condition_block: expr stat_block;
 
 stat_block: OBRACE block CBRACE | stat;
 
 while_stat: WHILE expr stat_block;
 
-fn_call: ID OPAR (expr (COMMA expr)*)? CPAR;
-
 // https://en.cppreference.com/w/c/language/operator_precedence
 expr:
-    fn_call                                  # fnCallExpr
+    ID OPAR (expr (COMMA expr)*)? CPAR       # fnCallExpr
     | expr POW <assoc = right> expr          # powExpr
     | MINUS expr                             # unaryMinusExpr
     | NOT expr                               # notExpr

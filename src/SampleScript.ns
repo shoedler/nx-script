@@ -1,0 +1,75 @@
+help(); // Prints all variables & functions in the global scope
+print();
+
+print("Booleans:");
+if true   print("true = true!");       // Ok
+if false  print("false = true");       // Nope
+if !false print("false = false");      // Ok
+print();
+
+print("Number to boolean:");
+if 0    print("0 = true");            // Nope
+if !0   print("0 = false");           // Ok
+if 1    print("1 = true");            // Ok
+if -1   print("-1 = true");           // Ok
+if 1234 print("1234 = true");         // Ok
+print();
+
+print("String to boolean");
+if ""       print("empty string = true");   // Nope
+if !""      print("empty string = false");  // Ok
+if !"false" print("'false' = false");       // Ok
+if "true"   print("'true' = true");         // Ok
+print();
+
+print("Boolean to number:");
+x = true + 0;  print(x, typeof(x));  // 1 Number
+x = false + 0; print(x, typeof(x));  // 0 Number
+print();
+
+print("String to number:"); Number
+x = 1234 + "";          print(x, typeof(x)); // 1234 Number
+x = 0 + "";             print(x, typeof(x)); // 0 Number
+x = -1 + "1";           print(x, typeof(x)); // 0 Number
+x = 10 + "abacd";       print(x, typeof(x)); // 10 Number
+x = 10 + "abacd123";    print(x, typeof(x)); // 10 Number
+x = 10 + "123abacd123"; print(x, typeof(x)); // 10 Number
+x = ("-1" + 0) * "-2";  print(x, typeof(x)); // 20 Number
+print();
+
+print("Number to string:");
+x = "1234" + 0; print(x, typeof(x)); // 1234 String
+x = "0" + 0;    print(x, typeof(x)); // 00 String
+x = "-1" + 0;   print(x, typeof(x)); // -10 String
+print();
+
+print("While-Loops and If-Statements:")
+a = true;
+while (a) {
+    a = a + 1;
+
+    if (a > 10) {
+        a = false;
+    }
+
+    print("'a'", typeof(a), a);
+}
+print();
+
+b = 0;
+while b <= 3 {
+    if b < 2 print(b, "b < 2");
+    else if b > 2 print(b, "b > 2");
+    else print(b, "b == 2");
+    b = b + 1;
+}
+print();
+
+print("Write file:");
+write(cwd + "/src/Test.txt", "Hello World!");
+
+print("Read file:");
+read = read(cwd + "/src/Test.txt");
+print(read);
+print();
+
