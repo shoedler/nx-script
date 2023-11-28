@@ -91,3 +91,37 @@ print();
 a = ["asd", false, 123];
 print(a);
 print(a[0]);
+
+x = "abc";
+
+a = {
+    1: "Key is number",
+    1.1111112: "Key is a precise number",
+    1.1111111: "Key is a whole different number",
+    true: "Key is boolean",
+    "foo": "Key is string",
+    x: "Key is a reference",
+    nil: "Key is nil",
+    ([1,2,3]): "Key is an array",
+};
+
+print("Obj", a);
+print();
+
+print("Get 1 with indexing", a[1]);
+print("Get true with indexing", a[true]);
+print("Get 'foo' with indexing", a["foo"]);
+print("Get x with indexing", a[x]);
+print("Get nil with indexing", a[nil]);
+print("Get [1,2,3] with indexing", a[[1,2,3]]);
+print(a[1.1111112]);
+print(a[1.1111111]);
+print();
+
+print("Get 1 with member access does not work - e.g. a.1");
+print("Get true with member access does not work, because true is a keyword - e.g. a.true");
+print("Get 'foo' with member access", a.foo);
+print("Get x with member access", a.x);
+print("Get nil with member access does not work, because nil is a keyword - e.g. a.nil");
+print("Get [1,2,3] with member access, does not work - e.g. a.[1,2,3]");
+print();

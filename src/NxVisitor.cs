@@ -74,12 +74,38 @@ public interface INxVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitWhile_stat([NotNull] NxParser.While_statContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="NxParser.obj_literal"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitObj_literal([NotNull] NxParser.Obj_literalContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="NxParser.array_literal"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitArray_literal([NotNull] NxParser.Array_literalContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>arrayExpr</c>
 	/// labeled alternative in <see cref="NxParser.expr"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitArrayExpr([NotNull] NxParser.ArrayExprContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>memberExpr</c>
+	/// labeled alternative in <see cref="NxParser.expr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitMemberExpr([NotNull] NxParser.MemberExprContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>objExpr</c>
+	/// labeled alternative in <see cref="NxParser.expr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitObjExpr([NotNull] NxParser.ObjExprContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>atomExpr</c>
 	/// labeled alternative in <see cref="NxParser.expr"/>.

@@ -22,11 +22,17 @@ stat_block: OBRACE block CBRACE | stat;
 
 while_stat: WHILE expr stat_block;
 
+obj_literal: OBRACE (atom COLON expr (COMMA atom COLON expr)*)? COMMA? CBRACE;
+
+array_literal: OBRACK (expr (COMMA expr)*)? CBRACK;
+
 // https://en.cppreference.com/w/c/language/operator_precedence
 expr:
     ID OPAR (expr (COMMA expr)*)? CPAR       # fnCallExpr
-    | expr OBRACK expr CBRACK                # indexExpr
-    | OBRACK (expr (COMMA expr)*)? CBRACK    # arrayExpr
+    | expr OBRACK expr CBRACK                # indexExpr // Maybe use atom here for the first expr
+    | expr DOT ID                            # memberExpr // Maybe use atom here for the first expr
+    | array_literal                          # arrayExpr
+    | obj_literal                            # objExpr
     | expr POW <assoc = right> expr          # powExpr
     | MINUS expr                             # unaryMinusExpr
     | NOT expr                               # notExpr
@@ -62,8 +68,10 @@ MOD      : '%' ;
 POW      : '^' ;
 NOT      : '!' ;
 
+DOT      : '.' ;
 COMMA    : ',' ;
 SCOL     : ';' ;
+COLON    : ':' ;
 ASSIGN   : '=' ;
 OPAR     : '(' ;
 CPAR     : ')' ;

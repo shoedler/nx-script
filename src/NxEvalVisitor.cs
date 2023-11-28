@@ -23,20 +23,28 @@ namespace NxScript
 
             this.Functions.Add("print", (args) =>
             {
-                args.ForEach(arg => Console.Write(arg.AsString() + " "));
+                args.ForEach(arg =>
+                {
+                    var log = arg.IsString ? $"\"{arg.AsString()}\"" : arg.AsString();
+                    Console.Write(log + " ");
+                });
+
                 Console.WriteLine();
                 return new NxValue();
             });
+
             this.Functions.Add("read", args =>
             {
                 var content = File.ReadAllText(args[0].AsString());
                 return new NxValue(content);
             });
+
             this.Functions.Add("write", args =>
             {
                 File.WriteAllText(args[0].AsString(), args[1].AsString() ?? "");
                 return new NxValue(args[0].AsString());
             });
+
             this.Functions.Add("help", args =>
             {
                 Console.WriteLine("Variables in global scope:");
@@ -47,6 +55,7 @@ namespace NxScript
                     .ForEach((kvp) => Console.WriteLine($"{kvp.Key}:\t{kvp.Value}"));
                 return new NxValue();
             });
+
             this.Functions.Add("typeof", (args =>
             {
                 var type = args[0].IsBoolean ? "Boolean" :
@@ -90,17 +99,21 @@ namespace NxScript
             var expressions = context.expr();
             var statBlocks = context.stat_block();
 
-
             foreach (var (condition, stat) in expressions.Zip(statBlocks))
             {
-                if (!Visit(condition).AsBoolean()) continue;
+                if (!Visit(condition).AsBoolean())
+                {
+                    continue;
+                }
 
                 Visit(stat);
                 return new NxValue();
             }
 
             if (statBlocks.Length > expressions.Length)
+            {
                 Visit(statBlocks.Last());
+            }
 
             return new NxValue();
         }
@@ -108,12 +121,16 @@ namespace NxScript
         public NxValue VisitWhile_stat([NotNull] NxParser.While_statContext context)
         {
             var panic = 0;
+
             while (Visit(context.expr()).AsBoolean())
             {
                 Visit(context.stat_block());
                 if (panic++ > 1e6)
+                {
                     throw NxEvalException.FromContext($"Panic! Loop did not finish after {panic} iterations", context);
+                }
             }
+
             return new NxValue();
 
         }
@@ -125,6 +142,24 @@ namespace NxScript
         {
             VisitChildren(context);
             return new NxValue();
+        }
+
+        ///
+        /// Literals
+        ///
+        public NxValue VisitArray_literal([NotNull] NxParser.Array_literalContext context)
+        {
+            var items = context.expr().Select(Visit).ToList();
+
+            return new NxValue(items);
+        }
+
+        public NxValue VisitObj_literal([NotNull] NxParser.Obj_literalContext context)
+        {
+            var atoms = context.atom().Select(Visit);
+            var expressions = context.expr().Select(Visit);
+
+            return new NxValue(atoms.Zip(expressions));
         }
 
         ///
@@ -147,29 +182,43 @@ namespace NxScript
             return array.Index(index);
         }
 
+        public NxValue VisitMemberExpr([NotNull] NxParser.MemberExprContext context)
+        {
+            var obj = base.Visit(context.expr());
+            var member = new NxValue(context.ID().GetText());
+            
+            return obj.Member(member);
+        }
+
         public NxValue VisitArrayExpr([NotNull] NxParser.ArrayExprContext context)
         {
-            var items = context.expr().Select(base.Visit).ToList();
+            return base.Visit(context.array_literal()); // Just pluck the literal, could also just return the default base.VisitChildren() but this is quicker
+        }
 
-            return new NxValue(items);
+        public NxValue VisitObjExpr([NotNull] NxParser.ObjExprContext context)
+        {
+            return base.Visit(context.obj_literal()); // Just pluck the literal, could also just return the default base.VisitChildren() but this is quicker
         }
 
         public NxValue VisitPowExpr([NotNull] NxParser.PowExprContext context)
         {
             var left = base.Visit(context.expr()[0]);
             var right = base.Visit(context.expr()[1]);
+
             return new NxValue((float)Math.Pow(left.AsNumber(), right.AsNumber()));
         }
 
         public NxValue VisitUnaryMinusExpr([NotNull] NxParser.UnaryMinusExprContext context)
         {
             var right = base.Visit(context.expr());
+
             return new NxValue(-right.AsNumber());
         }
 
         public NxValue VisitNotExpr([NotNull] NxParser.NotExprContext context)
         {
             var right = base.Visit(context.expr());
+
             return new NxValue(!right.AsBoolean());
         }
 
@@ -177,6 +226,7 @@ namespace NxScript
         {
             var left = base.Visit(context.expr()[0]);
             var right = base.Visit(context.expr()[1]);
+
             return context.op.Type switch
             {
                 NxParser.MULT => new NxValue(left.AsNumber() * right.AsNumber()),
@@ -190,6 +240,7 @@ namespace NxScript
         {
             var left = base.Visit(context.expr()[0]);
             var right = base.Visit(context.expr()[1]);
+
             return context.op.Type switch
             {
                 NxParser.PLUS => left.IsString ? new NxValue(left.AsString() + right.AsString()) : new NxValue(left.AsNumber() + right.AsNumber()),
@@ -202,6 +253,7 @@ namespace NxScript
         {
             var left = base.Visit(context.expr()[0]);
             var right = base.Visit(context.expr()[1]);
+
             return context.op.Type switch
             {
                 NxParser.LTEQ => new NxValue(left.AsNumber() <= right.AsNumber()),
@@ -216,6 +268,7 @@ namespace NxScript
         {
             var left = base.Visit(context.expr()[0]);
             var right = base.Visit(context.expr()[1]);
+
             return context.op.Type switch
             {
                 NxParser.EQ => new NxValue(left.AsBoolean() == right.AsBoolean()),
@@ -228,6 +281,7 @@ namespace NxScript
         {
             var left = base.Visit(context.expr()[0]);
             var right = base.Visit(context.expr()[1]);
+
             return new NxValue(left.AsBoolean() && right.AsBoolean());
         }
 
@@ -235,6 +289,7 @@ namespace NxScript
         {
             var left = base.Visit(context.expr()[0]);
             var right = base.Visit(context.expr()[1]);
+
             return new NxValue(left.AsBoolean() || right.AsBoolean());
         }
 
@@ -256,10 +311,14 @@ namespace NxScript
         internal NxValue GetVariable(string key, ParserRuleContext context)
         {
             if (this.Variables.ContainsKey(key))
+            {
                 return this.Variables[key];
+            }
 
             if (this.Upper is null)
+            {
                 throw NxEvalException.FromContext($"Variable '{key}' is not defined", context);
+            }
 
             return this.Upper.GetVariable(key, context);
         }
@@ -267,7 +326,9 @@ namespace NxScript
         internal void SetVariable(string key, NxValue value)
         {
             if (this.UpdateVariable(key, value))
+            {
                 return;
+            }
 
             this.Variables[key] = value;
         }
@@ -282,7 +343,9 @@ namespace NxScript
             }
 
             if (this.Upper is null)
+            {
                 return false;
+            }
 
             return this.Upper.UpdateVariable(key, value);
         }
@@ -290,10 +353,14 @@ namespace NxScript
         internal Func<List<NxValue>, NxValue> GetFunction(string key, ParserRuleContext context)
         {
             if (this.Functions.ContainsKey(key))
+            {
                 return this.Functions[key];
+            }
 
             if (this.Upper is null)
+            {
                 throw NxEvalException.FromContext($"Function '{key}' is not defined", context);
+            }
 
             return this.Upper.GetFunction(key, context);
         }
