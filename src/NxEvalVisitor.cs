@@ -70,7 +70,9 @@ namespace NxScript
             return new NxValue();
         }
 
-        // Statements
+        ///
+        /// Statements
+        ///
         public NxValue VisitStat([NotNull] NxParser.StatContext context)
         {
             VisitChildren(context);
@@ -116,14 +118,18 @@ namespace NxScript
 
         }
 
-        // Blocks
+        ///
+        /// Blocks
+        /// 
         public NxValue VisitStat_block([NotNull] NxParser.Stat_blockContext context)
         {
             VisitChildren(context);
             return new NxValue();
         }
 
-        // Expressions
+        ///
+        /// Expressions
+        /// 
         public NxValue VisitFnCallExpr([NotNull] NxParser.FnCallExprContext context)
         {
             var key = context.ID().GetText();
@@ -131,6 +137,21 @@ namespace NxScript
             var function = this.GetFunction(key, context);
             var args = context.expr().Select(base.Visit).ToList();
             return function.Invoke(args);
+        }
+
+        public NxValue VisitIndexExpr([NotNull] NxParser.IndexExprContext context)
+        {
+            var array = base.Visit(context.expr().First());
+            var index = base.Visit(context.expr().Last());
+
+            return array.Index(index);
+        }
+
+        public NxValue VisitArrayExpr([NotNull] NxParser.ArrayExprContext context)
+        {
+            var items = context.expr().Select(base.Visit).ToList();
+
+            return new NxValue(items);
         }
 
         public NxValue VisitPowExpr([NotNull] NxParser.PowExprContext context)
@@ -222,7 +243,9 @@ namespace NxScript
             return base.VisitChildren(context);
         }
 
-        // Atoms
+        ///
+        /// Atoms
+        /// 
         public NxValue VisitParExpr([NotNull] NxParser.ParExprContext context) { return base.Visit(context.expr()); }
         public NxValue VisitNumberAtom([NotNull] NxParser.NumberAtomContext context) { return new NxValue(context); }
         public NxValue VisitStringAtom([NotNull] NxParser.StringAtomContext context) { return new NxValue(context); }

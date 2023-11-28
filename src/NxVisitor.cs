@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from C:/Projects/.playground/nx-script///src//Nx.g4 by ANTLR 4.13.1
+// Generated from C:/Projects/nx-script///src//Nx.g4 by ANTLR 4.13.1
 
 // Unreachable code detected
 #pragma warning disable 0162
@@ -74,26 +74,12 @@ public interface INxVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitWhile_stat([NotNull] NxParser.While_statContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>notExpr</c>
+	/// Visit a parse tree produced by the <c>arrayExpr</c>
 	/// labeled alternative in <see cref="NxParser.expr"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitNotExpr([NotNull] NxParser.NotExprContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>unaryMinusExpr</c>
-	/// labeled alternative in <see cref="NxParser.expr"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitUnaryMinusExpr([NotNull] NxParser.UnaryMinusExprContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>multiplicationExpr</c>
-	/// labeled alternative in <see cref="NxParser.expr"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitMultiplicationExpr([NotNull] NxParser.MultiplicationExprContext context);
+	Result VisitArrayExpr([NotNull] NxParser.ArrayExprContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>atomExpr</c>
 	/// labeled alternative in <see cref="NxParser.expr"/>.
@@ -116,13 +102,6 @@ public interface INxVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitAdditiveExpr([NotNull] NxParser.AdditiveExprContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>powExpr</c>
-	/// labeled alternative in <see cref="NxParser.expr"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitPowExpr([NotNull] NxParser.PowExprContext context);
-	/// <summary>
 	/// Visit a parse tree produced by the <c>relationalExpr</c>
 	/// labeled alternative in <see cref="NxParser.expr"/>.
 	/// </summary>
@@ -130,19 +109,54 @@ public interface INxVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitRelationalExpr([NotNull] NxParser.RelationalExprContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>equalityExpr</c>
-	/// labeled alternative in <see cref="NxParser.expr"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitEqualityExpr([NotNull] NxParser.EqualityExprContext context);
-	/// <summary>
 	/// Visit a parse tree produced by the <c>fnCallExpr</c>
 	/// labeled alternative in <see cref="NxParser.expr"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitFnCallExpr([NotNull] NxParser.FnCallExprContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>indexExpr</c>
+	/// labeled alternative in <see cref="NxParser.expr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitIndexExpr([NotNull] NxParser.IndexExprContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>notExpr</c>
+	/// labeled alternative in <see cref="NxParser.expr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitNotExpr([NotNull] NxParser.NotExprContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>unaryMinusExpr</c>
+	/// labeled alternative in <see cref="NxParser.expr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitUnaryMinusExpr([NotNull] NxParser.UnaryMinusExprContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>multiplicationExpr</c>
+	/// labeled alternative in <see cref="NxParser.expr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitMultiplicationExpr([NotNull] NxParser.MultiplicationExprContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>powExpr</c>
+	/// labeled alternative in <see cref="NxParser.expr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitPowExpr([NotNull] NxParser.PowExprContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>equalityExpr</c>
+	/// labeled alternative in <see cref="NxParser.expr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitEqualityExpr([NotNull] NxParser.EqualityExprContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>andExpr</c>
 	/// labeled alternative in <see cref="NxParser.expr"/>.

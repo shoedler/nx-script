@@ -25,6 +25,8 @@ while_stat: WHILE expr stat_block;
 // https://en.cppreference.com/w/c/language/operator_precedence
 expr:
     ID OPAR (expr (COMMA expr)*)? CPAR       # fnCallExpr
+    | expr OBRACK expr CBRACK                # indexExpr
+    | OBRACK (expr (COMMA expr)*)? CBRACK    # arrayExpr
     | expr POW <assoc = right> expr          # powExpr
     | MINUS expr                             # unaryMinusExpr
     | NOT expr                               # notExpr
@@ -67,6 +69,8 @@ OPAR     : '(' ;
 CPAR     : ')' ;
 OBRACE   : '{' ;
 CBRACE   : '}' ;
+OBRACK   : '[' ;
+CBRACK   : ']' ;
 
 TRUE     : 'true' ;
 FALSE    : 'false' ;

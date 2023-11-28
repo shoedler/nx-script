@@ -88,3 +88,6 @@ read = read(cwd + "/src/Test.txt");
 print(read);
 print();
 
+a = ["asd", false, 123];
+print(a);
+print(a[0]);
