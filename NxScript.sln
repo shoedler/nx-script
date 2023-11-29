@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NxScript", "NxScript.csproj", "{EBE3799D-6646-4D4F-AF33-FED8F5A154D0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NxScript", "NxScript\NxScript.csproj", "{EBE3799D-6646-4D4F-AF33-FED8F5A154D0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NxScriptTest", "NxScriptTest\NxScriptTest.csproj", "{433166E9-678A-4356-B982-133DC75399DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{EBE3799D-6646-4D4F-AF33-FED8F5A154D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EBE3799D-6646-4D4F-AF33-FED8F5A154D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EBE3799D-6646-4D4F-AF33-FED8F5A154D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{433166E9-678A-4356-B982-133DC75399DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{433166E9-678A-4356-B982-133DC75399DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{433166E9-678A-4356-B982-133DC75399DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{433166E9-678A-4356-B982-133DC75399DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

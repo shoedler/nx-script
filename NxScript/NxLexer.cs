@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from C:/Projects/nx-script///src//Nx.g4 by ANTLR 4.13.1
+// Generated from C:/Projects/nx-script/NxScript///Nx.g4 by ANTLR 4.13.1
 
 // Unreachable code detected
 #pragma warning disable 0162
