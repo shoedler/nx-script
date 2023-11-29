@@ -1,7 +1,6 @@
 ﻿using Antlr4.Runtime.Tree;
 using Antlr4.Runtime;
 using NxScript;
-using NxScript.src;
 
 Terminal.EnableVirtualTerminalOutput();
 

@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace NxScript.src;
+namespace NxScript;
+
 internal static class Terminal
 {
     [DllImport("kernel32.dll")]
