@@ -1,26 +1,28 @@
 ﻿using Antlr4.Runtime.Tree;
 using Antlr4.Runtime;
 using NxScript;
+using NxScript.src;
+
+Terminal.EnableVirtualTerminalOutput();
 
 if (args.Length == 2)
 {
     if (args[0] == "run")
     {
-        RunFile(args[1]);
-        Environment.Exit(0);
+        Environment.Exit(RunFile(args[1]));
     }
 
     if (args[0] == "watch")
     {
-        WatchFile(args[1]);
-        Environment.Exit(1);
+        Environment.Exit(WatchFile(args[1]));
     }
 }
 
 UsageExit();
 
-void RunFile(string path)
+int RunFile(string path)
 {
+    WaitForFileSync(path);
     var input = File.ReadAllText(path);
 
     var stream = CharStreams.fromString(input);
@@ -37,13 +39,21 @@ void RunFile(string path)
     var value = visitor.Visit(tree);
 
     Console.WriteLine(value.AsString());
+
+    return 0;
 }
 
-void WatchFile(string path)
+int WatchFile(string path)
 {
     var watcher = new FileSystemWatcher();
 
-    watcher.Path = Path.GetDirectoryName(path);
+    if (!File.Exists(path))
+    {
+        Terminal.Error($"File {path.InYellow()} does not exist");
+        return 1;
+    }
+
+    watcher.Path = Path.GetDirectoryName(path)!;
     watcher.Filter = Path.GetFileName(path);
 
     watcher.NotifyFilter = NotifyFilters.LastWrite;
@@ -51,14 +61,16 @@ void WatchFile(string path)
     watcher.Changed += OnChanged;
     watcher.EnableRaisingEvents = true;
 
-    Console.WriteLine("INFO: Watching file: " + path);
-    Console.WriteLine("INFO: Press enter to exit.");
+    Terminal.Info($"Watching file {path.InYellow()}");
+    Terminal.Info("Press enter to exit.");
     Console.ReadLine();
+
+    return 0;
 }
 
 void OnChanged(object source, FileSystemEventArgs e)
 {
-    Console.WriteLine("INFO: File changed: " + e.FullPath);
+    Terminal.Info($"INFO: File {e.FullPath.InYellow()} changed");
 
     try
     {
@@ -66,15 +78,41 @@ void OnChanged(object source, FileSystemEventArgs e)
     }
     catch (Exception ex)
     {
-        Console.WriteLine("ERROR: " + ex.Message);
+        Terminal.Info("ERROR: " + ex.Message);
     }
+
+    Terminal.Info($"Watching file {e.FullPath.InYellow()}");
+    Terminal.Info("Press enter to exit.");
 }
 
 void UsageExit()
 {
-    Console.WriteLine("Usage: nxs <command?> <path>");
-    Console.WriteLine("Commands:");
-    Console.WriteLine("    run   - run a file");
-    Console.WriteLine("    watch - watch and run a file");
+    Terminal.Info("Usage: nxs <command?> <path>");
+    Console.WriteLine("       Commands:");
+    Console.WriteLine("         run   - run a file");
+    Console.WriteLine("         watch - watch and run a file");
     Environment.Exit(1);
+}
+
+bool IsFileLocked(string path)
+{
+    try
+    {
+        using var stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.None);
+        stream.Close();
+    }
+    catch (IOException)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+void WaitForFileSync(string path)
+{
+    while (IsFileLocked(path))
+    {
+        Thread.Sleep(400);
+    }
 }

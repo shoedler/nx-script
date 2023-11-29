@@ -1,5 +1,5 @@
 ﻿#define STRICT_MODE
-#define DEBUG_LOG
+//#define DEBUG_LOG
 
 using System.Globalization;
 
@@ -22,6 +22,7 @@ internal class NxValue
     public bool IsBoolean => this._booleanValue is not null;
     public bool IsArray => this._arrayValue is not null;
     public bool IsObj => this._objValue is not null;
+    public bool IsNil => !this.IsBoolean && !this.IsNumber && !this.IsString && !this.IsArray && !this.IsObj;
 
     ///
     /// Pure Constructors
@@ -125,8 +126,9 @@ internal class NxValue
 
         if (this.IsString)
         {
-            return this._stringValue.GetHashCode();
+            return this._stringValue!.GetHashCode();
         }
+
 
         return base.GetHashCode();
     }
@@ -134,7 +136,9 @@ internal class NxValue
     public override bool Equals(object? obj)
     {
         if (obj == null || GetType() != obj.GetType())
+        {
             return false;
+        }
 
         var other = (NxValue)obj;
 
@@ -151,6 +155,11 @@ internal class NxValue
         if (this.IsString && other.IsString)
         {
             return this._stringValue == other._stringValue;
+        }
+
+        if (this.IsNil && other.IsNil)
+        {
+            return true;
         }
 
         return false;

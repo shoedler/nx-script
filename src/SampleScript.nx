@@ -80,7 +80,7 @@ while b <= 3 {
 }
 print();
 
-print("Write file:");
+print("Writing file");
 write(cwd + "/src/Test.txt", "Hello World!");
 
 print("Read file:");
@@ -109,13 +109,13 @@ print("Obj", a);
 print();
 
 print("Get 1 with indexing", a[1]);
+print("Get 1.1111112 with indexing", a[1.1111112]);
+print("Get 1.1111111 with indexing", a[1.1111111]);
 print("Get true with indexing", a[true]);
 print("Get 'foo' with indexing", a["foo"]);
 print("Get x with indexing", a[x]);
 print("Get nil with indexing", a[nil]);
-print("Get [1,2,3] with indexing", a[[1,2,3]]);
-print(a[1.1111112]);
-print(a[1.1111111]);
+print("Get [1,2,3] with indexing (isn't the same reference - doesn't work!)", a[[1,2,3]]);
 print();
 
 print("Get 1 with member access does not work - e.g. a.1");
