@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Antlr4.Runtime;
+﻿using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
 
@@ -12,18 +11,26 @@ internal class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxV
     internal Dictionary<string, NxValue> Variables = new();
     internal Dictionary<string, Func<List<NxValue>, NxValue>> Functions = new();
 
-    public NxEvalVisitor()
+    public NxEvalVisitor(string path)
     {
         // Preload variables
         this.Variables.Add("pi", new NxValue((float)Math.PI));
-        this.Variables.Add("cwd", new NxValue(Environment.CurrentDirectory));
+        this.Variables.Add("cwd", new NxValue(Path.Combine(Environment.CurrentDirectory, Path.GetDirectoryName(path)!)));
 
         // Preload "print" function - print to console
         this.Functions.Add("print", (args) =>
         {
             args.ForEach(arg =>
             {
-                var log = arg.IsString ? $"\"{arg.AsString().InGreen()}\"" : arg.AsString();
+                var log = arg.Type switch
+                {
+                    NxValueType.String => $"{arg.AsString()}".InGreen(),
+                    NxValueType.Boolean => arg.AsString().InMagenta(),
+                    NxValueType.Number => arg.AsString().InYellow(),
+                    NxValueType.Nil => arg.AsString().InCyan(),
+                    _ => arg.AsString()
+                };
+
                 Console.Write(log + " ");
             });
 
@@ -60,10 +67,7 @@ internal class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxV
         // Preload "typeof" function - show type of value
         this.Functions.Add("typeof", (args =>
         {
-            var type = args[0].IsBoolean ? "Boolean" :
-                args[0].IsString ? "String" :
-                args[0].IsNumber ? "Number" : "Nil";
-            return new NxValue(type);
+            return new NxValue(Enum.GetName(args[0].Type));
         }));
     }
 
@@ -193,7 +197,7 @@ internal class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxV
     {
         var obj = base.Visit(context.expr());
         var member = new NxValue(context.ID().GetText());
-            
+
         return obj.Member(member);
     }
 

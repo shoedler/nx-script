@@ -34,7 +34,7 @@ int RunFile(string path)
 
     IParseTree tree = parser.parse();
 
-    var visitor = new NxEvalVisitor();
+    var visitor = new NxEvalVisitor(path);
     var value = visitor.Visit(tree);
 
     Console.WriteLine(value.AsString());
@@ -48,7 +48,7 @@ int WatchFile(string path)
 
     if (!File.Exists(path))
     {
-        Terminal.Error($"File {path.InYellow()} does not exist");
+        Terminal.Error($"File {path} does not exist");
         return 1;
     }
 
@@ -60,8 +60,9 @@ int WatchFile(string path)
     watcher.Changed += OnChanged;
     watcher.EnableRaisingEvents = true;
 
-    Terminal.Info($"Watching file {path.InYellow()}");
-    Terminal.Info("Press enter to exit.");
+    // Trigger initially
+    OnChanged(null, new(WatcherChangeTypes.All, watcher.Path, watcher.Filter));
+
     Console.ReadLine();
 
     return 0;
@@ -69,7 +70,7 @@ int WatchFile(string path)
 
 void OnChanged(object source, FileSystemEventArgs e)
 {
-    Terminal.Info($"INFO: File {e.FullPath.InYellow()} changed");
+    Terminal.Info($"INFO: File {e.FullPath} changed");
 
     try
     {
@@ -77,11 +78,12 @@ void OnChanged(object source, FileSystemEventArgs e)
     }
     catch (Exception ex)
     {
-        Terminal.Info("ERROR: " + ex.Message);
+        Terminal.Error(ex.Message);
     }
 
-    Terminal.Info($"Watching file {e.FullPath.InYellow()}");
+    Terminal.Info($"Watching file {e.FullPath}");
     Terminal.Info("Press enter to exit.");
+    Terminal.Separate();
 }
 
 void UsageExit()

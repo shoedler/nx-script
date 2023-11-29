@@ -37,4 +37,9 @@ internal static class Terminal
     {
         Console.WriteLine("INFO:  ".InBlue() + message);
     }
+
+    public static void Separate()
+    {
+        Console.WriteLine(new string('-', Console.BufferWidth -1));
+    }
 }

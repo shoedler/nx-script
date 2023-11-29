@@ -24,6 +24,13 @@ internal class NxValue
     public bool IsObj => this._objValue is not null;
     public bool IsNil => !this.IsBoolean && !this.IsNumber && !this.IsString && !this.IsArray && !this.IsObj;
 
+    public NxValueType Type => this._stringValue is not null ? NxValueType.String :
+        this._numberValue is not null ? NxValueType.Number :
+        this._booleanValue is not null ? NxValueType.Boolean :
+        this._arrayValue is not null ? NxValueType.Array :
+        this._objValue is not null ? NxValueType.Obj :
+        NxValueType.Nil;
+
     ///
     /// Pure Constructors
     /// 

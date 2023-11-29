@@ -2,30 +2,36 @@ help(); // Prints all variables & functions in the global scope
 print();
 
 print("Booleans:");
-if true   print("true = true!");       // Ok
-if false  print("false = true");       // Nope
-if !false print("false = false");      // Ok
+if true   print("true = ", true);       // Ok
+if false  print("false = ", true);       // Nope
+if !false print("false = ", false);      // Ok
 print();
 
 print("Number to boolean:");
-if 0    print("0 = true");            // Nope
-if !0   print("0 = false");           // Ok
-if 1    print("1 = true");            // Ok
-if -1   print("-1 = true");           // Ok
-if 1234 print("1234 = true");         // Ok
+if 0    print("0 =", true);            // Nope
+if !0   print("0 =", false);           // Ok
+if 1    print("1 =", true);            // Ok
+if -1   print("-1 =", true);           // Ok
+if 1234 print("1234 =", true);         // Ok
 print();
 
 print("String to boolean");
-if ""       print("empty string = true");   // Nope
-if !""      print("empty string = false");  // Ok
-if !"false" print("'false' = false");       // Ok
-if "true"   print("'true' = true");         // Ok
+if ""       print("empty string = ", true);   // Nope
+if !""      print("empty string = ", false);  // Ok
+if !"false" print("`false` = ", false);       // Ok
+if "true"   print("`true` = ", true);         // Ok
 print();
 
 print("Boolean to number:");
 x = true + 0;  print(x, typeof(x));  // 1 Number
 x = false + 0; print(x, typeof(x));  // 0 Number
 print();
+
+print("Equality:");
+if 1 == 1 print("1 == 1", true); // Ok
+if 1 == 2 print("1 == 2", true); // Nope
+if "a" == "a" print("`a` == `a`", true); // Ok
+if "a" == "b" print("`a` == `b`", true); // Nope
 
 print("String to number:");
 x = 1234 + "";          print(x, typeof(x)); // 1234 Number
@@ -81,10 +87,10 @@ while b <= 3 {
 print();
 
 print("Writing file");
-write(cwd + "/src/Test.txt", "Hello World!");
+write(cwd + "/Test.txt", "Hello World!");
 
 print("Read file:");
-read = read(cwd + "/src/Test.txt");
+read = read(cwd + "/Test.txt");
 print(read);
 print();
 
@@ -125,3 +131,30 @@ print("Get x with member access", a.x);
 print("Get nil with member access does not work, because nil is a keyword - e.g. a.nil");
 print("Get [1,2,3] with member access, does not work - e.g. a.[1,2,3]");
 print();
+
+a = {
+    1: {
+        2: "Nested object"
+    }
+};
+
+print("Nested object a =", a);
+print();
+print("a[1] =", a[1]);
+print("a[1][2] =", a[1][2]);
+print();
+
+print("Fibonacci");
+i=3;
+n=10;
+t1=0;
+t2=1;
+tNext=t1+t2;
+
+while i < n {
+    print("... of", i, "is", tNext);
+    t1 = t2;
+    t2 = tNext;
+    tNext = t1 + t2;
+    i = i + 1;
+}
