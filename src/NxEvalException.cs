@@ -17,7 +17,7 @@ internal class NxEvalException : Exception
             $"{context.Start.Line}:{context.Start.Column}-{context.Stop.Column}" :
             $"{context.Start.Line}:{context.Start.Column}-{context.Stop.Line}:{context.Stop.Column}";
 
-        var exceptionMessage = $"{context.Start.InputStream.SourceName}:{pos}: {message}";
+        var exceptionMessage = $"ERROR: {context.Start.InputStream.SourceName}:{pos}: {message}";
 
         return new NxEvalException(exceptionMessage, context);
     }

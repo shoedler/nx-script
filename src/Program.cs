@@ -2,26 +2,79 @@
 using Antlr4.Runtime;
 using NxScript;
 
-if (args.Length != 1)
+if (args.Length == 2)
 {
-    Console.Error.WriteLine("Missing path to source file");
-    Environment.ExitCode = 1;
-    return;
+    if (args[0] == "run")
+    {
+        RunFile(args[1]);
+        Environment.Exit(0);
+    }
+
+    if (args[0] == "watch")
+    {
+        WatchFile(args[1]);
+        Environment.Exit(1);
+    }
 }
 
-var input = File.ReadAllText(args[0]);
+UsageExit();
 
-var stream = CharStreams.fromString(input);
-var lexer = new NxLexer(stream);
-var tokens = new CommonTokenStream(lexer);
-var parser = new NxParser(tokens)
+void RunFile(string path)
 {
-    BuildParseTree = true
-};
+    var input = File.ReadAllText(path);
 
-IParseTree tree = parser.parse();
+    var stream = CharStreams.fromString(input);
+    var lexer = new NxLexer(stream);
+    var tokens = new CommonTokenStream(lexer);
+    var parser = new NxParser(tokens)
+    {
+        BuildParseTree = true
+    };
 
-var visitor = new NxEvalVisitor();
-var value = visitor.Visit(tree);
+    IParseTree tree = parser.parse();
 
-Console.WriteLine(value.AsString());
+    var visitor = new NxEvalVisitor();
+    var value = visitor.Visit(tree);
+
+    Console.WriteLine(value.AsString());
+}
+
+void WatchFile(string path)
+{
+    var watcher = new FileSystemWatcher();
+
+    watcher.Path = Path.GetDirectoryName(path);
+    watcher.Filter = Path.GetFileName(path);
+
+    watcher.NotifyFilter = NotifyFilters.LastWrite;
+
+    watcher.Changed += OnChanged;
+    watcher.EnableRaisingEvents = true;
+
+    Console.WriteLine("INFO: Watching file: " + path);
+    Console.WriteLine("INFO: Press enter to exit.");
+    Console.ReadLine();
+}
+
+void OnChanged(object source, FileSystemEventArgs e)
+{
+    Console.WriteLine("INFO: File changed: " + e.FullPath);
+
+    try
+    {
+        RunFile(e.FullPath);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("ERROR: " + ex.Message);
+    }
+}
+
+void UsageExit()
+{
+    Console.WriteLine("Usage: nxs <command?> <path>");
+    Console.WriteLine("Commands:");
+    Console.WriteLine("    run   - run a file");
+    Console.WriteLine("    watch - watch and run a file");
+    Environment.Exit(1);
+}
