@@ -1,34 +1,33 @@
-﻿#define STRICT_MODE
+﻿//#define STRICT_MODE
 //#define DEBUG_LOG
 
 using System.Globalization;
 
 namespace NxScript;
 
-internal class NxValue
+public class NxValue
 {
-    private const string NilString = "nil";
-    private const bool NilBoolean = false;
-    private const float NilNumber = float.NaN;
+    // TODO: Use this everywhere where new NxValue() is used. Lock it, too.
+    public static readonly NxValue Nil = new();
 
-    private readonly float? _numberValue = null;
-    private readonly string? _stringValue = null;
-    private readonly bool? _booleanValue = null;
-    private readonly List<NxValue>? _arrayValue = null;
-    private readonly Dictionary<NxValue, NxValue>? _objValue = null;
+    private readonly float? numberValue = null;
+    private readonly string? stringValue = null;
+    private readonly bool? booleanValue = null;
+    private readonly List<NxValue>? arrayValue = null;
+    private readonly Dictionary<NxValue, NxValue>? objValue = null;
 
-    public bool IsString => this._stringValue is not null;
-    public bool IsNumber => this._numberValue is not null;
-    public bool IsBoolean => this._booleanValue is not null;
-    public bool IsArray => this._arrayValue is not null;
-    public bool IsObj => this._objValue is not null;
+    public bool IsString => this.stringValue is not null;
+    public bool IsNumber => this.numberValue is not null;
+    public bool IsBoolean => this.booleanValue is not null;
+    public bool IsArray => this.arrayValue is not null;
+    public bool IsObj => this.objValue is not null;
     public bool IsNil => !this.IsBoolean && !this.IsNumber && !this.IsString && !this.IsArray && !this.IsObj;
 
-    public NxValueType Type => this._stringValue is not null ? NxValueType.String :
-        this._numberValue is not null ? NxValueType.Number :
-        this._booleanValue is not null ? NxValueType.Boolean :
-        this._arrayValue is not null ? NxValueType.Array :
-        this._objValue is not null ? NxValueType.Obj :
+    public NxValueType Type => this.stringValue is not null ? NxValueType.String :
+        this.numberValue is not null ? NxValueType.Number :
+        this.booleanValue is not null ? NxValueType.Boolean :
+        this.arrayValue is not null ? NxValueType.Array :
+        this.objValue is not null ? NxValueType.Obj :
         NxValueType.Nil;
 
     ///
@@ -37,37 +36,37 @@ internal class NxValue
     public NxValue() { }
     public NxValue(float value)
     {
-        this._numberValue = value;
+        this.numberValue = value;
     }
 
     public NxValue(string value)
     {
-        this._stringValue = value;
+        this.stringValue = value;
     }
 
     public NxValue(bool value)
     {
-        this._booleanValue = value;
+        this.booleanValue = value;
     }
 
     public NxValue(List<NxValue> value)
     {
-        this._arrayValue = value;
+        this.arrayValue = value;
     }
 
     public NxValue(IEnumerable<(NxValue, NxValue)> value)
     {
 
-        this._objValue = new();
+        this.objValue = new();
 
         foreach (var (key, val) in value)
         {
 #if DEBUG_LOG
             Console.WriteLine($"Adding '{key.AsString()}' with Hashcode {key.GetHashCode()}");
 #endif
-            if (!this._objValue.TryAdd(key, val))
+            if (!this.objValue.TryAdd(key, val))
             {
-                this._objValue[key] = val;
+                this.objValue[key] = val;
             }
         }
     }
@@ -79,11 +78,11 @@ internal class NxValue
     {
         if (context.FLOAT() is not null)
         {
-            this._numberValue = float.Parse(context.FLOAT().GetText());
+            this.numberValue = float.Parse(context.FLOAT().GetText());
         }
         else if (context.INT() is not null)
         {
-            this._numberValue = int.Parse(context.INT().GetText());
+            this.numberValue = int.Parse(context.INT().GetText());
         }
         else
         {
@@ -95,7 +94,7 @@ internal class NxValue
     {
         if (context.STRING() is not null)
         {
-            this._stringValue = context.STRING().GetText().Trim('"');
+            this.stringValue = context.STRING().GetText().Trim('"');
         }
         else
         {
@@ -107,11 +106,11 @@ internal class NxValue
     {
         if (context.TRUE() is not null)
         {
-            this._booleanValue = true;
+            this.booleanValue = true;
         }
         else if (context.FALSE() is not null)
         {
-            this._booleanValue = false;
+            this.booleanValue = false;
         }
         else
         {
@@ -123,17 +122,17 @@ internal class NxValue
     {
         if (this.IsNumber)
         {
-            return this._numberValue.GetHashCode();
+            return this.numberValue.GetHashCode();
         }
 
         if (this.IsBoolean)
         {
-            return this._booleanValue.GetHashCode();
+            return this.booleanValue.GetHashCode();
         }
 
         if (this.IsString)
         {
-            return this._stringValue!.GetHashCode();
+            return this.stringValue!.GetHashCode();
         }
 
 
@@ -151,17 +150,17 @@ internal class NxValue
 
         if (this.IsNumber && other.IsNumber)
         {
-            return this._numberValue!.GetHashCode() == other._numberValue!.GetHashCode();
+            return this.numberValue!.GetHashCode() == other.numberValue!.GetHashCode();
         }
 
         if (this.IsBoolean && other.IsBoolean)
         {
-            return this._booleanValue == other._booleanValue;
+            return this.booleanValue == other.booleanValue;
         }
 
         if (this.IsString && other.IsString)
         {
-            return this._stringValue == other._stringValue;
+            return this.stringValue == other.stringValue;
         }
 
         if (this.IsNil && other.IsNil)
@@ -177,37 +176,41 @@ internal class NxValue
     /// 
     public float AsNumber()
     {
-        return this._numberValue ??
+        // TODO: Try cast from current type first
+        return this.numberValue ??
                this.StringToNumber() ??
                this.BooleanToNumber() ??
                this.ArrayToNumber() ??
                this.ObjToNumber() ??
-               NilNumber;
+               0f;
     }
 
     public string AsString()
     {
-        return this._stringValue ??
+        // TODO: Try cast from current type first
+        return this.stringValue ??
                this.NumberToString() ??
                this.BooleanToString() ??
                this.ArrayToString() ??
                this.ObjToString() ??
-               NilString;
+               string.Empty;
     }
 
     public bool AsBoolean()
     {
-        return this._booleanValue ??
+        // TODO: Try cast from current type first
+        return this.booleanValue ??
                this.NumberToBoolean() ??
                this.StringToBoolean() ??
                this.ArrayToBoolean() ??
                this.ObjToBoolean() ??
-               NilBoolean;
+               false;
     }
 
     public List<NxValue> AsArray()
     {
-        return this._arrayValue ??
+        // TODO: Try cast from current type first
+        return this.arrayValue ??
                this.StringToArray() ??
                this.NumberToArray() ??
                this.BooleanToArray() ??
@@ -217,7 +220,8 @@ internal class NxValue
 
     public Dictionary<NxValue, NxValue> AsObj()
     {
-        return this._objValue ??
+        // TODO: Try cast from current type first
+        return this.objValue ??
                this.StringToObj() ??
                this.NumberToObj() ??
                this.BooleanToObj() ??
@@ -226,7 +230,7 @@ internal class NxValue
     }
 
     ///
-    /// Other
+    /// Operations
     ///
     public NxValue Index(NxValue indexValue)
     {
@@ -234,17 +238,17 @@ internal class NxValue
         {
             var index = (int)indexValue.AsNumber();
 
-            if (index < 0 || index >= this._arrayValue!.Count)
+            if (index < 0 || index >= this.arrayValue!.Count)
             {
                 return new NxValue();
             }
 
-            return this._arrayValue[index];
+            return this.arrayValue[index];
         }
 
         if (this.IsObj)
         {
-            this._objValue!.TryGetValue(indexValue, out var result);
+            this.objValue!.TryGetValue(indexValue, out var result);
             return result ?? new NxValue();
         }
 
@@ -265,32 +269,49 @@ internal class NxValue
     }
 
     ///
+    /// Testing
+    ///
+    public dynamic? GetInternalValue(NxValueType type)
+    {
+        return this.Type switch
+        {
+            NxValueType.Boolean => this.booleanValue,
+            NxValueType.Number => this.numberValue,
+            NxValueType.String => this.stringValue,
+            NxValueType.Array => this.arrayValue,
+            NxValueType.Obj => this.objValue,
+            NxValueType.Nil => null,
+            _ => throw new NotSupportedException($"Don't know type {Enum.GetName(this.Type)}")
+        };
+    }
+
+    ///
     /// To Number Castings
     /// 
     private float? StringToNumber()
     {
-        if (this._stringValue is null)
+        if (this.stringValue is null)
         {
             return null;
         }
 
-        float.TryParse(this._stringValue, CultureInfo.InvariantCulture, out var ret);
+        float.TryParse(this.stringValue, CultureInfo.InvariantCulture, out var ret);
         return ret;
     }
 
     private float? BooleanToNumber()
     {
-        if (this._booleanValue is null)
+        if (this.booleanValue is null)
         {
             return null;
         }
 
-        return (bool)this._booleanValue ? 1f : 0f;
+        return (bool)this.booleanValue ? 1f : 0f;
     }
 
     private float? ArrayToNumber()
     {
-        if (this._arrayValue is null)
+        if (this.arrayValue is null)
         {
             return null;
         }
@@ -299,12 +320,12 @@ internal class NxValue
         throw new NotSupportedException("Cannot convert array to number in strict mode");
 #endif
 
-        return this._arrayValue.Count;
+        return this.arrayValue.Count;
     }
 
     private float? ObjToNumber()
     {
-        if (this._objValue is null)
+        if (this.objValue is null)
         {
             return null;
         }
@@ -313,7 +334,7 @@ internal class NxValue
         throw new NotSupportedException("Cannot convert obj to number in strict mode");
 #endif
 
-        return this._objValue.Count;
+        return this.objValue.Count;
     }
 
     ///
@@ -321,43 +342,43 @@ internal class NxValue
     /// 
     private string? NumberToString()
     {
-        if (this._numberValue is null)
+        if (this.numberValue is null)
         {
             return null;
         }
 
-        return this._numberValue.ToString();
+        return this.numberValue.ToString();
     }
 
     private string? BooleanToString()
     {
-        if (this._booleanValue is null)
+        if (this.booleanValue is null)
         {
             return null;
         }
 
-        return (bool)this._booleanValue ? "true" : "false";
+        return (bool)this.booleanValue ? "true" : "false";
     }
 
     private string? ArrayToString()
     {
-        if (this._arrayValue is null)
+        if (this.arrayValue is null)
         {
             return null;
         }
 
-        var items = this._arrayValue.Select(item => item.AsString());
+        var items = this.arrayValue.Select(item => item.AsString());
         return "[" + string.Join(", ", items) + "]";
     }
 
     private string? ObjToString()
     {
-        if (this._objValue is null)
+        if (this.objValue is null)
         {
             return null;
         }
 
-        var items = this._objValue.Select((kvp) => $"{kvp.Key.AsString()}: {kvp.Value.AsString()}");
+        var items = this.objValue.Select((kvp) => $"{kvp.Key.AsString()}: {kvp.Value.AsString()}");
         return "{\n  " + string.Join(",\n  ", items) + "\n}";
     }
 
@@ -366,29 +387,29 @@ internal class NxValue
     /// 
     private bool? StringToBoolean()
     {
-        if (this._stringValue is null)
+        if (this.stringValue is null)
         {
             return null;
         }
 
-        return this._stringValue is "true" ? true :
-            this._stringValue is "false" ? false :
-            this._stringValue.Length > 0;
+        return this.stringValue is "true" ? true :
+            this.stringValue is "false" ? false :
+            this.stringValue.Length > 0;
     }
 
     private bool? NumberToBoolean()
     {
-        if (this._numberValue is null)
+        if (this.numberValue is null)
         {
             return null;
         }
 
-        return this._numberValue is not 0;
+        return this.numberValue is not 0;
     }
 
     private bool? ArrayToBoolean()
     {
-        if (this._arrayValue is null)
+        if (this.arrayValue is null)
         {
             return null;
         }
@@ -398,7 +419,7 @@ internal class NxValue
 
     private bool? ObjToBoolean()
     {
-        if (this._objValue is null)
+        if (this.objValue is null)
         {
             return null;
         }
@@ -411,14 +432,14 @@ internal class NxValue
     /// 
     private List<NxValue>? StringToArray()
     {
-        if (this._stringValue is null)
+        if (this.stringValue is null)
         {
             return null;
         }
 
         var ret = new List<NxValue>();
 
-        foreach (var c in this._stringValue)
+        foreach (var c in this.stringValue)
         {
             ret.Add(new NxValue(c.ToString()));
         }
@@ -428,14 +449,14 @@ internal class NxValue
 
     private List<NxValue>? NumberToArray()
     {
-        if (this._numberValue is null)
+        if (this.numberValue is null)
         {
             return null;
         }
 
         var ret = new List<NxValue>();
 
-        for (var i = 0; i < this._numberValue; i++)
+        for (var i = 0; i < this.numberValue; i++)
         {
             ret.Add(new NxValue(i));
         }
@@ -445,22 +466,22 @@ internal class NxValue
 
     private List<NxValue>? BooleanToArray()
     {
-        if (this._booleanValue is null)
+        if (this.booleanValue is null)
         {
             return null;
         }
 
-        return new List<NxValue> { new((bool)this._booleanValue) };
+        return new List<NxValue> { new((bool)this.booleanValue) };
     }
 
     private List<NxValue>? ObjToArray()
     {
-        if (this._objValue is null)
+        if (this.objValue is null)
         {
             return null;
         }
 
-        return this._objValue.Select(x =>
+        return this.objValue.Select(x =>
         {
             var kvpList = new List<NxValue>()
             {
@@ -477,7 +498,7 @@ internal class NxValue
     ///
     private Dictionary<NxValue, NxValue>? StringToObj()
     {
-        if (this._stringValue is null)
+        if (this.stringValue is null)
         {
             return null;
         }
@@ -494,7 +515,7 @@ internal class NxValue
 
     private Dictionary<NxValue, NxValue>? NumberToObj()
     {
-        if (this._numberValue is null)
+        if (this.numberValue is null)
         {
             return null;
         }
@@ -512,7 +533,7 @@ internal class NxValue
 
     private Dictionary<NxValue, NxValue>? BooleanToObj()
     {
-        if (this._booleanValue is null)
+        if (this.booleanValue is null)
         {
             return null;
         }
@@ -530,11 +551,11 @@ internal class NxValue
 
     private Dictionary<NxValue, NxValue>? ArrayToObj()
     {
-        if (this._arrayValue is null)
+        if (this.arrayValue is null)
         {
             return null;
         }
 
-        return this._arrayValue.ToDictionary(value => value, value => value);
+        return this.arrayValue.ToDictionary(value => value, value => value);
     }
 }

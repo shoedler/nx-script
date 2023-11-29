@@ -1,27 +1,6 @@
 help(); // Prints all variables & functions in the global scope
 print();
 
-print("Booleans:");
-if true   print("true = ", true);       // Ok
-if false  print("false = ", true);       // Nope
-if !false print("false = ", false);      // Ok
-print();
-
-print("Number to boolean:");
-if 0    print("0 =", true);            // Nope
-if !0   print("0 =", false);           // Ok
-if 1    print("1 =", true);            // Ok
-if -1   print("-1 =", true);           // Ok
-if 1234 print("1234 =", true);         // Ok
-print();
-
-print("String to boolean");
-if ""       print("empty string = ", true);   // Nope
-if !""      print("empty string = ", false);  // Ok
-if !"false" print("`false` = ", false);       // Ok
-if "true"   print("`true` = ", true);         // Ok
-print();
-
 print("Boolean to number:");
 x = true + 0;  print(x, typeof(x));  // 1 Number
 x = false + 0; print(x, typeof(x));  // 0 Number
@@ -33,15 +12,6 @@ if 1 == 2 print("1 == 2", true); // Nope
 if "a" == "a" print("`a` == `a`", true); // Ok
 if "a" == "b" print("`a` == `b`", true); // Nope
 
-print("String to number:");
-x = 1234 + "";          print(x, typeof(x)); // 1234 Number
-x = 0 + "";             print(x, typeof(x)); // 0 Number
-x = -1 + "1";           print(x, typeof(x)); // 0 Number
-x = 10 + "abacd";       print(x, typeof(x)); // 10 Number
-x = 10 + "abacd123";    print(x, typeof(x)); // 10 Number
-x = 10 + "123abacd123"; print(x, typeof(x)); // 10 Number
-x = ("-1" + 0) * "-2";  print(x, typeof(x)); // 20 Number
-print();
 
 print("Number to string:");
 x = "1234" + 0; print(x, typeof(x)); // 1234 String

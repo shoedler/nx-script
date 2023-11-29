@@ -4,13 +4,13 @@ using Antlr4.Runtime.Tree;
 
 namespace NxScript;
 
-internal class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxValue>
+public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxValue>
 {
-    internal NxEvalVisitor? Upper = null;
+    public readonly Dictionary<string, NxValue> Variables = new();
+    public readonly Dictionary<string, Func<List<NxValue>, NxValue>> Functions = new();
 
-    internal Dictionary<string, NxValue> Variables = new();
-    internal Dictionary<string, Func<List<NxValue>, NxValue>> Functions = new();
-
+    protected NxEvalVisitor? Upper = null;
+    
     public NxEvalVisitor(string path)
     {
         // Preload variables
@@ -71,7 +71,7 @@ internal class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxV
         }));
     }
 
-    private NxEvalVisitor(NxEvalVisitor upper)
+    protected NxEvalVisitor(NxEvalVisitor upper)
     {
         this.Upper = upper;
     }
@@ -84,7 +84,7 @@ internal class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxV
 
     public NxValue VisitBlock([NotNull] NxParser.BlockContext context)
     {
-        var visitor = new NxEvalVisitor(this);
+        var visitor = this.NewScope();
         visitor.VisitChildren(context);
 
         return new NxValue();
@@ -377,5 +377,10 @@ internal class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxV
         }
 
         return this.Upper.GetFunction(key, context);
+    }
+
+    protected virtual NxEvalVisitor NewScope()
+    {
+        return new NxEvalVisitor(this);
     }
 }

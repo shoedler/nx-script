@@ -1,6 +1,6 @@
 ﻿namespace NxScript;
 
-internal enum NxValueType
+public enum NxValueType
 {
     Nil,
     Boolean,
