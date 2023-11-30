@@ -48,9 +48,9 @@ public class ToBooleanTests : ToTypeTestsBase
     }
 
     [Theory]
-    [InlineData("true && 0", false)]
-    [InlineData("true && -1", true)]
-    [InlineData("true && 1", true)]
+    [InlineData("true && 0  ", false)]
+    [InlineData("true && -1 ", true)]
+    [InlineData("true && 1  ", true)]
     [InlineData("true && 123", true)]
     public void Number_ToBoolean_Works(string expression, bool expectedInternalResult)
     {
@@ -58,30 +58,30 @@ public class ToBooleanTests : ToTypeTestsBase
     }
 
     [Theory]
-    [InlineData(@"true && """"", false)]
+    [InlineData(@"true && """"     ", false)]
     [InlineData(@"true && ""false""", false)]
-    [InlineData(@"true && ""true""", true)]
-    [InlineData(@"true && ""asdf""", true)]
-    [InlineData(@"true && ""0""", true)]
-    [InlineData(@"true && ""123""", true)]
+    [InlineData(@"true && ""true"" ", true)]
+    [InlineData(@"true && ""asdf"" ", true)]
+    [InlineData(@"true && ""0""    ", true)]
+    [InlineData(@"true && ""123""  ", true)]
     public void String_ToBoolean_Works(string expression, bool expectedInternalResult)
     {
         this.TypeConversion_Works(expression, expectedInternalResult, this.BooleanType, this.NxType);
     }
 
     [Theory]
-    [InlineData("true && []", true)]
+    [InlineData("true && []     ", true)]
     [InlineData("true && [false]", true)]
-    [InlineData("true && [nil]", true)]
+    [InlineData("true && [nil]  ", true)]
     public void Array_ToBoolean_Works(string expression, bool expectedInternalResult)
     {
         this.TypeConversion_Works(expression, expectedInternalResult, this.BooleanType, this.NxType);
     }
 
     [Theory]
-    [InlineData("true && {}", true)]
+    [InlineData("true && {}           ", true)]
     [InlineData("true && {false:false}", true)]
-    [InlineData("true && {nil:false}", true)]
+    [InlineData("true && {nil:false}  ", true)]
     public void Obj_ToBoolean_Works(string expression, bool expectedInternalResult)
     {
         this.TypeConversion_Works(expression, expectedInternalResult, this.BooleanType, this.NxType);

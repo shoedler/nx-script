@@ -31,7 +31,7 @@ public class ToStringTests : ToTypeTestsBase
 
 
     [Theory]
-    [InlineData(@"""foo"" + true", "footrue")]
+    [InlineData(@"""foo"" + true ", "footrue")]
     [InlineData(@"""foo"" + false", "foofalse")]
     public void Boolean_ToString_Works(string expression, string expectedInternalResult)
     {
@@ -40,17 +40,17 @@ public class ToStringTests : ToTypeTestsBase
 
     [Theory]
     [InlineData(@"""1234"" + 0", "12340")]
-    [InlineData(@"""0"" + 0", "00")]
-    [InlineData(@"""-1"" + 0", "-10")]
+    [InlineData(@"""0"" + 0   ", "00")]
+    [InlineData(@"""-1"" + 0  ", "-10")]
     public void Number_ToString_Works(string expression, string expectedInternalResult)
     {
         this.TypeConversion_Works(expression, expectedInternalResult, this.StringType, this.NxType);
     }
 
     [Theory]
-    [InlineData(@"""foo"" + []", "foo[]")]
-    [InlineData(@"""foo"" + [false]", "foo[false]")]
-    [InlineData(@"""foo"" + [nil]", "foo[]")]
+    [InlineData(@"""foo"" + []       ", "foo[]")]
+    [InlineData(@"""foo"" + [false]  ", "foo[false]")]
+    [InlineData(@"""foo"" + [nil]    ", "foo[]")]
     [InlineData(@"""foo"" + [1,2,3,4]", "foo[1, 2, 3, 4]")]
     public void Array_ToString_Works(string expression, string expectedInternalResult)
     {
@@ -58,9 +58,9 @@ public class ToStringTests : ToTypeTestsBase
     }
 
     [Theory]
-    [InlineData(@"""foo"" + {}", "foo{}")]
-    [InlineData(@"""foo"" + {false:false}", "foo{false: false}")]
-    [InlineData(@"""foo"" + {1:2,3:4,5:6,7:8}", "foo{1: 2, 3: 4, 5: 6, 7: 8}")]
+    [InlineData(@"""foo"" + {}                          ", "foo{}")]
+    [InlineData(@"""foo"" + {false:false}               ", "foo{false: false}")]
+    [InlineData(@"""foo"" + {1:2,3:4,5:6,7:8}           ", "foo{1: 2, 3: 4, 5: 6, 7: 8}")]
     [InlineData(@"""foo"" + {""a"":{""nested"":""Lol""}}", "foo{a: {nested: Lol}}")]
     public void Obj_ToString_Works(string expression, string expectedInternalResult)
     {

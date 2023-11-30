@@ -34,9 +34,9 @@ public abstract class ToTypeTestsBase : IClassFixture<NxEvalFixture>
         {
             this.AssertByValueEquals(new NxValue(expectedInternalResult), a);
         }
-        else if (expectedInternalResult is Dictionary<NxValue, NxValue>)
+        else if (expectedInternalResult is Dictionary<NxValue, NxValue>) // Objs
         {
-            throw new NotImplementedException();
+            this.AssertByValueEquals(new NxValue(expectedInternalResult), a);
         }
         else
         {
@@ -64,6 +64,23 @@ public abstract class ToTypeTestsBase : IClassFixture<NxEvalFixture>
             }
 
             return;
+        }
+
+        if (expected.Type == NxValueType.Obj)
+        {
+            Dictionary<NxValue, NxValue> expectedDict = expected.GetInternalValue(NxValueType.Obj)!;
+            Dictionary<NxValue, NxValue>? actualDict = actual.GetInternalValue(NxValueType.Obj);
+
+            var length = Math.Max(expectedDict.Count, actualDict?.Count ?? 0);
+
+            for (var i = 0; i < length; i++)
+            {
+                var (expectedKey, expectedValue) = expectedDict.ElementAtOrDefault(i);
+                var (actualKey, actualValue) = actualDict.ElementAtOrDefault(i);
+
+                this.AssertByValueEquals(expectedKey, actualKey);
+                this.AssertByValueEquals(expectedValue, actualValue);
+            }
         }
 
         Assert.Equal(expected.Type, actual.Type);

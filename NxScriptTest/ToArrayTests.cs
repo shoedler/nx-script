@@ -90,7 +90,7 @@ public class ToArrayTests : ToTypeTestsBase
             return new NxValue(pairArrayContent);
         }).ToList();
 
-        var a = this.TypeConversion_Works(expression, expectedInternalResultArray, this.ArrayType, this.NxType);
+        this.TypeConversion_Works(expression, expectedInternalResultArray, this.ArrayType, this.NxType);
     }
 
     private void ToArray_Works(string expression, params dynamic[]? expectedInternalResult)
@@ -100,6 +100,6 @@ public class ToArrayTests : ToTypeTestsBase
         var expectedArray = arrayContent.Select(value => new NxValue(value)).ToList();
 
         // Act, Assert
-        var a = this.TypeConversion_Works(expression, expectedArray, this.ArrayType, this.NxType);
+        this.TypeConversion_Works(expression, expectedArray, this.ArrayType, this.NxType);
     }
 }

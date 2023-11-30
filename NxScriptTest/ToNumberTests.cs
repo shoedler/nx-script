@@ -31,7 +31,7 @@ public class ToNumberTests : ToTypeTestsBase
 
 
     [Theory]
-    [InlineData("0 + true", 1f)]
+    [InlineData("0 + true ", 1f)]
     [InlineData("0 + false", 0f)]
     public void Boolean_ToNumber_Works(string expression, float expectedInternalResult)
     {
@@ -59,9 +59,9 @@ public class ToNumberTests : ToTypeTestsBase
     }
 
     [Theory]
-    [InlineData("0 + []", 0f)]
-    [InlineData("0 + [false]", 1f)]
-    [InlineData("0 + [nil]", 1f)]
+    [InlineData("0 + []       ", 0f)]
+    [InlineData("0 + [false]  ", 1f)]
+    [InlineData("0 + [nil]    ", 1f)]
     [InlineData("0 + [1,2,3,4]", 4f)]
     public void Array_ToNumber_Works(string expression, float expectedInternalResult)
     {
@@ -69,8 +69,8 @@ public class ToNumberTests : ToTypeTestsBase
     }
 
     [Theory]
-    [InlineData("0 + {}", 0f)]
-    [InlineData("0 + {false:false}", 1f)]
+    [InlineData("0 + {}               ", 0f)]
+    [InlineData("0 + {false:false}    ", 1f)]
     [InlineData("0 + {1:2,3:4,5:6,7:8}", 4f)]
     public void Obj_ToNumber_Works(string expression, float expectedInternalResult)
     {
