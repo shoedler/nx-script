@@ -10,7 +10,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
     public readonly Dictionary<string, Func<List<NxValue>, NxValue>> Functions = new();
 
     protected NxEvalVisitor? Upper = null;
-    
+
     public NxEvalVisitor(string path)
     {
         // Preload variables
@@ -57,10 +57,10 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         {
             Console.WriteLine("Variables in global scope:");
             this.Variables.AsEnumerable().ToList()
-                .ForEach((kvp) => Console.WriteLine($"{kvp.Key}:\t{kvp.Value.AsString()}"));
+                .ForEach((pair) => Console.WriteLine($"{pair.Key}:\t{pair.Value.AsString()}"));
             Console.WriteLine("Functions in global scope:");
             this.Functions.AsEnumerable().ToList()
-                .ForEach((kvp) => Console.WriteLine($"{kvp.Key}:\t{kvp.Value}"));
+                .ForEach((pair) => Console.WriteLine($"{pair.Key}:\t{pair.Value}"));
             return new NxValue();
         });
 
@@ -190,7 +190,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         var array = base.Visit(context.expr().First());
         var index = base.Visit(context.expr().Last());
 
-        return array.Index(index);
+        return NxValue.Index(array, index);
     }
 
     public NxValue VisitMemberExpr([NotNull] NxParser.MemberExprContext context)
@@ -198,7 +198,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         var obj = base.Visit(context.expr());
         var member = new NxValue(context.ID().GetText());
 
-        return obj.Member(member);
+        return NxValue.Member(obj, member);
     }
 
     public NxValue VisitArrayExpr([NotNull] NxParser.ArrayExprContext context)
@@ -240,7 +240,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
 
         return context.op.Type switch
         {
-            NxParser.MULT => new NxValue(left.AsNumber() * right.AsNumber()),
+            NxParser.MULT => NxValue.Multiply(left, right),
             NxParser.DIV => new NxValue(left.AsNumber() / right.AsNumber()),
             NxParser.MOD => new NxValue(left.AsNumber() % right.AsNumber()),
             _ => throw NxEvalException.FromContext($"Don't know this multiplicative operator '{context.GetText()}'", context)
@@ -254,7 +254,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
 
         return context.op.Type switch
         {
-            NxParser.PLUS => left.IsString ? new NxValue(left.AsString() + right.AsString()) : new NxValue(left.AsNumber() + right.AsNumber()),
+            NxParser.PLUS => NxValue.Add(left, right),
             NxParser.MINUS => new NxValue(left.AsNumber() - right.AsNumber()),
             _ => throw NxEvalException.FromContext($"Don't know this additive operator '{context.GetText()}'", context)
         };

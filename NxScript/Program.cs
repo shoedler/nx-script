@@ -77,7 +77,10 @@ int WatchFile(string path)
 
 void OnChanged(object source, FileSystemEventArgs e)
 {
-    Terminal.Info($"INFO: File {e.FullPath} changed");
+    Console.Clear();
+
+    Terminal.Info($"INFO: File {e.FullPath} changed, re-running...");
+    Terminal.Separate();
 
     try
     {

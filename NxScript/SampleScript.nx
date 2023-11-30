@@ -7,10 +7,6 @@ if 1 == 2 print("1 == 2", true); // Nope
 if "a" == "a" print("`a` == `a`", true); // Ok
 if "a" == "b" print("`a` == `b`", true); // Nope
 
-q = 0 + "";
-print("q",q);
-
-
 print("Nil:");
 x = nil; print(x, typeof(x)); // nil Nil
 print();
@@ -29,7 +25,7 @@ print();
 print("While-Loops and If-Statements:");
 a = true;
 while (a) {
-    a = a + 1;
+    a = 1 + a; // Because Boolean + Number -> Boolean OR Boolean(a)
 
     if (a > 10) {
         a = false;

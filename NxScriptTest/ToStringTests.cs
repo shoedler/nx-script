@@ -61,7 +61,7 @@ public class ToStringTests : ToTypeTestsBase
     [InlineData(@"""foo"" + {}", "foo{}")]
     [InlineData(@"""foo"" + {false:false}", "foo{false: false}")]
     [InlineData(@"""foo"" + {1:2,3:4,5:6,7:8}", "foo{1: 2, 3: 4, 5: 6, 7: 8}")]
-    [InlineData(@"""foo"" + {""a"":{nested:""Lol""}}", "foo{a: {nested: Lol}}")]
+    [InlineData(@"""foo"" + {""a"":{""nested"":""Lol""}}", "foo{a: {nested: Lol}}")]
     public void Obj_ToString_Works(string expression, string expectedInternalResult)
     {
         this.TypeConversion_Works(expression, expectedInternalResult, this.StringType, this.NxType);
