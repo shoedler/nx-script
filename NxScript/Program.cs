@@ -5,6 +5,10 @@ using NxScript;
 // TODO: Test DiagnosticParseErrorListener by Sam
 // TODO: Add type inference examples with l/r associativity, e.g. true + 0 vs. 0 + true
 
+#if DEBUG
+args = new[] { "watch", "..\\..\\..\\SampleScript.nx" };
+#endif
+
 Terminal.EnableVirtualTerminalOutput();
 
 if (args.Length == 2)

@@ -1,23 +1,15 @@
 help(); // Prints all variables & functions in the global scope
 print();
 
-print("Boolean to number:");
-x = true + 0;  print(x, typeof(x));  // 1 Number
-x = false + 0; print(x, typeof(x));  // 0 Number
-print();
-
 print("Equality:");
 if 1 == 1 print("1 == 1", true); // Ok
 if 1 == 2 print("1 == 2", true); // Nope
 if "a" == "a" print("`a` == `a`", true); // Ok
 if "a" == "b" print("`a` == `b`", true); // Nope
 
+q = 0 + "";
+print("q",q);
 
-print("Number to string:");
-x = "1234" + 0; print(x, typeof(x)); // 1234 String
-x = "0" + 0;    print(x, typeof(x)); // 00 String
-x = "-1" + 0;   print(x, typeof(x)); // -10 String
-print();
 
 print("Nil:");
 x = nil; print(x, typeof(x)); // nil Nil

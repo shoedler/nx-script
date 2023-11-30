@@ -286,7 +286,7 @@ public class NxValue
     }
 
     ///
-    /// To Number Castings
+    /// To Number Casts
     /// 
     private float? StringToNumber()
     {
@@ -338,7 +338,7 @@ public class NxValue
     }
 
     ///
-    /// To String Castings
+    /// To String Casts
     /// 
     private string? NumberToString()
     {
@@ -379,11 +379,11 @@ public class NxValue
         }
 
         var items = this.objValue.Select((kvp) => $"{kvp.Key.AsString()}: {kvp.Value.AsString()}");
-        return "{\n  " + string.Join(",\n  ", items) + "\n}";
+        return "{" + string.Join(", ", items) + "}";
     }
 
     ///
-    /// To Boolean Castings
+    /// To Boolean Casts
     /// 
     private bool? StringToBoolean()
     {
@@ -428,7 +428,7 @@ public class NxValue
     }
 
     ///
-    /// To Array Castings
+    /// To Array Casts
     /// 
     private List<NxValue>? StringToArray()
     {
@@ -494,7 +494,7 @@ public class NxValue
     }
 
     ///
-    /// To Obj Castings
+    /// To Obj Casts
     ///
     private Dictionary<NxValue, NxValue>? StringToObj()
     {

@@ -39,7 +39,7 @@ public class ToNumberTests : ToTypeTestsBase
     }
 
     [Theory]
-    [InlineData("0 + \"\"               ", 0f)]
+    [InlineData(@"0 + """"              ", 0f)]
     [InlineData(@"0 + ""1""             ", 1f)]
     [InlineData(@"0 + ""10.23""         ", 10.23f)]
     [InlineData(@"0 + ""123.12312""     ", 123.12312f)]
@@ -47,7 +47,6 @@ public class ToNumberTests : ToTypeTestsBase
     [InlineData(@"0 + ""1Hello""        ", 0f)]
     [InlineData(@"0 + ""12.345 Hello""  ", 0f)]
     [InlineData(@"1234 + """"           ", 1234f)]
-    [InlineData(@"0 + ""                ", 0f)]
     [InlineData(@"-1 + ""1""            ", 0f)]
     [InlineData(@"10 + ""abacd""        ", 10f)]
     [InlineData(@"10 + ""abacd123""     ", 10f)]
