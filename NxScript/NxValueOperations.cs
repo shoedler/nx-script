@@ -64,6 +64,42 @@ public partial class NxValue
         };
     }
 
+    public static NxValue Eq(NxValue left, NxValue right)
+    {
+        return left.Type switch
+        {
+            NxValueType.Number => new NxValue(left.AsNumber() == right.AsNumber()), // [By-Val]
+            NxValueType.Boolean => new NxValue(left.AsBoolean() == right.AsBoolean()), // [By-Val]
+            NxValueType.String => new NxValue(left.AsString() == right.AsString()), // [By-Val]
+            NxValueType.Array or
+            NxValueType.Obj or
+            NxValueType.Fn => new NxValue(left == right), // [By-Ref]
+#if STRICT_MODE
+            _ => throw new NotSupportedException("Cannot compare values of type " + left.Type + " and " + right.Type + ".")
+#else
+            _ => new NxValue(left.AsNumber() == right.AsNumber()) // [By-Val]
+#endif
+        };
+    }
+
+    public static NxValue Neq(NxValue left, NxValue right)
+    {
+        return left.Type switch
+        {
+            NxValueType.Number => new NxValue(left.AsNumber() != right.AsNumber()), // [By-Val]
+            NxValueType.Boolean => new NxValue(left.AsBoolean() != right.AsBoolean()), // [By-Val]
+            NxValueType.String => new NxValue(left.AsString() != right.AsString()), // [By-Val]
+            NxValueType.Array or
+            NxValueType.Obj or
+            NxValueType.Fn => new NxValue(left != right), // [By-Ref]
+#if STRICT_MODE
+            _ => throw new NotSupportedException("Cannot compare values of type " + left.Type + " and " + right.Type + ".")
+#else
+            _ => new NxValue(left.AsNumber() != right.AsNumber()) // [By-Val]
+#endif
+        };
+    }
+
     public static NxValue Multiply(NxValue left, NxValue right)
     {
         return left.Type switch

@@ -1,6 +1,7 @@
 ﻿using Antlr4.Runtime.Tree;
 using Antlr4.Runtime;
 using NxScript;
+using System.Diagnostics;
 
 // TODO: Test DiagnosticParseErrorListener by Sam
 // TODO: Add type inference examples with l/r associativity, e.g. true + 0 vs. 0 + true
@@ -42,9 +43,14 @@ int RunFile(string path)
     IParseTree tree = parser.parse();
 
     var visitor = new NxEvalVisitor(path);
+
+    Stopwatch sw = Stopwatch.StartNew();
     var value = visitor.Visit(tree);
+    sw.Stop();
 
     Console.WriteLine(value.AsString());
+
+    Terminal.Info($"Took {sw.ElapsedMilliseconds} ms");
 
     return 0;
 }

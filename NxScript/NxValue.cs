@@ -15,19 +15,22 @@ public partial class NxValue
     private readonly bool? booleanValue = null;
     private readonly List<NxValue>? arrayValue = null;
     private readonly Dictionary<NxValue, NxValue>? objValue = null;
+    private readonly Func<List<NxValue>, NxValue>? fnValue = null;
 
     public bool IsString => this.stringValue is not null;
     public bool IsNumber => this.numberValue is not null;
     public bool IsBoolean => this.booleanValue is not null;
     public bool IsArray => this.arrayValue is not null;
     public bool IsObj => this.objValue is not null;
-    public bool IsNil => !this.IsBoolean && !this.IsNumber && !this.IsString && !this.IsArray && !this.IsObj;
+    public bool IsFn => this.fnValue is not null;
+    public bool IsNil => !this.IsBoolean && !this.IsNumber && !this.IsString && !this.IsArray && !this.IsObj && !this.IsFn;
 
     public NxValueType Type => this.stringValue is not null ? NxValueType.String :
         this.numberValue is not null ? NxValueType.Number :
         this.booleanValue is not null ? NxValueType.Boolean :
         this.arrayValue is not null ? NxValueType.Array :
         this.objValue is not null ? NxValueType.Obj :
+        this.fnValue is not null ? NxValueType.Fn :
         NxValueType.Nil;
 
     ///
@@ -95,6 +98,12 @@ public partial class NxValue
                 this.objValue[key] = val;
             }
         }
+    }
+
+    // Fn
+    public NxValue(Func<List<NxValue>, NxValue> value)
+    {
+        this.fnValue = value;
     }
 
     ///
@@ -209,6 +218,7 @@ public partial class NxValue
             NxValueType.String => this.stringValue,
             NxValueType.Array => this.arrayValue,
             NxValueType.Obj => this.objValue,
+            NxValueType.Fn => this.fnValue,
             NxValueType.Nil => null,
             _ => throw new NotSupportedException($"Don't know type {Enum.GetName(this.Type)}")
         };

@@ -21,6 +21,9 @@
             "include": "#functions"
         },
         {
+            "include": "#constants"
+        },
+        {
             "include": "#operators"
         }
     ],
@@ -33,11 +36,19 @@
                 }
             ]
         },
+        "constants": {
+            "patterns": [
+                {
+                    "name": "constant.language.NxScript",
+                    "match": "\\b(nil|true|false)\\b"
+                }
+            ]
+        },
         "keywords": {
             "patterns": [
                 {
                     "name": "keyword.control.NxScript",
-                    "match": "\\b(if|else|while|nil|true|false)\\b"
+                    "match": "\\b(if|else|while|fn|ret)\\b"
                 }
             ]
         },
@@ -92,7 +103,7 @@
                 },
                 {
                     "name": "keyword.operator.assignment.NxScript",
-                    "match": "="
+                    "match": "=|->"
                 },
                 {
                     "name": "keyword.operator.comparison.NxScript",

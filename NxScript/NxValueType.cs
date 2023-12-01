@@ -8,4 +8,5 @@ public enum NxValueType
     String,
     Array,
     Obj,
+    Fn,
 }

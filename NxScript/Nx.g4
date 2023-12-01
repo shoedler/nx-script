@@ -6,12 +6,18 @@ block: stat*;
 
 stat:
     assignment
+    | fn_declaration
     | if_stat
     | while_stat
     | expr SCOL
+    | return
     | OTHER { throw new System.Exception("Unknown Character: " + $OTHER.text); };
 
 assignment: ID ASSIGN expr SCOL;
+
+return : RETURN expr? SCOL;
+
+fn_declaration: FN ID ASSIGN (ID (COMMA ID)*)? LAMBDA stat_block ;
 
 if_stat:
     IF expr stat_block 
@@ -68,6 +74,8 @@ MOD      : '%' ;
 POW      : '^' ;
 NOT      : '!' ;
 
+LAMBDA   : '->' ;
+
 DOT      : '.' ;
 COMMA    : ',' ;
 SCOL     : ';' ;
@@ -87,6 +95,8 @@ IF       : 'if' ;
 ELSE     : 'else' ;
 WHILE    : 'while' ;
 LOG      : 'log' ;
+FN       : 'fn' ;
+RETURN   : 'ret';
 
 ID       : [a-zA-Z_] [a-zA-Z_0-9]* ;
 INT      : [0-9]+ ;

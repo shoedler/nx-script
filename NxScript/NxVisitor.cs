@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from C:/Projects/nx-script/NxScript///Nx.g4 by ANTLR 4.13.1
+// Generated from Nx.g4 by ANTLR 4.13.1
 
 // Unreachable code detected
 #pragma warning disable 0162
@@ -55,6 +55,18 @@ public interface INxVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitAssignment([NotNull] NxParser.AssignmentContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="NxParser.return"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitReturn([NotNull] NxParser.ReturnContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="NxParser.fn_declaration"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFn_declaration([NotNull] NxParser.Fn_declarationContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="NxParser.if_stat"/>.
 	/// </summary>

@@ -12,57 +12,71 @@ public partial class NxValue
     /// 
     public float AsNumber()
     {
-        // TODO: Try cast from current type first
         return this.numberValue ??
                this.StringToNumber() ??
                this.BooleanToNumber() ??
                this.ArrayToNumber() ??
                this.ObjToNumber() ??
+               this.FnToNumber() ??
                0f;
     }
 
     public string AsString()
     {
-        // TODO: Try cast from current type first
         return this.stringValue ??
                this.NumberToString() ??
                this.BooleanToString() ??
                this.ArrayToString() ??
                this.ObjToString() ??
+               this.FnToString() ??
                string.Empty;
     }
 
     public bool AsBoolean()
     {
-        // TODO: Try cast from current type first
         return this.booleanValue ??
                this.NumberToBoolean() ??
                this.StringToBoolean() ??
                this.ArrayToBoolean() ??
                this.ObjToBoolean() ??
+               this.FnToBoolean() ??
                false;
     }
 
     public List<NxValue> AsArray()
     {
-        // TODO: Try cast from current type first
         return this.arrayValue ??
                this.StringToArray() ??
                this.NumberToArray() ??
                this.BooleanToArray() ??
                this.ObjToArray() ??
+               this.FnToArray() ??
                new List<NxValue>();
     }
 
     public Dictionary<NxValue, NxValue> AsObj()
     {
-        // TODO: Try cast from current type first
         return this.objValue ??
                this.StringToObj() ??
                this.NumberToObj() ??
                this.BooleanToObj() ??
                this.ArrayToObj() ??
+               this.FnToObj() ??
                new Dictionary<NxValue, NxValue>();
+    }
+
+    public Func<List<NxValue>, NxValue> AsFn()
+    {
+        // We can jsut return ourselves here. (args) => this
+        // Then, in the visitor: Create a new Visitor, inject (somehow) the args as variables and then store 
+        // set the func to () => newvisitor.visit(context)
+        // Should work yo!
+        if (this.fnValue is not null)
+        {
+            return this.fnValue;
+        }
+
+        return new Func<List<NxValue>, NxValue>((List<NxValue> Args) => this);
     }
 
     ///
@@ -117,6 +131,20 @@ public partial class NxValue
         return this.objValue.Count;
     }
 
+    private float? FnToNumber()
+    {
+        if (this.fnValue is null)
+        {
+            return null;
+        }
+
+#if STRICT_MODE
+        throw new NotSupportedException("Cannot convert fn to number in strict mode");
+#endif
+
+        return null; // Unconvertable
+    }
+
     ///
     /// To String conversions
     ///
@@ -159,7 +187,18 @@ public partial class NxValue
         }
 
         var items = this.objValue.Select((pair) => $"{pair.Key.AsString()}: {pair.Value.AsString()}");
-        return "{" + string.Join(", ", items) + "}";
+        var objString = "{" + string.Join(", ", items) + "}";
+        return objString.Length > 100 ? "[Object]" : objString;
+    }
+
+    private string? FnToString()
+    {
+        if (this.fnValue is null)
+        {
+            return null;
+        }
+
+        return "[Function]";
     }
 
     ///
@@ -198,6 +237,16 @@ public partial class NxValue
     }
 
     private bool? ObjToBoolean()
+    {
+        if (this.objValue is null)
+        {
+            return null;
+        }
+
+        return true;
+    }
+
+    private bool? FnToBoolean()
     {
         if (this.objValue is null)
         {
@@ -266,6 +315,16 @@ public partial class NxValue
         }).ToList();
     }
 
+    private List<NxValue>? FnToArray()
+    {
+        if (this.fnValue is null)
+        {
+            return null;
+        }
+
+        return new List<NxValue> { new(this.fnValue) };
+    }
+
     ///
     /// To Obj conversions
     ///
@@ -328,6 +387,27 @@ public partial class NxValue
             return null;
         }
 
+#if STRICT_MODE
+        throw new NotSupportedException("Cannot convert array to obj in strict mode");
+#endif
+
         return this.arrayValue.ToDictionary(value => value, value => value);
+    }
+
+    private Dictionary<NxValue, NxValue>? FnToObj()
+    {
+        if (this.fnValue is null)
+        {
+            return null;
+        }
+
+#if STRICT_MODE
+        throw new NotSupportedException("Cannot convert fn to obj in strict mode");
+#endif
+
+        return new Dictionary<NxValue, NxValue>
+        {
+            { this, this }
+        };
     }
 }
