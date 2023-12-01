@@ -51,7 +51,7 @@ public partial class NxValue
         return left.Type switch
         {
             NxValueType.Number => new NxValue(left.AsNumber() + right.AsNumber()), // [Not-Mut]
-            NxValueType.Boolean => new NxValue(left.AsBoolean() || right.AsBoolean()), // [Not-Mut] (Boolean OR)
+            NxValueType.Bool => new NxValue(left.AsBool() || right.AsBool()), // [Not-Mut] (Bool OR)
 
             NxValueType.String => new NxValue(left.AsString() + right.AsString()), // [Not-Mut]
             NxValueType.Array => new NxValue(left.AsArray().Concat(right.AsArray()).ToList()), // [Not-Mut]
@@ -69,7 +69,7 @@ public partial class NxValue
         return left.Type switch
         {
             NxValueType.Number => new NxValue(left.AsNumber() == right.AsNumber()), // [By-Val]
-            NxValueType.Boolean => new NxValue(left.AsBoolean() == right.AsBoolean()), // [By-Val]
+            NxValueType.Bool => new NxValue(left.AsBool() == right.AsBool()), // [By-Val]
             NxValueType.String => new NxValue(left.AsString() == right.AsString()), // [By-Val]
             NxValueType.Array or
             NxValueType.Obj or
@@ -87,7 +87,7 @@ public partial class NxValue
         return left.Type switch
         {
             NxValueType.Number => new NxValue(left.AsNumber() != right.AsNumber()), // [By-Val]
-            NxValueType.Boolean => new NxValue(left.AsBoolean() != right.AsBoolean()), // [By-Val]
+            NxValueType.Bool => new NxValue(left.AsBool() != right.AsBool()), // [By-Val]
             NxValueType.String => new NxValue(left.AsString() != right.AsString()), // [By-Val]
             NxValueType.Array or
             NxValueType.Obj or
@@ -105,7 +105,7 @@ public partial class NxValue
         return left.Type switch
         {
             NxValueType.Number => new NxValue(left.AsNumber() * right.AsNumber()), // [Not-Mut]
-            NxValueType.Boolean => new NxValue(left.AsBoolean() && right.AsBoolean()), // [Not-Mut] (Boolean AND)
+            NxValueType.Bool => new NxValue(left.AsBool() && right.AsBool()), // [Not-Mut] (Bool AND)
             _ => new NxValue(left.AsNumber() * right.AsNumber()) // [Not-Mut]
         };
     }

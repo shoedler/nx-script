@@ -37,7 +37,7 @@ public class ToObjTests : ToTypeTestsBase
     [InlineData("{true:false} + true  ", new bool[] { true, true })] // {true: true}
     [InlineData("{false: false} + true", new bool[] { false, false }, new bool[] { true, true })] // {false: false, true: true}
     [InlineData("{false: true} + true ", new bool[] { false, true }, new bool[] { true, true })] // {false: true, true: true}
-    public void Boolean_ToObj_Works(string expression, params IEnumerable[] expectedInternalResult)
+    public void Bool_ToObj_Works(string expression, params IEnumerable[] expectedInternalResult)
     {
         this.ToObj_Works(expression, expectedInternalResult);
     }

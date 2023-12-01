@@ -36,7 +36,7 @@ public class ToArrayTests : ToTypeTestsBase
     [InlineData("[] + false", false)] // [false]
     [InlineData("[false] + false", false, false)] // [false, false]
     [InlineData("[false] + true", false, true)] // [false, true]
-    public void Boolean_ToArray_Works(string expression, params dynamic[] expectedInternalResult)
+    public void Bool_ToArray_Works(string expression, params dynamic[] expectedInternalResult)
     {
         this.ToArray_Works(expression, expectedInternalResult);
     }

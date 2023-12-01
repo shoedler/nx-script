@@ -14,7 +14,7 @@ public partial class NxValue
     {
         return this.numberValue ??
                this.StringToNumber() ??
-               this.BooleanToNumber() ??
+               this.BoolToNumber() ??
                this.ArrayToNumber() ??
                this.ObjToNumber() ??
                this.FnToNumber() ??
@@ -25,21 +25,21 @@ public partial class NxValue
     {
         return this.stringValue ??
                this.NumberToString() ??
-               this.BooleanToString() ??
+               this.BoolToString() ??
                this.ArrayToString() ??
                this.ObjToString() ??
                this.FnToString() ??
                string.Empty;
     }
 
-    public bool AsBoolean()
+    public bool AsBool()
     {
         return this.booleanValue ??
-               this.NumberToBoolean() ??
-               this.StringToBoolean() ??
-               this.ArrayToBoolean() ??
-               this.ObjToBoolean() ??
-               this.FnToBoolean() ??
+               this.NumberToBool() ??
+               this.StringToBool() ??
+               this.ArrayToBool() ??
+               this.ObjToBool() ??
+               this.FnToBool() ??
                false;
     }
 
@@ -48,7 +48,7 @@ public partial class NxValue
         return this.arrayValue ??
                this.StringToArray() ??
                this.NumberToArray() ??
-               this.BooleanToArray() ??
+               this.BoolToArray() ??
                this.ObjToArray() ??
                this.FnToArray() ??
                new List<NxValue>();
@@ -59,7 +59,7 @@ public partial class NxValue
         return this.objValue ??
                this.StringToObj() ??
                this.NumberToObj() ??
-               this.BooleanToObj() ??
+               this.BoolToObj() ??
                this.ArrayToObj() ??
                this.FnToObj() ??
                new Dictionary<NxValue, NxValue>();
@@ -93,7 +93,7 @@ public partial class NxValue
         return ret;
     }
 
-    private float? BooleanToNumber()
+    private float? BoolToNumber()
     {
         if (this.booleanValue is null)
         {
@@ -158,7 +158,7 @@ public partial class NxValue
         return this.numberValue.ToString();
     }
 
-    private string? BooleanToString()
+    private string? BoolToString()
     {
         if (this.booleanValue is null)
         {
@@ -202,9 +202,9 @@ public partial class NxValue
     }
 
     ///
-    /// To Boolean conversions
+    /// To Bool conversions
     ///
-    private bool? StringToBoolean()
+    private bool? StringToBool()
     {
         if (this.stringValue is null)
         {
@@ -216,7 +216,7 @@ public partial class NxValue
             this.stringValue.Length > 0;
     }
 
-    private bool? NumberToBoolean()
+    private bool? NumberToBool()
     {
         if (this.numberValue is null)
         {
@@ -226,7 +226,7 @@ public partial class NxValue
         return this.numberValue is not 0;
     }
 
-    private bool? ArrayToBoolean()
+    private bool? ArrayToBool()
     {
         if (this.arrayValue is null)
         {
@@ -236,7 +236,7 @@ public partial class NxValue
         return true;
     }
 
-    private bool? ObjToBoolean()
+    private bool? ObjToBool()
     {
         if (this.objValue is null)
         {
@@ -246,7 +246,7 @@ public partial class NxValue
         return true;
     }
 
-    private bool? FnToBoolean()
+    private bool? FnToBool()
     {
         if (this.objValue is null)
         {
@@ -286,7 +286,7 @@ public partial class NxValue
         return new List<NxValue> { new((float)this.numberValue) };
     }
 
-    private List<NxValue>? BooleanToArray()
+    private List<NxValue>? BoolToArray()
     {
         if (this.booleanValue is null)
         {
@@ -363,7 +363,7 @@ public partial class NxValue
     }
 
 
-    private Dictionary<NxValue, NxValue>? BooleanToObj()
+    private Dictionary<NxValue, NxValue>? BoolToObj()
     {
         if (this.booleanValue is null)
         {

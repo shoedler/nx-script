@@ -217,12 +217,12 @@ public interface INxVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitNumberAtom([NotNull] NxParser.NumberAtomContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>booleanAtom</c>
+	/// Visit a parse tree produced by the <c>boolAtom</c>
 	/// labeled alternative in <see cref="NxParser.atom"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitBooleanAtom([NotNull] NxParser.BooleanAtomContext context);
+	Result VisitBoolAtom([NotNull] NxParser.BoolAtomContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>idAtom</c>
 	/// labeled alternative in <see cref="NxParser.atom"/>.

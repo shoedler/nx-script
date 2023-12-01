@@ -53,7 +53,7 @@ expr:
 atom:
     OPAR expr CPAR   # parExpr
     | (INT | FLOAT)  # numberAtom
-    | (TRUE | FALSE) # booleanAtom
+    | (TRUE | FALSE) # boolAtom
     | ID             # idAtom
     | STRING         # stringAtom
     | NIL            # nilAtom;

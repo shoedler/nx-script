@@ -33,7 +33,7 @@ public class ToNumberTests : ToTypeTestsBase
     [Theory]
     [InlineData("0 + true ", 1f)]
     [InlineData("0 + false", 0f)]
-    public void Boolean_ToNumber_Works(string expression, float expectedInternalResult)
+    public void Bool_ToNumber_Works(string expression, float expectedInternalResult)
     {
         this.TypeConversion_Works(expression, expectedInternalResult, this.FloatType, this.NxType);
     }

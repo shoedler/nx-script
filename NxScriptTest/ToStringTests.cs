@@ -33,7 +33,7 @@ public class ToStringTests : ToTypeTestsBase
     [Theory]
     [InlineData(@"""foo"" + true ", "footrue")]
     [InlineData(@"""foo"" + false", "foofalse")]
-    public void Boolean_ToString_Works(string expression, string expectedInternalResult)
+    public void Bool_ToString_Works(string expression, string expectedInternalResult)
     {
         this.TypeConversion_Works(expression, expectedInternalResult, this.StringType, this.NxType);
     }

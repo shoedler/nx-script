@@ -1437,17 +1437,6 @@ public partial class NxParser : Parser {
 			else return visitor.VisitChildren(this);
 		}
 	}
-	public partial class BooleanAtomContext : AtomContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode TRUE() { return GetToken(NxParser.TRUE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode FALSE() { return GetToken(NxParser.FALSE, 0); }
-		public BooleanAtomContext(AtomContext context) { CopyFrom(context); }
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			INxVisitor<TResult> typedVisitor = visitor as INxVisitor<TResult>;
-			if (typedVisitor != null) return typedVisitor.VisitBooleanAtom(this);
-			else return visitor.VisitChildren(this);
-		}
-	}
 	public partial class IdAtomContext : AtomContext {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ID() { return GetToken(NxParser.ID, 0); }
 		public IdAtomContext(AtomContext context) { CopyFrom(context); }
@@ -1465,6 +1454,17 @@ public partial class NxParser : Parser {
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
 			INxVisitor<TResult> typedVisitor = visitor as INxVisitor<TResult>;
 			if (typedVisitor != null) return typedVisitor.VisitStringAtom(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+	public partial class BoolAtomContext : AtomContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode TRUE() { return GetToken(NxParser.TRUE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode FALSE() { return GetToken(NxParser.FALSE, 0); }
+		public BoolAtomContext(AtomContext context) { CopyFrom(context); }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			INxVisitor<TResult> typedVisitor = visitor as INxVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitBoolAtom(this);
 			else return visitor.VisitChildren(this);
 		}
 	}
@@ -1529,7 +1529,7 @@ public partial class NxParser : Parser {
 				break;
 			case TRUE:
 			case FALSE:
-				_localctx = new BooleanAtomContext(_localctx);
+				_localctx = new BoolAtomContext(_localctx);
 				EnterOuterAlt(_localctx, 3);
 				{
 				State = 198;

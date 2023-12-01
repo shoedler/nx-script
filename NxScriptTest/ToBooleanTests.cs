@@ -2,12 +2,12 @@ using NxScript;
 
 namespace NxScriptTest;
 
-public class ToBooleanTests : ToTypeTestsBase
+public class ToBoolTests : ToTypeTestsBase
 {
-    private readonly Type BooleanType = typeof(bool);
-    private readonly NxValueType NxType = NxValueType.Boolean;
+    private readonly Type BoolType = typeof(bool);
+    private readonly NxValueType NxType = NxValueType.Bool;
 
-    public ToBooleanTests(NxEvalFixture fixture) : base(fixture)
+    public ToBoolTests(NxEvalFixture fixture) : base(fixture)
     {
     }
 
@@ -22,10 +22,10 @@ public class ToBooleanTests : ToTypeTestsBase
 
         var foo = result.TryGetVariableFromAnyScope("foo");
         Assert.NotNull(foo);
-        Assert.True(foo.IsBoolean);
+        Assert.True(foo.IsBool);
 
-        var fooValue = foo.GetInternalValue(NxValueType.Boolean);
-        Assert.IsType(this.BooleanType, fooValue);
+        var fooValue = foo.GetInternalValue(NxValueType.Bool);
+        Assert.IsType(this.BoolType, fooValue);
         Assert.True(fooValue);
     }
 
@@ -40,10 +40,10 @@ public class ToBooleanTests : ToTypeTestsBase
 
         var foo = result.TryGetVariableFromAnyScope("foo");
         Assert.NotNull(foo);
-        Assert.True(foo.IsBoolean);
+        Assert.True(foo.IsBool);
 
-        var fooValue = foo.GetInternalValue(NxValueType.Boolean);
-        Assert.IsType(this.BooleanType, fooValue);
+        var fooValue = foo.GetInternalValue(NxValueType.Bool);
+        Assert.IsType(this.BoolType, fooValue);
         Assert.False(fooValue);
     }
 
@@ -52,9 +52,9 @@ public class ToBooleanTests : ToTypeTestsBase
     [InlineData("true && -1 ", true)]
     [InlineData("true && 1  ", true)]
     [InlineData("true && 123", true)]
-    public void Number_ToBoolean_Works(string expression, bool expectedInternalResult)
+    public void Number_ToBool_Works(string expression, bool expectedInternalResult)
     {
-        this.TypeConversion_Works(expression, expectedInternalResult, this.BooleanType, this.NxType);
+        this.TypeConversion_Works(expression, expectedInternalResult, this.BoolType, this.NxType);
     }
 
     [Theory]
@@ -64,26 +64,26 @@ public class ToBooleanTests : ToTypeTestsBase
     [InlineData(@"true && ""asdf"" ", true)]
     [InlineData(@"true && ""0""    ", true)]
     [InlineData(@"true && ""123""  ", true)]
-    public void String_ToBoolean_Works(string expression, bool expectedInternalResult)
+    public void String_ToBool_Works(string expression, bool expectedInternalResult)
     {
-        this.TypeConversion_Works(expression, expectedInternalResult, this.BooleanType, this.NxType);
+        this.TypeConversion_Works(expression, expectedInternalResult, this.BoolType, this.NxType);
     }
 
     [Theory]
     [InlineData("true && []     ", true)]
     [InlineData("true && [false]", true)]
     [InlineData("true && [nil]  ", true)]
-    public void Array_ToBoolean_Works(string expression, bool expectedInternalResult)
+    public void Array_ToBool_Works(string expression, bool expectedInternalResult)
     {
-        this.TypeConversion_Works(expression, expectedInternalResult, this.BooleanType, this.NxType);
+        this.TypeConversion_Works(expression, expectedInternalResult, this.BoolType, this.NxType);
     }
 
     [Theory]
     [InlineData("true && {}           ", true)]
     [InlineData("true && {false:false}", true)]
     [InlineData("true && {nil:false}  ", true)]
-    public void Obj_ToBoolean_Works(string expression, bool expectedInternalResult)
+    public void Obj_ToBool_Works(string expression, bool expectedInternalResult)
     {
-        this.TypeConversion_Works(expression, expectedInternalResult, this.BooleanType, this.NxType);
+        this.TypeConversion_Works(expression, expectedInternalResult, this.BoolType, this.NxType);
     }
 }

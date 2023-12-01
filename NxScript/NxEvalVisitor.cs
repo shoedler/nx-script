@@ -27,7 +27,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
                 var log = arg.Type switch
                 {
                     NxValueType.String => $"{arg.AsString()}".InGreen(),
-                    NxValueType.Boolean => arg.AsString().InMagenta(),
+                    NxValueType.Bool => arg.AsString().InMagenta(),
                     NxValueType.Number => arg.AsString().InYellow(),
                     NxValueType.Array or 
                     NxValueType.Obj or 
@@ -152,7 +152,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
 
         foreach (var (condition, stat) in expressions.Zip(statBlocks))
         {
-            if (!Visit(condition).AsBoolean())
+            if (!Visit(condition).AsBool())
             {
                 continue;
             }
@@ -173,7 +173,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         var panic = 0;
         NxValue lastValue = DefaultResult;
 
-        while (Visit(context.expr()).AsBoolean())
+        while (Visit(context.expr()).AsBool())
         {
             lastValue = Visit(context.stat_block());
             if (panic++ > 10_000_000) // TODO: Move to Constants
@@ -273,7 +273,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
     {
         var right = Visit(context.expr());
 
-        return new NxValue(!right.AsBoolean());
+        return new NxValue(!right.AsBool());
     }
 
     public NxValue VisitMultiplicationExpr([NotNull] NxParser.MultiplicationExprContext context)
@@ -336,7 +336,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         var left = Visit(context.expr()[0]);
         var right = Visit(context.expr()[1]);
 
-        return new NxValue(left.AsBoolean() && right.AsBoolean());
+        return new NxValue(left.AsBool() && right.AsBool());
     }
 
     public NxValue VisitOrExpr([NotNull] NxParser.OrExprContext context)
@@ -344,7 +344,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         var left = Visit(context.expr()[0]);
         var right = Visit(context.expr()[1]);
 
-        return new NxValue(left.AsBoolean() || right.AsBoolean());
+        return new NxValue(left.AsBool() || right.AsBool());
     }
 
     public NxValue VisitAtomExpr([NotNull] NxParser.AtomExprContext context)
@@ -358,7 +358,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
     public NxValue VisitParExpr([NotNull] NxParser.ParExprContext context) { return Visit(context.expr()); }
     public NxValue VisitNumberAtom([NotNull] NxParser.NumberAtomContext context) { return new NxValue(context); }
     public NxValue VisitStringAtom([NotNull] NxParser.StringAtomContext context) { return new NxValue(context); }
-    public NxValue VisitBooleanAtom([NotNull] NxParser.BooleanAtomContext context) { return new NxValue(context); }
+    public NxValue VisitBoolAtom([NotNull] NxParser.BoolAtomContext context) { return new NxValue(context); }
     public NxValue VisitNilAtom([NotNull] NxParser.NilAtomContext context) { return new NxValue(); }
     public NxValue VisitIdAtom([NotNull] NxParser.IdAtomContext context) { return this.GetVariable(context.ID().GetText(), context); }
 

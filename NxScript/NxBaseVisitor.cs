@@ -332,7 +332,7 @@ public partial class NxBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, I
 	/// <return>The visitor result.</return>
 	public virtual Result VisitNumberAtom([NotNull] NxParser.NumberAtomContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by the <c>booleanAtom</c>
+	/// Visit a parse tree produced by the <c>boolAtom</c>
 	/// labeled alternative in <see cref="NxParser.atom"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
@@ -341,7 +341,7 @@ public partial class NxBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, I
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitBooleanAtom([NotNull] NxParser.BooleanAtomContext context) { return VisitChildren(context); }
+	public virtual Result VisitBoolAtom([NotNull] NxParser.BoolAtomContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>idAtom</c>
 	/// labeled alternative in <see cref="NxParser.atom"/>.

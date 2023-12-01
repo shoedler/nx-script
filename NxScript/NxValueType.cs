@@ -3,7 +3,7 @@
 public enum NxValueType
 {
     Nil,
-    Boolean,
+    Bool,
     Number,
     String,
     Array,

@@ -19,15 +19,15 @@ public partial class NxValue
 
     public bool IsString => this.stringValue is not null;
     public bool IsNumber => this.numberValue is not null;
-    public bool IsBoolean => this.booleanValue is not null;
+    public bool IsBool => this.booleanValue is not null;
     public bool IsArray => this.arrayValue is not null;
     public bool IsObj => this.objValue is not null;
     public bool IsFn => this.fnValue is not null;
-    public bool IsNil => !this.IsBoolean && !this.IsNumber && !this.IsString && !this.IsArray && !this.IsObj && !this.IsFn;
+    public bool IsNil => !this.IsBool && !this.IsNumber && !this.IsString && !this.IsArray && !this.IsObj && !this.IsFn;
 
     public NxValueType Type => this.stringValue is not null ? NxValueType.String :
         this.numberValue is not null ? NxValueType.Number :
-        this.booleanValue is not null ? NxValueType.Boolean :
+        this.booleanValue is not null ? NxValueType.Bool :
         this.arrayValue is not null ? NxValueType.Array :
         this.objValue is not null ? NxValueType.Obj :
         this.fnValue is not null ? NxValueType.Fn :
@@ -52,7 +52,7 @@ public partial class NxValue
         this.stringValue = value;
     }
 
-    // Boolean
+    // Bool
     public NxValue(bool value)
     {
         this.booleanValue = value;
@@ -137,7 +137,7 @@ public partial class NxValue
         }
     }
 
-    public NxValue(NxParser.BooleanAtomContext context)
+    public NxValue(NxParser.BoolAtomContext context)
     {
         if (context.TRUE() is not null)
         {
@@ -160,7 +160,7 @@ public partial class NxValue
             return this.numberValue.GetHashCode();
         }
 
-        if (this.IsBoolean)
+        if (this.IsBool)
         {
             return this.booleanValue.GetHashCode();
         }
@@ -188,7 +188,7 @@ public partial class NxValue
             return this.numberValue!.GetHashCode() == other.numberValue!.GetHashCode();
         }
 
-        if (this.IsBoolean && other.IsBoolean)
+        if (this.IsBool && other.IsBool)
         {
             return this.booleanValue == other.booleanValue;
         }
@@ -213,7 +213,7 @@ public partial class NxValue
     {
         return this.Type switch
         {
-            NxValueType.Boolean => this.booleanValue,
+            NxValueType.Bool => this.booleanValue,
             NxValueType.Number => this.numberValue,
             NxValueType.String => this.stringValue,
             NxValueType.Array => this.arrayValue,
