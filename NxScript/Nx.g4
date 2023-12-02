@@ -6,14 +6,13 @@ block: stat*;
 
 stat:
     var_declaration
-    | fn_declaration
     | if_stat
     | while_stat
-    | expr SCOL
     | return
+    | expr
     | OTHER { throw new System.Exception("Unknown Character: " + $OTHER.text); };
 
-var_declaration: LET ID ASSIGN expr SCOL;
+var_declaration: LET ID ASSIGN expr;
 
 if_stat:
     IF expr stat_block 
@@ -28,9 +27,9 @@ obj_literal: OBRACE (atom COLON expr (COMMA atom COLON expr)*)? COMMA? CBRACE;
 
 array_literal: OBRACK (expr (COMMA expr)*)? CBRACK;
 
-fn_declaration: LET FN ID ASSIGN (ID (COMMA ID)*)? LAMBDA stat_block ;
+fn_literal : FN (ID (COMMA ID)*)? LAMBDA stat_block;
 
-return : RETURN expr? SCOL;
+return : RETURN expr;
 
 // https://en.cppreference.com/w/c/language/operator_precedence
 expr:
@@ -39,6 +38,7 @@ expr:
     | expr DOT ID                            # memberExpr // Maybe use atom here for the first expr
     | array_literal                          # arrayExpr
     | obj_literal                            # objExpr
+    | fn_literal                             # fnExpr
     | <assoc=right> expr POW expr            # powExpr
     | MINUS expr                             # unaryMinusExpr
     | NOT expr                               # notExpr
@@ -79,7 +79,6 @@ LAMBDA   : '->' ;
 
 DOT      : '.' ;
 COMMA    : ',' ;
-SCOL     : ';' ;
 COLON    : ':' ;
 ASSIGN   : '=' ;
 OPAR     : '(' ;

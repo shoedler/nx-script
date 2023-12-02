@@ -6,7 +6,6 @@ using System.Diagnostics;
 // TODO: Test DiagnosticParseErrorListener by Sam
 // TODO: Add type inference examples with l/r associativity, e.g. true + 0 vs. 0 + true
 // TODO: Add type specific intrinsic stuff, like "length" for strings, arrays, etc.
-// TODO: Add assignment to index and member, e.g. a[0] = 1, a.b = 1
 // TODO: Add string interpolation
 // TODO: Decide if we want static typing or not
 

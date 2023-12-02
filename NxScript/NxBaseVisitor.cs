@@ -125,7 +125,7 @@ public partial class NxBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, I
 	/// <return>The visitor result.</return>
 	public virtual Result VisitArray_literal([NotNull] NxParser.Array_literalContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="NxParser.fn_declaration"/>.
+	/// Visit a parse tree produced by <see cref="NxParser.fn_literal"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -133,7 +133,7 @@ public partial class NxBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, I
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitFn_declaration([NotNull] NxParser.Fn_declarationContext context) { return VisitChildren(context); }
+	public virtual Result VisitFn_literal([NotNull] NxParser.Fn_literalContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="NxParser.return"/>.
 	/// <para>
@@ -144,6 +144,17 @@ public partial class NxBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, I
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	public virtual Result VisitReturn([NotNull] NxParser.ReturnContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>fnExpr</c>
+	/// labeled alternative in <see cref="NxParser.expr"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitFnExpr([NotNull] NxParser.FnExprContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>arrayExpr</c>
 	/// labeled alternative in <see cref="NxParser.expr"/>.

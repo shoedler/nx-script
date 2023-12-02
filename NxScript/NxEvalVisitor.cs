@@ -154,40 +154,6 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         return value;
     }
 
-    public NxValue VisitFn_declaration([NotNull] NxParser.Fn_declarationContext context)
-    {
-        var names = context.ID().Select(n => n.GetText());
-        var name = names.First();
-        var argNames = names.Skip(1);
-
-        // Some manual optimization to ensure we don't create a new scope twice when running trough 
-        // VisitBlock() (Affects fns with block bodies)
-        var blockBody = context.stat_block().block();
-        var statBody = context.stat_block().stat();
-
-        IParseTree fnBody = blockBody is not null ? blockBody : statBody;
-
-        // Closure
-        var fn = new NxValueFn((args) =>
-        {
-            var fnVisitor = this.NewScope();
-
-            foreach (var (argName, value) in argNames.Zip(args))
-            {
-                // We deliberaltely set it manually here. Bc if there's a an identically named variable above, it's not gonna be fun.
-                fnVisitor.Variables[argName] = value ?? throw NxEvalException.FromContext($"Missing arg {argName}", context);
-            }
-
-            fnVisitor.Fn = fnVisitor;
-            var ret = fnVisitor.Visit(fnBody);
-
-            return fnVisitor.Fn.ReturnValue ?? ret ?? DefaultResult;
-        });
-
-        this.DeclareVariable(name, fn, context);
-        return fn;
-    }
-
     public NxValue VisitIf_stat([NotNull] NxParser.If_statContext context)
     {
         var expressions = context.expr();
@@ -259,6 +225,37 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         return new NxValueObj(atoms.Zip(expressions));
     }
 
+    public NxValue VisitFn_literal([NotNull] NxParser.Fn_literalContext context)
+    {
+        var argNames = context.ID().Select(n => n.GetText());
+
+        // Some manual optimization to ensure we don't create a new scope twice when running trough 
+        // VisitBlock() (Affects fns with block bodies)
+        var blockBody = context.stat_block().block();
+        var statBody = context.stat_block().stat();
+
+        IParseTree fnBody = blockBody is not null ? blockBody : statBody;
+
+        // Closure
+        var fn = new NxValueFn((args) =>
+        {
+            var fnVisitor = this.NewScope();
+
+            foreach (var (argName, value) in argNames.Zip(args))
+            {
+                // We deliberaltely set it manually here. Bc if there's a an identically named variable above, it's not gonna be fun.
+                fnVisitor.Variables[argName] = value ?? throw NxEvalException.FromContext($"Missing arg {argName}", context);
+            }
+
+            fnVisitor.Fn = fnVisitor;
+            var ret = fnVisitor.Visit(fnBody);
+
+            return fnVisitor.Fn.ReturnValue ?? ret ?? DefaultResult;
+        });
+
+        return fn;
+    }
+
     ///
     /// Expressions
     /// 
@@ -295,6 +292,11 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
     public NxValue VisitObjExpr([NotNull] NxParser.ObjExprContext context)
     {
         return Visit(context.obj_literal()); // Just pluck the literal, could also just return the default VisitChildren() but this is quicker
+    }
+
+    public NxValue VisitFnExpr([NotNull] NxParser.FnExprContext context)
+    {
+        return Visit(context.fn_literal()); // Just pluck the literal, could also just return the default VisitChildren() but this is quicker
     }
 
     public NxValue VisitPowExpr([NotNull] NxParser.PowExprContext context)
@@ -437,12 +439,6 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
             {
                 // Use return value if there is one!
                 return this.Fn.ReturnValue;
-            }
-
-            // We skip over ";" so that the return value does not get ignored
-            if (child.Payload is IToken token && token.Type == NxParser.SCOL)
-            {
-                break;
             }
 
             val = Visit(child);

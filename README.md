@@ -2,7 +2,7 @@
 
 TODO
 
-## Prerequisites
+## Prerequisites (For Development)
 
 - Java JDK 17 or 21
 - ANTLR 4.13.1 [See Setup Guide](#antlr4-toolchain---windows-11-setup-quickguide)
@@ -18,7 +18,7 @@ dotnet build
 Run the sample script.
 
 ```shell
-.\bin\Debug\net7.0\NxScript.exe .\src\SampleScript.ns
+.\NxScript\bin\Debug\net7.0\nxs.exe run .\NxScript\SampleScript.nx
 ```
 
 # ANTLR4 Toolchain - Windows 11 Setup Quickguide

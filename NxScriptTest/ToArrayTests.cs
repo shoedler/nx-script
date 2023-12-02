@@ -25,9 +25,9 @@ public class ToArrayTests : ToTypeTestsBase
         Assert.NotNull(foo);
         Assert.True(foo.IsSeq);
 
-        var fooValue = foo.GetInternalValue(NxValueType.Seq);
+        var fooValue = foo.GetInternalValue();
         Assert.IsType(this.ArrayType, fooValue);
-        Assert.Same(fooValue, foo.GetInternalValue(NxValueType.Seq));
+        Assert.Same(fooValue, foo.GetInternalValue());
     }
 
 

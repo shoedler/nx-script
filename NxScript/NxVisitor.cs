@@ -86,17 +86,24 @@ public interface INxVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitArray_literal([NotNull] NxParser.Array_literalContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="NxParser.fn_declaration"/>.
+	/// Visit a parse tree produced by <see cref="NxParser.fn_literal"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitFn_declaration([NotNull] NxParser.Fn_declarationContext context);
+	Result VisitFn_literal([NotNull] NxParser.Fn_literalContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="NxParser.return"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitReturn([NotNull] NxParser.ReturnContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>fnExpr</c>
+	/// labeled alternative in <see cref="NxParser.expr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFnExpr([NotNull] NxParser.FnExprContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>arrayExpr</c>
 	/// labeled alternative in <see cref="NxParser.expr"/>.
