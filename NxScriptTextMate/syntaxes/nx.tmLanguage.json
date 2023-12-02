@@ -48,7 +48,7 @@
             "patterns": [
                 {
                     "name": "keyword.control.NxScript",
-                    "match": "\\b(if|else|while|fn|ret)\\b"
+                    "match": "\\b(if|else|while|fn|ret|let)\\b"
                 }
             ]
         },

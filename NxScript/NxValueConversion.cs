@@ -34,7 +34,7 @@ public partial class NxValue
 
     public bool AsBool()
     {
-        return this.booleanValue ??
+        return this.boolValue ??
                this.NumberToBool() ??
                this.StringToBool() ??
                this.ArrayToBool() ??
@@ -95,12 +95,12 @@ public partial class NxValue
 
     private float? BoolToNumber()
     {
-        if (this.booleanValue is null)
+        if (this.boolValue is null)
         {
             return null;
         }
 
-        return (bool)this.booleanValue ? 1f : 0f;
+        return (bool)this.boolValue ? 1f : 0f;
     }
 
     private float? ArrayToNumber()
@@ -160,12 +160,12 @@ public partial class NxValue
 
     private string? BoolToString()
     {
-        if (this.booleanValue is null)
+        if (this.boolValue is null)
         {
             return null;
         }
 
-        return (bool)this.booleanValue ? "true" : "false";
+        return (bool)this.boolValue ? "true" : "false";
     }
 
     private string? ArrayToString()
@@ -288,12 +288,12 @@ public partial class NxValue
 
     private List<NxValue>? BoolToArray()
     {
-        if (this.booleanValue is null)
+        if (this.boolValue is null)
         {
             return null;
         }
 
-        return new List<NxValue> { new((bool)this.booleanValue) };
+        return new List<NxValue> { new((bool)this.boolValue) };
     }
 
     private List<NxValue>? ObjToArray()
@@ -341,7 +341,7 @@ public partial class NxValue
 
         return new Dictionary<NxValue, NxValue>
         {
-            { this, this }
+            { this, new NxValue(this) }
         };
     }
 
@@ -358,14 +358,14 @@ public partial class NxValue
 
         return new Dictionary<NxValue, NxValue>
         {
-            { this, this }
+            { this, new NxValue(this) }
         };
     }
 
 
     private Dictionary<NxValue, NxValue>? BoolToObj()
     {
-        if (this.booleanValue is null)
+        if (this.boolValue is null)
         {
             return null;
         }
@@ -376,7 +376,7 @@ public partial class NxValue
 
         return new Dictionary<NxValue, NxValue>
         {
-            { this, this }
+            { this, new NxValue(this) }
         };
     }
 
@@ -391,7 +391,18 @@ public partial class NxValue
         throw new NotSupportedException("Cannot convert array to obj in strict mode");
 #endif
 
-        return this.arrayValue.ToDictionary(value => value, value => value);
+        var dict = new Dictionary<NxValue, NxValue>();
+
+        foreach (var value in this.arrayValue)
+        {
+            var valueCopy = new NxValue(value);
+            if (!dict.TryAdd(value, valueCopy))
+            {
+                dict[value] = valueCopy;
+            }
+        }
+
+        return dict;
     }
 
     private Dictionary<NxValue, NxValue>? FnToObj()

@@ -10,16 +10,16 @@ public partial class NxValue
     // TODO: Use this everywhere where new NxValue() is used. Lock it, too.
     public static readonly NxValue Nil = new();
 
-    private readonly float? numberValue = null;
-    private readonly string? stringValue = null;
-    private readonly bool? booleanValue = null;
-    private readonly List<NxValue>? arrayValue = null;
-    private readonly Dictionary<NxValue, NxValue>? objValue = null;
-    private readonly Func<List<NxValue>, NxValue>? fnValue = null;
+    private float? numberValue = null;
+    private string? stringValue = null;
+    private bool? boolValue = null;
+    private List<NxValue>? arrayValue = null;
+    private Dictionary<NxValue, NxValue>? objValue = null;
+    private Func<List<NxValue>, NxValue>? fnValue = null;
 
     public bool IsString => this.stringValue is not null;
     public bool IsNumber => this.numberValue is not null;
-    public bool IsBool => this.booleanValue is not null;
+    public bool IsBool => this.boolValue is not null;
     public bool IsArray => this.arrayValue is not null;
     public bool IsObj => this.objValue is not null;
     public bool IsFn => this.fnValue is not null;
@@ -27,7 +27,7 @@ public partial class NxValue
 
     public NxValueType Type => this.stringValue is not null ? NxValueType.String :
         this.numberValue is not null ? NxValueType.Number :
-        this.booleanValue is not null ? NxValueType.Bool :
+        this.boolValue is not null ? NxValueType.Bool :
         this.arrayValue is not null ? NxValueType.Array :
         this.objValue is not null ? NxValueType.Obj :
         this.fnValue is not null ? NxValueType.Fn :
@@ -55,7 +55,7 @@ public partial class NxValue
     // Bool
     public NxValue(bool value)
     {
-        this.booleanValue = value;
+        this.boolValue = value;
     }
 
     // Array
@@ -106,6 +106,12 @@ public partial class NxValue
         this.fnValue = value;
     }
 
+    // From NxValue (Referenceless Copy)
+    public NxValue(NxValue old)
+    {
+        NxValue.AssignInternalRTLFromRType(this, old);
+    }
+
     ///
     /// Context Constructors
     /// 
@@ -141,11 +147,11 @@ public partial class NxValue
     {
         if (context.TRUE() is not null)
         {
-            this.booleanValue = true;
+            this.boolValue = true;
         }
         else if (context.FALSE() is not null)
         {
-            this.booleanValue = false;
+            this.boolValue = false;
         }
         else
         {
@@ -162,7 +168,7 @@ public partial class NxValue
 
         if (this.IsBool)
         {
-            return this.booleanValue.GetHashCode();
+            return this.boolValue.GetHashCode();
         }
 
         if (this.IsString)
@@ -190,7 +196,7 @@ public partial class NxValue
 
         if (this.IsBool && other.IsBool)
         {
-            return this.booleanValue == other.booleanValue;
+            return this.boolValue == other.boolValue;
         }
 
         if (this.IsString && other.IsString)
@@ -213,7 +219,7 @@ public partial class NxValue
     {
         return this.Type switch
         {
-            NxValueType.Bool => this.booleanValue,
+            NxValueType.Bool => this.boolValue,
             NxValueType.Number => this.numberValue,
             NxValueType.String => this.stringValue,
             NxValueType.Array => this.arrayValue,

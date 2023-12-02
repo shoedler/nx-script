@@ -109,4 +109,86 @@ public partial class NxValue
             _ => new NxValue(left.AsNumber() * right.AsNumber()) // [Not-Mut]
         };
     }
+
+    public static NxValue AssignInternalRTLFromLType(NxValue left, NxValue right)
+    {
+        if (left.Type == NxValueType.Number)
+        {
+            left.numberValue = right.AsNumber();
+            return left;
+        }
+
+        if (left.Type == NxValueType.Bool)
+        {
+            left.boolValue = right.AsBool();
+            return left;
+        }
+
+        if (left.Type == NxValueType.String)
+        {
+            left.stringValue = right.AsString();
+            return left;
+        }
+
+        if (left.Type == NxValueType.Array)
+        {
+            left.arrayValue = right.AsArray();
+            return left;
+        }
+
+        if (left.Type == NxValueType.Obj)
+        {
+            left.objValue = right.AsObj();
+            return left;
+        }
+
+        if (left.Type == NxValueType.Fn)
+        {
+            left.fnValue = right.AsFn();
+            return left;
+        }
+
+        throw new NotSupportedException("Cannot assign to value of type " + left.Type + ".");
+    }
+
+    public static NxValue AssignInternalRTLFromRType(NxValue left, NxValue right)
+    {
+        if (right.numberValue is not null)
+        {
+            left.numberValue = right.numberValue;
+            return left;
+        }
+
+        if (right.boolValue is not null)
+        {
+            left.boolValue = right.boolValue;
+            return left;
+        }
+
+        if (right.stringValue is not null)
+        {
+            left.stringValue = right.stringValue;
+            return left;
+        }
+
+        if (right.arrayValue is not null)
+        {
+            left.arrayValue = right.arrayValue;
+            return left;
+        }
+
+        if (right.objValue is not null)
+        {
+            left.objValue = right.objValue;
+            return left;
+        }
+
+        if (right.fnValue is not null)
+        {
+            left.fnValue = right.fnValue;
+            return left;
+        }
+
+        throw new NotSupportedException("Cannot assign from value of type " + right.Type + ".");
+    }
 }

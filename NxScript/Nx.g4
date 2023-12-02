@@ -5,7 +5,7 @@ parse: block EOF;
 block: stat*;
 
 stat:
-    assignment
+    var_declaration
     | fn_declaration
     | if_stat
     | while_stat
@@ -13,11 +13,7 @@ stat:
     | return
     | OTHER { throw new System.Exception("Unknown Character: " + $OTHER.text); };
 
-assignment: ID ASSIGN expr SCOL;
-
-return : RETURN expr? SCOL;
-
-fn_declaration: FN ID ASSIGN (ID (COMMA ID)*)? LAMBDA stat_block ;
+var_declaration: LET ID ASSIGN expr SCOL;
 
 if_stat:
     IF expr stat_block 
@@ -32,6 +28,10 @@ obj_literal: OBRACE (atom COLON expr (COMMA atom COLON expr)*)? COMMA? CBRACE;
 
 array_literal: OBRACK (expr (COMMA expr)*)? CBRACK;
 
+fn_declaration: LET FN ID ASSIGN (ID (COMMA ID)*)? LAMBDA stat_block ;
+
+return : RETURN expr? SCOL;
+
 // https://en.cppreference.com/w/c/language/operator_precedence
 expr:
     ID OPAR (expr (COMMA expr)*)? CPAR       # fnCallExpr
@@ -39,7 +39,7 @@ expr:
     | expr DOT ID                            # memberExpr // Maybe use atom here for the first expr
     | array_literal                          # arrayExpr
     | obj_literal                            # objExpr
-    | expr POW <assoc = right> expr          # powExpr
+    | <assoc=right> expr POW expr            # powExpr
     | MINUS expr                             # unaryMinusExpr
     | NOT expr                               # notExpr
     | expr op = (MULT | DIV | MOD) expr      # multiplicationExpr
@@ -48,6 +48,7 @@ expr:
     | expr op = (EQ | NEQ) expr              # equalityExpr
     | expr AND expr                          # andExpr
     | expr OR expr                           # orExpr
+    | <assoc=right> expr ASSIGN expr         # assignExpr 
     | atom                                   # atomExpr;
 
 atom:
@@ -96,7 +97,8 @@ ELSE     : 'else' ;
 WHILE    : 'while' ;
 LOG      : 'log' ;
 FN       : 'fn' ;
-RETURN   : 'ret';
+RETURN   : 'ret' ;
+LET      : 'let' ;
 
 ID       : [a-zA-Z_] [a-zA-Z_0-9]* ;
 INT      : [0-9]+ ;

@@ -32,7 +32,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
                     NxValueType.Array or 
                     NxValueType.Obj or 
                     NxValueType.Fn => arg.AsString().InCyan(),
-                    NxValueType.Nil => arg.AsString().InBlue(),
+                    NxValueType.Nil => "nil".InBlue(),
                     _ => arg.AsString()
                 };
 
@@ -60,7 +60,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         // Preload "help" function - show vars & funcs
         this.Variables.Add("help", new NxValue(args =>
         {
-            Console.WriteLine("Variables in global scope:");
+            Console.WriteLine("Variables in current scope:");
             this.Variables.AsEnumerable().ToList()
                 .ForEach((pair) => Console.WriteLine($"{pair.Key}:\t{pair.Value.AsString()}"));
             return new NxValue();
@@ -71,10 +71,53 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         {
             return new NxValue(Enum.GetName(args[0].Type));
         }));
+
+        // Preload "len" function - show lenght of array
+        this.Variables.Add("len", new NxValue(args =>
+        {
+            var arg = args[0] ?? new NxValue();
+            return new NxValue(arg.AsArray().Count);
+        }));
+
+        // Preload "split" function - split string into array (default is \r\n
+        this.Variables.Add("split_by_newline", new NxValue(args =>
+        {
+            var arg = args[0] ?? new NxValue();
+            var strings = arg.AsString().Split(Environment.NewLine).Select(str => new NxValue(str)).ToList();
+            return new NxValue(strings);
+        }));
     }
 
     protected NxEvalVisitor(NxEvalVisitor upper)
     {
+        // Preload "help" function - show vars & funcs
+        this.Variables["help"] = new NxValue(args =>
+        {
+            Console.WriteLine("Variables in scope:");
+
+            var parent = this;
+            var scopes = new List<NxEvalVisitor> { this };
+
+            while (parent.Upper is not null)
+            {
+                parent = parent.Upper;
+                scopes.Add(parent);
+            }
+
+            scopes.Reverse();
+
+            for (var i = 0; i < scopes.Count; i++)
+            {
+                var scope = scopes[i];
+                var indent = new string(' ', i);
+                Console.WriteLine($"{indent}[Scope {i}]:");
+                scope.Variables.AsEnumerable().ToList()
+                    .ForEach((pair) => Console.WriteLine($"{indent}{pair.Key}:\t{pair.Value.AsString()}"));
+            }
+                
+            return new NxValue();
+        });
+
         this.Upper = upper;
         this.Fn = upper.Fn;
     }
@@ -104,10 +147,10 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
        return VisitChildren(context);;
     }
 
-    public NxValue VisitAssignment([NotNull] NxParser.AssignmentContext context)
+    public NxValue VisitVar_declaration([NotNull] NxParser.Var_declarationContext context)
     {
         var value = Visit(context.expr());
-        this.SetVariable(context.ID().GetText(), value);
+        this.DeclareVariable(context.ID().GetText(), value, context);
         return value;
     }
 
@@ -141,7 +184,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
             return fnVisitor.Fn.ReturnValue ?? ret ?? DefaultResult;
         });
 
-        this.SetVariable(name, fn);
+        this.DeclareVariable(name, fn, context);
         return fn;
     }
 
@@ -256,8 +299,8 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
 
     public NxValue VisitPowExpr([NotNull] NxParser.PowExprContext context)
     {
-        var left = Visit(context.expr()[0]);
         var right = Visit(context.expr()[1]);
+        var left = Visit(context.expr()[0]);
 
         return new NxValue((float)Math.Pow(left.AsNumber(), right.AsNumber()));
     }
@@ -347,6 +390,20 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         return new NxValue(left.AsBool() || right.AsBool());
     }
 
+    public NxValue VisitAssignExpr([NotNull] NxParser.AssignExprContext context)
+    {
+        var right = Visit(context.expr()[1]);
+        var left = Visit(context.expr()[0]);
+
+        // TODO: Decide if we want RTL From LType
+        // We could also create a new Variable (Results in a new reference which doesn't really work)
+        // Could also make RTL from RType, which is MUCH more understandable. You kinda have to know the type of lvalue to 
+        // understand what your assignment will do -> it converts rvalue to lvalue!
+        NxValue.AssignInternalRTLFromLType(left, right);
+
+        return left;
+    }
+
     public NxValue VisitAtomExpr([NotNull] NxParser.AtomExprContext context)
     {
         return VisitChildren(context);
@@ -376,6 +433,12 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         {
             var child = node.GetChild(i);
 
+            if (this.Fn is not null && this.Fn.ReturnValue is not null)
+            {
+                // Use return value if there is one!
+                return this.Fn.ReturnValue;
+            }
+
             // We skip over ";" so that the return value does not get ignored
             if (child.Payload is IToken token && token.Type == NxParser.SCOL)
             {
@@ -386,20 +449,6 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         }
 
         return val;
-    }
-
-    public override NxValue Visit(IParseTree tree)
-    {
-        // If we're in a function, return early if we have a return value
-        // If you thought VistChildren() was hot - this is even hotter!
-
-        if (this.Fn is not null && this.Fn.ReturnValue is not null)
-        {
-            // Use return value if there is one!
-            return this.Fn.ReturnValue;
-        }
-
-        return tree.Accept(this);
     }
 
     ///
@@ -420,31 +469,14 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         return this.Upper.GetVariable(key, context);
     }
 
-    internal void SetVariable(string key, NxValue value)
-    {
-        if (this.UpdateVariable(key, value))
-        {
-            return;
-        }
-
-        this.Variables[key] = value;
-    }
-
-
-    internal bool UpdateVariable(string key, NxValue value)
+    internal void DeclareVariable(string key, NxValue value, ParserRuleContext context)
     {
         if (this.Variables.ContainsKey(key))
         {
-            this.Variables[key] = value;
-            return true;
+            throw NxEvalException.FromContext($"Variable '{key}' is already defined", context);
         }
 
-        if (this.Upper is null)
-        {
-            return false;
-        }
-
-        return this.Upper.UpdateVariable(key, value);
+        this.Variables[key] = value;
     }
 
     protected virtual NxEvalVisitor NewScope()

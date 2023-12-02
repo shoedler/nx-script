@@ -1,118 +1,283 @@
-help(); // Prints all variables & functions in the global scope
-print();
+// //
+// //
+// // GLOBALS
+// //
+// //
+// print("--------------------");
+// print("Globals");
+// print("--------------------");
+// print("cwd =", cwd);
+// print("pi =", pi);
+// print("Functions:");
+// print("    print()", " - print all arguments to the console");
+// print("    typeof()", "- print the type of the first argument");
+// print("    help()", "  - print all variables & functions in the current scope");
+// print("    read()", "  - read a file (path as first argument)");
+// print("    write()", " - write a file (path as first argument, content as second argument)");
+// print("    len()", "   - get the length of an the first argument");
+// print("Running help now:");
+// help(); // Prints all variables & functions in the current scope
+// print();
 
-print("Equality:");
-if 1 == 1 print("1 == 1", true); // Ok
-if 1 == 2 print("1 == 2", true); // Nope
-if "a" == "a" print("`a` == `a`", true); // Ok
-if "a" == "b" print("`a` == `b`", true); // Nope
+// //
+// //
+// // TYPES
+// //
+// //
+// print("--------------------");
+// print("Types");
+// print("--------------------");
+// let _nil = nil;      print("Nil:     ", _nil,   "typeof(nil) =",       typeof(_nil));
+// let _true = true;    print("True:    ", _true,  "typeof(true) =",      typeof(_true));
+// let _false = false;  print("False:   ", _false, "typeof(false) =",     typeof(_false));
+// let _num = 1;        print("Number:  ", _num,   "typeof(1) =",         typeof(_num));
+// let _str = "foo";    print("String:  ", _str,   "typeof('foo') =",     typeof(_str));
+// let _arr = [1,2,3];  print("Array:   ", _arr,   "typeof([1,2,3]) =",   typeof(_arr));
+// let _obj = {1:2};    print("Object:  ", _obj,   "typeof({1:2}) =",     typeof(_obj));
+// let fn _fn = x -> x; print("Function:", _fn,    "typeof(fn x -> x) =", typeof(_fn));
+// print();
 
-print("Nil:");
-x = nil; print(x, typeof(x)); // nil Nil
-print();
+// //
+// //
+// // ARITHMETIC
+// //
+// //
+// print("--------------------");
+// print("Arithmetic");
+// print("--------------------");
+// let n = 0;
+// n = 1 + 2 * 3;     print("n = 1 + 2 * 3;    ", n, typeof(n)); // 7 Number
+// n = 1 + 2 * 3 + 4; print("n = 1 + 2 * 3 + 4;", n, typeof(n)); // 11 Number
+// n = 10 / 3;        print("n = 10 / 3;       ", n, typeof(n)); // 3.333333 Number
+// n = 10 % 3;        print("n = 10 % 3;       ", n, typeof(n)); // 1 Number
+// n = 10 % 3 + 1;    print("n = 10 % 3 + 1;   ", n, typeof(n)); // 2 Number
+// n = 2^3;           print("n = 2^3;          ", n, typeof(n)); // 8 Number
+// n = 2^3 + 1;       print("n = 2^3 + 1;      ", n, typeof(n)); // 9 Number
+// n = 2^3 + 1 * 2;   print("n = 2^3 + 1 * 2;  ", n, typeof(n)); // 10 Number
+// print();
 
-print("Arithmetic shenanigans:");
-x = 1 + 2 * 3;     print(x, typeof(x)); // 7 Number
-x = 1 + 2 * 3 + 4; print(x, typeof(x)); // 11 Number
-x = 10 / 3;        print(x, typeof(x)); // 3.333333 Number
-x = 10 % 3;        print(x, typeof(x)); // 1 Number
-x = 10 % 3 + 1;    print(x, typeof(x)); // 2 Number
-x = 2^3;           print(x, typeof(x)); // 8 Number
-x = 2^3 + 1;       print(x, typeof(x)); // 9 Number
-x = 2^3 + 1 * 2;   print(x, typeof(x)); // 10 Number
-print();
+// //
+// //
+// // COMPARISON
+// //
+// //
+// print("--------------------");
+// print("Comparison");
+// print("--------------------");
+// print("Equality:");
+// print("1 == 1            ", 1 == 1);
+// print("1 == 2            ", 1 == 2);
+// print("'a' == 'a'        ", "a" == "a");
+// print("'a' == 'b'        ", "a" == "b");
+// print("true == true      ", true == true);
+// print("true == false     ", true == false);
+// print("[1,2,3] == [1,2,3]", [1,2,3] == [1,2,3]);
+// print("{1:2} == {1:2}    ", {1:2} == {1:2});
+// print();
 
-print("While-Loops and If-Statements:");
-a = true;
-while (a) {
-    a = 1 + a; // Because Boolean + Number -> Boolean OR Boolean(a)
+// print("Reference equality:");
+// let ref = [1,2,3];
+// let ref1 = "foo";
+// let ref2 = {"arr": ref, "str": ref1};
+// print("ref = [1,2,3]; ref1 = 'foo'; ref2 = {'arr': ref, 'str': ref1};");
+// print("ref      == ref     ", ref == ref);
+// print("ref      == [1,2,3] ", ref == [1,2,3]);
+// print("ref1     == ref1    ", ref1 == ref1);
+// print("ref1     == 'foo'   ", ref1 == "foo");
+// print("ref2     == ref2    ", ref2 == ref2);
+// print("ref2.arr == ref     ", ref2.arr == ref);
+// print("ref2.str == ref1    ", ref2.str == ref1);
+// print();
 
-    if (a > 10) {
-        a = false;
+// //
+// //
+// // CONDITIONALS & LOOPS
+// //
+// //
+// print("--------------------");
+// print("Conditionals & Loops");
+// print("--------------------");
+// print("While-Loops and If-Statements:");
+// let i = 0;
+// while i < 3 {
+//     print("'i'", typeof(i), i);
+
+//     let j = 0;
+//     while (j = j + 1) < 3
+//         print("   'i':", i, "j", j);
+    
+//     i = i + 1;
+// }
+// print("Sequential fibonacci:");
+// let __i=3;
+// let __n=50;
+// let __t1=0;
+// let __t2=1;
+// let __tNext=__t1 + __t2;
+
+// while __i < __n {
+//     print("... of", __i, "is",__tNext);
+//     __t1 = __t2;
+//     __t2 = __tNext;
+//     __tNext = __t1 + __t2;
+//     __i = __i + 1;
+// }
+// print();
+
+// //
+// //
+// // IO
+// //
+// //
+// print("--------------------");
+// print("IO");
+// print("--------------------");
+// print("Writing to file with: write(cwd + '/Test.txt'");
+// write(cwd + "/Test.txt", "Hello World!");
+// print("Reading a file with: read(cwd + '/Test.txt'");
+// let _read = read(cwd + "/Test.txt");
+// print("Read returned",_read);
+// print();
+
+// //
+// //
+// // OBJECTS
+// //
+// //
+// print("--------------------");
+// print("Objects");
+// print("--------------------");
+// let _prop = "abc";
+// let _nested = {1:2, 3:4, 5:6};
+
+// let obj = {
+//     1: "Key is number",
+//     1.1111112: "Key is precise number",
+//     1.1111111: "Key is a whole different number",
+//     true: "Key is boolean",
+//     "foo": "Key is string",
+//     _prop: "Key is a reference",
+//     _nested: "Key is also a reference",
+//     nil: "Key is nil",
+//     ([1,2,3]): "Key is an array",
+// };
+
+// print("obj:", obj);
+// print("obj[1] =         ", obj[1]);
+// print("obj[1.1111112] = ", obj[1.1111112]);
+// print("obj[1.1111111] = ", obj[1.1111111]);
+// print("obj[true] =      ", obj[true]);
+// print("obj['foo'] =     ", obj["foo"]);
+// print("obj[_prop] =     ", obj[_prop]);
+// print("obj[_nested] =   ", obj[_nested]);
+// print("obj[nil] =       ", obj[nil]);
+// print("obj[[1,2,3]] =   ", obj[[1,2,3]]);
+// print("Member access:");
+// print("a.foo =          ", obj.foo);
+// print("a._prop =        ", obj._prop);
+
+// let nested_obj = {
+//     1: {
+//         2: "Hi!"
+//     }
+// };
+
+// print("Nested object nested_obj =", nested_obj);
+// print("nested_obj[1] =           ", nested_obj[1]);
+// print("nested_obj[1][2] =        ", nested_obj[1][2]);
+// print();
+
+//
+//
+// FUNCTIONS
+//
+//
+// print("--------------------");
+// print("Functions");
+// print("--------------------");
+// let fn fib = n -> if n <= 1 ret n; else ret (fib(n-1) + fib(n-2));
+
+// let fn map = arr, callback -> {
+//     print("Mapping", arr, ":");
+//     let i = 0;
+//     while i < len(arr) {
+//         callback(arr[i], i, arr);
+//         i = i + 1;
+//     }
+// }
+
+// let fn to_array = val -> {
+//     print("typeof(val) =", typeof(val), typeof(val) == "Array", typeof(true));
+//     if typeof(val) == "Array" ret val;
+//     ret [] + val;
+// }
+
+// print("to_array(1) =", to_array(1));
+// print("to_array([1,2,3]) =", to_array([1,2,3]));
+
+// print("fib(6) =",fib(6));
+// print("fib(7) =",fib(7));
+// print("fib(8) =",fib(8));
+// print("fib(9) =",fib(9));
+// print("fib(10) =",fib(10));
+// print("fib(11) =",fib(11));
+// print("fib(12) =",fib(12));
+// print("fib(13) =",fib(13));
+// print("fib(14) =",fib(14));
+// print("fib(15) =",fib(15));
+
+// let x = {} + "Foo Bar";
+// x["Foo Bar"] = "Hello World"; 
+
+// let fn callback = x, i, arr -> print("    value at", i, x);
+// map([] + "Hello", callback);
+// map([x], callback);
+
+// print("--------------------");
+
+
+
+// AOC23 Day 1 Part 1
+
+let fn is_str_digit = x -> 
+    x == "0" || x == "1" || x == "2" || x == "3" || x == "4" || 
+    x == "5" || x == "6" || x == "7" || x == "8" || x == "9";
+
+let fn get_calibration_values_of_line = str_line -> {
+    let arr = []+str_line; // str to array will split by char
+    let arr_len = len(arr);
+
+    let first_no = "";
+    let last_no = "";
+
+    let i = 0;
+    let j = arr_len - 1;
+
+    // only while loops exist - currently
+    while i < arr_len && j >= 0 {
+        if first_no == "" && is_str_digit(arr[i]) first_no = arr[i];
+        if last_no == "" && is_str_digit(arr[j]) last_no = arr[j];
+        
+        i = i + 1; 
+        j = j - 1;
     }
 
-    print("'a'", typeof(a), a);
+    if (first_no == "") first_no = last_no;
+    if (last_no == "") last_no = first_no;
+
+    let str_no = first_no + last_no; // str concat
+
+    ret (0+str_no); // str to num
 }
-print();
 
-b = 0;
-while b <= 3 {
-    if b < 2 print(b, "b < 2");
-    else if b > 2 print(b, "b > 2");
-    else print(b, "b == 2");
-    b = b + 1;
-}
-print();
+let lines = split_by_newline(read(cwd + "/input.txt"));
+let sum = 0;
+let i = 0;
 
-print("Writing file");
-write(cwd + "/Test.txt", "Hello World!");
-
-print("Read file:");
-read = read(cwd + "/Test.txt");
-print(read);
-print();
-
-a = ["asd", false, 123];
-print(a);
-print(a[0]);
-
-x = "abc";
-
-a = {
-    1: "Key is number",
-    1.1111112: "Key is a precise number",
-    1.1111111: "Key is a whole different number",
-    true: "Key is boolean",
-    "foo": "Key is string",
-    x: "Key is a reference",
-    nil: "Key is nil",
-    ([1,2,3]): "Key is an array",
-};
-
-print("Obj", a);
-print();
-
-print("Get 1 with indexing", a[1]);
-print("Get 1.1111112 with indexing", a[1.1111112]);
-print("Get 1.1111111 with indexing", a[1.1111111]);
-print("Get true with indexing", a[true]);
-print("Get 'foo' with indexing", a["foo"]);
-print("Get x with indexing", a[x]);
-print("Get nil with indexing", a[nil]);
-print("Get [1,2,3] with indexing (isn't the same reference - doesn't work!)", a[[1,2,3]]);
-print();
-
-print("Get 1 with member access does not work - e.g. a.1");
-print("Get true with member access does not work, because true is a keyword - e.g. a.true");
-print("Get 'foo' with member access", a.foo);
-print("Get x with member access", a.x);
-print("Get nil with member access does not work, because nil is a keyword - e.g. a.nil");
-print("Get [1,2,3] with member access, does not work - e.g. a.[1,2,3]");
-print();
-
-a = {
-    1: {
-        2: "Nested object"
-    }
-};
-
-print("Nested object a =", a);
-print();
-print("a[1] =", a[1]);
-print("a[1][2] =", a[1][2]);
-print();
-
-print("Fibonacci");
-i=3;
-n=10;
-t1=0;
-t2=1;
-tNext=t1+t2;
-
-while i < n {
-    print("... of", i, "is", tNext);
-    t1 = t2;
-    t2 = tNext;
-    tNext = t1 + t2;
+while i < len(lines) {
+    let calib_val = get_calibration_values_of_line(lines[i]);
+    sum = sum + calib_val;
     i = i + 1;
 }
+
+print("Sum:", sum); // 54951 took 507ms (Debug build)
