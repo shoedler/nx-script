@@ -6,7 +6,7 @@ public enum NxValueType
     Bool,
     Number,
     String,
-    Array,
+    Seq,
     Obj,
     Fn,
 }

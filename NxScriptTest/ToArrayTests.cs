@@ -6,7 +6,7 @@ namespace NxScriptTest;
 public class ToArrayTests : ToTypeTestsBase
 {
     private readonly Type ArrayType = typeof(List<NxValue>);
-    private readonly NxValueType NxType = NxValueType.Array;
+    private readonly NxValueType NxType = NxValueType.Seq;
 
     public ToArrayTests(NxEvalFixture fixture) : base(fixture)
     {
@@ -23,11 +23,11 @@ public class ToArrayTests : ToTypeTestsBase
 
         var foo = result.TryGetVariableFromAnyScope("foo");
         Assert.NotNull(foo);
-        Assert.True(foo.IsArray);
+        Assert.True(foo.IsSeq);
 
-        var fooValue = foo.GetInternalValue(NxValueType.Array);
+        var fooValue = foo.GetInternalValue(NxValueType.Seq);
         Assert.IsType(this.ArrayType, fooValue);
-        Assert.Same(fooValue, foo.GetInternalValue(NxValueType.Array));
+        Assert.Same(fooValue, foo.GetInternalValue(NxValueType.Seq));
     }
 
 

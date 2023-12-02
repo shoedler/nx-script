@@ -51,10 +51,10 @@ public abstract class ToTypeTestsBase : IClassFixture<NxEvalFixture>
         Assert.NotNull(expected);
         Assert.NotNull(actual);
 
-        if (expected.Type == NxValueType.Array)
+        if (expected.Type == NxValueType.Seq)
         {
-            List<NxValue> expectedArray = expected.GetInternalValue(NxValueType.Array)!;
-            List<NxValue>? actualArray = actual.GetInternalValue(NxValueType.Array);
+            List<NxValue> expectedArray = expected.GetInternalValue(NxValueType.Seq)!;
+            List<NxValue>? actualArray = actual.GetInternalValue(NxValueType.Seq);
 
             var length = Math.Max(expectedArray.Count, actualArray?.Count ?? 0);
 

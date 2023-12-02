@@ -11,16 +11,16 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
     protected NxEvalVisitor? Upper = null;
     protected NxEvalVisitor? Fn = null;
     protected NxValue? ReturnValue = null;
-    protected override NxValue DefaultResult => new NxValue(); // Always a new one!
+    protected override NxValue DefaultResult => new NxValueNil(); // Always a new one!
 
     public NxEvalVisitor(string path)
     {
         // Preload variables
-        this.Variables.Add("pi", new NxValue((float)Math.PI));
-        this.Variables.Add("cwd", new NxValue(Path.Combine(Environment.CurrentDirectory, Path.GetDirectoryName(path)!)));
+        this.Variables.Add("pi", new NxValueNumber((float)Math.PI));
+        this.Variables.Add("cwd", new NxValueString(Path.Combine(Environment.CurrentDirectory, Path.GetDirectoryName(path)!)));
 
         // Preload "print" function - print to console
-        this.Variables.Add("print", new NxValue((args) =>
+        this.Variables.Add("print", new NxValueFn((args) =>
         {
             args.ForEach(arg =>
             {
@@ -29,7 +29,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
                     NxValueType.String => $"{arg.AsString()}".InGreen(),
                     NxValueType.Bool => arg.AsString().InMagenta(),
                     NxValueType.Number => arg.AsString().InYellow(),
-                    NxValueType.Array or 
+                    NxValueType.Seq or 
                     NxValueType.Obj or 
                     NxValueType.Fn => arg.AsString().InCyan(),
                     NxValueType.Nil => "nil".InBlue(),
@@ -40,58 +40,58 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
             });
 
             Console.WriteLine();
-            return new NxValue();
+            return DefaultResult;
         }));
 
         // Preload "read" function - read files from disk
-        this.Variables.Add("read", new NxValue(args =>
+        this.Variables.Add("read", new NxValueFn(args =>
         {
             var content = File.ReadAllText(args[0].AsString());
-            return new NxValue(content);
+            return new NxValueString(content);
         }));
 
         // Preload "write" function - write to disk
-        this.Variables.Add("write", new NxValue(args =>
+        this.Variables.Add("write", new NxValueFn(args =>
         {
             File.WriteAllText(args[0].AsString(), args[1].AsString() ?? "");
-            return new NxValue(args[0].AsString());
+            return new NxValueString(args[0].AsString());
         }));
 
         // Preload "help" function - show vars & funcs
-        this.Variables.Add("help", new NxValue(args =>
+        this.Variables.Add("help", new NxValueFn(args =>
         {
             Console.WriteLine("Variables in current scope:");
             this.Variables.AsEnumerable().ToList()
                 .ForEach((pair) => Console.WriteLine($"{pair.Key}:\t{pair.Value.AsString()}"));
-            return new NxValue();
+            return DefaultResult;
         }));
 
         // Preload "typeof" function - show type of value
-        this.Variables.Add("typeof", new NxValue(args =>
+        this.Variables.Add("typeof", new NxValueFn(args =>
         {
-            return new NxValue(Enum.GetName(args[0].Type));
+            return new NxValueString(Enum.GetName(args[0].Type));
         }));
 
         // Preload "len" function - show lenght of array
-        this.Variables.Add("len", new NxValue(args =>
+        this.Variables.Add("len", new NxValueFn(args =>
         {
-            var arg = args[0] ?? new NxValue();
-            return new NxValue(arg.AsArray().Count);
+            var arg = args[0] ?? new NxValueNil();
+            return new NxValueNumber(arg.AsSeq().Count);
         }));
 
         // Preload "split" function - split string into array (default is \r\n
-        this.Variables.Add("split_by_newline", new NxValue(args =>
+        this.Variables.Add("split_by_newline", new NxValueFn(args =>
         {
-            var arg = args[0] ?? new NxValue();
-            var strings = arg.AsString().Split(Environment.NewLine).Select(str => new NxValue(str)).ToList();
-            return new NxValue(strings);
+            var arg = args[0] ?? DefaultResult;
+            var strings = arg.AsString().Split(Environment.NewLine).Select(str => new NxValueString(str) as NxValue).ToList();
+            return new NxValueSeq(strings);
         }));
     }
 
     protected NxEvalVisitor(NxEvalVisitor upper)
     {
         // Preload "help" function - show vars & funcs
-        this.Variables["help"] = new NxValue(args =>
+        this.Variables["help"] = new NxValueFn(args =>
         {
             Console.WriteLine("Variables in scope:");
 
@@ -115,7 +115,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
                     .ForEach((pair) => Console.WriteLine($"{indent}{pair.Key}:\t{pair.Value.AsString()}"));
             }
                 
-            return new NxValue();
+            return new NxValueNil();
         });
 
         this.Upper = upper;
@@ -168,7 +168,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         IParseTree fnBody = blockBody is not null ? blockBody : statBody;
 
         // Closure
-        var fn = new NxValue((args) =>
+        var fn = new NxValueFn((args) =>
         {
             var fnVisitor = this.NewScope();
 
@@ -248,7 +248,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
     {
         var items = context.expr().Select(Visit).ToList();
 
-        return new NxValue(items);
+        return new NxValueSeq(items);
     }
 
     public NxValue VisitObj_literal([NotNull] NxParser.Obj_literalContext context)
@@ -256,7 +256,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         var atoms = context.atom().Select(Visit);
         var expressions = context.expr().Select(Visit);
 
-        return new NxValue(atoms.Zip(expressions));
+        return new NxValueObj(atoms.Zip(expressions));
     }
 
     ///
@@ -282,7 +282,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
     public NxValue VisitMemberExpr([NotNull] NxParser.MemberExprContext context)
     {
         var obj = Visit(context.expr());
-        var member = new NxValue(context.ID().GetText());
+        var member = new NxValueString(context.ID().GetText());
 
         return NxValue.Member(obj, member);
     }
@@ -302,21 +302,21 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         var right = Visit(context.expr()[1]);
         var left = Visit(context.expr()[0]);
 
-        return new NxValue((float)Math.Pow(left.AsNumber(), right.AsNumber()));
+        return new NxValueNumber((float)Math.Pow(left.AsNumber(), right.AsNumber()));
     }
 
     public NxValue VisitUnaryMinusExpr([NotNull] NxParser.UnaryMinusExprContext context)
     {
         var right = Visit(context.expr());
 
-        return new NxValue(-right.AsNumber());
+        return new NxValueNumber(-right.AsNumber());
     }
 
     public NxValue VisitNotExpr([NotNull] NxParser.NotExprContext context)
     {
         var right = Visit(context.expr());
 
-        return new NxValue(!right.AsBool());
+        return new NxValueBool(!right.AsBool());
     }
 
     public NxValue VisitMultiplicationExpr([NotNull] NxParser.MultiplicationExprContext context)
@@ -327,8 +327,8 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         return context.op.Type switch
         {
             NxParser.MULT => NxValue.Multiply(left, right),
-            NxParser.DIV => new NxValue(left.AsNumber() / right.AsNumber()),
-            NxParser.MOD => new NxValue(left.AsNumber() % right.AsNumber()),
+            NxParser.DIV => new NxValueNumber(left.AsNumber() / right.AsNumber()),
+            NxParser.MOD => new NxValueNumber(left.AsNumber() % right.AsNumber()),
             _ => throw NxEvalException.FromContext($"Don't know this multiplicative operator '{context.GetText()}'", context)
         };
     }
@@ -341,7 +341,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         return context.op.Type switch
         {
             NxParser.PLUS => NxValue.Add(left, right),
-            NxParser.MINUS => new NxValue(left.AsNumber() - right.AsNumber()),
+            NxParser.MINUS => new NxValueNumber(left.AsNumber() - right.AsNumber()),
             _ => throw NxEvalException.FromContext($"Don't know this additive operator '{context.GetText()}'", context)
         };
     }
@@ -353,10 +353,10 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
 
         return context.op.Type switch
         {
-            NxParser.LTEQ => new NxValue(left.AsNumber() <= right.AsNumber()),
-            NxParser.GTEQ => new NxValue(left.AsNumber() >= right.AsNumber()),
-            NxParser.LT => new NxValue(left.AsNumber() < right.AsNumber()),
-            NxParser.GT => new NxValue(left.AsNumber() > right.AsNumber()),
+            NxParser.LTEQ => new NxValueBool(left.AsNumber() <= right.AsNumber()),
+            NxParser.GTEQ => new NxValueBool(left.AsNumber() >= right.AsNumber()),
+            NxParser.LT => new NxValueBool(left.AsNumber() < right.AsNumber()),
+            NxParser.GT => new NxValueBool(left.AsNumber() > right.AsNumber()),
             _ => throw NxEvalException.FromContext($"Don't know this relational operator '{context.GetText()}'", context)
         };
     }
@@ -379,7 +379,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         var left = Visit(context.expr()[0]);
         var right = Visit(context.expr()[1]);
 
-        return new NxValue(left.AsBool() && right.AsBool());
+        return new NxValueBool(left.AsBool() && right.AsBool());
     }
 
     public NxValue VisitOrExpr([NotNull] NxParser.OrExprContext context)
@@ -387,7 +387,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         var left = Visit(context.expr()[0]);
         var right = Visit(context.expr()[1]);
 
-        return new NxValue(left.AsBool() || right.AsBool());
+        return new NxValueBool(left.AsBool() || right.AsBool());
     }
 
     public NxValue VisitAssignExpr([NotNull] NxParser.AssignExprContext context)
@@ -413,10 +413,10 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
     /// Atoms
     /// 
     public NxValue VisitParExpr([NotNull] NxParser.ParExprContext context) { return Visit(context.expr()); }
-    public NxValue VisitNumberAtom([NotNull] NxParser.NumberAtomContext context) { return new NxValue(context); }
-    public NxValue VisitStringAtom([NotNull] NxParser.StringAtomContext context) { return new NxValue(context); }
-    public NxValue VisitBoolAtom([NotNull] NxParser.BoolAtomContext context) { return new NxValue(context); }
-    public NxValue VisitNilAtom([NotNull] NxParser.NilAtomContext context) { return new NxValue(); }
+    public NxValue VisitNumberAtom([NotNull] NxParser.NumberAtomContext context) { return new NxValueNumber(context); }
+    public NxValue VisitStringAtom([NotNull] NxParser.StringAtomContext context) { return new NxValueString(context); }
+    public NxValue VisitBoolAtom([NotNull] NxParser.BoolAtomContext context) { return new NxValueBool(context); }
+    public NxValue VisitNilAtom([NotNull] NxParser.NilAtomContext context) { return DefaultResult; }
     public NxValue VisitIdAtom([NotNull] NxParser.IdAtomContext context) { return this.GetVariable(context.ID().GetText(), context); }
 
     ///

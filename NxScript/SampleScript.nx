@@ -192,10 +192,10 @@
 // FUNCTIONS
 //
 //
-// print("--------------------");
-// print("Functions");
-// print("--------------------");
-// let fn fib = n -> if n <= 1 ret n; else ret (fib(n-1) + fib(n-2));
+print("--------------------");
+print("Functions");
+print("--------------------");
+let fn fib = n -> if n <= 1 ret n; else ret (fib(n-1) + fib(n-2));
 
 // let fn map = arr, callback -> {
 //     print("Mapping", arr, ":");
@@ -225,6 +225,7 @@
 // print("fib(13) =",fib(13));
 // print("fib(14) =",fib(14));
 // print("fib(15) =",fib(15));
+print("fib(30) =",fib(30)); // 5343 ms (Release build, new Value System)
 
 // let x = {} + "Foo Bar";
 // x["Foo Bar"] = "Hello World"; 
@@ -239,45 +240,45 @@
 
 // AOC23 Day 1 Part 1
 
-let fn is_str_digit = x -> 
-    x == "0" || x == "1" || x == "2" || x == "3" || x == "4" || 
-    x == "5" || x == "6" || x == "7" || x == "8" || x == "9";
+// let fn is_str_digit = x -> 
+//     x == "0" || x == "1" || x == "2" || x == "3" || x == "4" || 
+//     x == "5" || x == "6" || x == "7" || x == "8" || x == "9";
 
-let fn get_calibration_values_of_line = str_line -> {
-    let arr = []+str_line; // str to array will split by char
-    let arr_len = len(arr);
+// let fn get_calibration_values_of_line = str_line -> {
+//     let arr = []+str_line; // str to array will split by char
+//     let arr_len = len(arr);
 
-    let first_no = "";
-    let last_no = "";
+//     let first_no = "";
+//     let last_no = "";
 
-    let i = 0;
-    let j = arr_len - 1;
+//     let i = 0;
+//     let j = arr_len - 1;
 
-    // only while loops exist - currently
-    while i < arr_len && j >= 0 {
-        if first_no == "" && is_str_digit(arr[i]) first_no = arr[i];
-        if last_no == "" && is_str_digit(arr[j]) last_no = arr[j];
+//     // only while loops exist - currently
+//     while i < arr_len && j >= 0 {
+//         if first_no == "" && is_str_digit(arr[i]) first_no = arr[i];
+//         if last_no == "" && is_str_digit(arr[j]) last_no = arr[j];
         
-        i = i + 1; 
-        j = j - 1;
-    }
+//         i = i + 1; 
+//         j = j - 1;
+//     }
 
-    if (first_no == "") first_no = last_no;
-    if (last_no == "") last_no = first_no;
+//     if (first_no == "") first_no = last_no;
+//     if (last_no == "") last_no = first_no;
 
-    let str_no = first_no + last_no; // str concat
+//     let str_no = first_no + last_no; // str concat
 
-    ret (0+str_no); // str to num
-}
+//     ret (0+str_no); // str to num
+// }
 
-let lines = split_by_newline(read(cwd + "/input.txt"));
-let sum = 0;
-let i = 0;
+// let lines = split_by_newline(read(cwd + "/input.txt"));
+// let sum = 0;
+// let i = 0;
 
-while i < len(lines) {
-    let calib_val = get_calibration_values_of_line(lines[i]);
-    sum = sum + calib_val;
-    i = i + 1;
-}
+// while i < len(lines) {
+//     let calib_val = get_calibration_values_of_line(lines[i]);
+//     sum = sum + calib_val;
+//     i = i + 1;
+// }
 
-print("Sum:", sum); // 54951 took 507ms (Debug build)
+// print("Sum:", sum); // 54951 took 507ms (Debug build)
