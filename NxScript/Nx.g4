@@ -75,8 +75,6 @@ MOD      : '%' ;
 POW      : '^' ;
 NOT      : '!' ;
 
-LAMBDA   : '->' ;
-
 DOT      : '.' ;
 COMMA    : ',' ;
 COLON    : ':' ;
@@ -87,6 +85,8 @@ OBRACE   : '{' ;
 CBRACE   : '}' ;
 OBRACK   : '[' ;
 CBRACK   : ']' ;
+
+LAMBDA   : '->' ;
 
 TRUE     : 'true' ;
 FALSE    : 'false' ;
