@@ -4,6 +4,8 @@
 #include "object.h"
 #include "vm.h"
 
-ObjFunction *compile(const char *source);
+#define MAX_FN_ARGS 255
+
+ObjFunction* compile(const char* source);
 
 #endif

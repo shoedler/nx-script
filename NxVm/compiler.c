@@ -42,7 +42,7 @@ typedef struct {
   int depth;
 } Local;
 
-typedef enum { TYPE_FUNCTION, TYPE_SCRIPT } FunctionType;
+typedef enum { TYPE_FUNCTION, TYPE_TOPLEVEL } FunctionType;
 
 typedef struct {
   struct Compiler* enclosing;
@@ -180,6 +180,7 @@ static void emit_constant(Value value) {
 }
 
 static void emit_return() {
+  emit_byte(OP_NIL);
   emit_byte(OP_RETURN);
 }
 
@@ -192,7 +193,7 @@ static void init_compiler(Compiler* compiler, FunctionType type) {
   compiler->function = new_function();
   current = compiler;
 
-  if (type != TYPE_SCRIPT) {
+  if (type != TYPE_TOPLEVEL) {
     current->function->name =
         copy_string(parser.previous.start, parser.previous.length);
   }
@@ -211,7 +212,7 @@ static ObjFunction* end_compiler() {
   if (!parser.had_error) {
     disassemble_chunk(current_chunk(), function->name != NULL
                                            ? function->name->chars
-                                           : "<script>");
+                                           : "<toplevel>");
   }
 #endif
   current = current->enclosing;
@@ -237,6 +238,7 @@ static void end_scope() {
 static void expression();
 static void statement();
 static void declaration();
+static uint8_t argument_list();
 static void function(FunctionType type);
 static ParseRule* get_rule(TokenType type);
 static void parse_precedence(Precedence precedence);
@@ -283,6 +285,11 @@ static void binary(bool can_assign) {
       INTERNAL_ERROR("Unhandled binary operator type: %d", op_type);
       break;
   }
+}
+
+static void call(bool canAssign) {
+  uint8_t arg_count = argument_list();
+  emit_bytes(OP_CALL, arg_count);
 }
 
 static void literal(bool can_assign) {
@@ -384,7 +391,7 @@ static void or_(bool canAssign) {
 }
 
 ParseRule rules[] = {
-    [TOKEN_OPAR] = {grouping, NULL, PREC_NONE},
+    [TOKEN_OPAR] = {grouping, call, PREC_CALL},
     [TOKEN_CPAR] = {NULL, NULL, PREC_NONE},
     [TOKEN_OBRACE] = {NULL, NULL, PREC_NONE},
     [TOKEN_CBRACE] = {NULL, NULL, PREC_NONE},
@@ -535,6 +542,21 @@ static void define_variable(uint8_t global) {
   emit_bytes(OP_DEFINE_GLOBAL, global);
 }
 
+static uint8_t argument_list() {
+  uint8_t arg_count = 0;
+  if (!check(TOKEN_CPAR)) {
+    do {
+      expression();
+      if (arg_count == MAX_FN_ARGS) {
+        error("Can't have more than MAX_FN_ARGS arguments.");
+      }
+      arg_count++;
+    } while (match(TOKEN_COMMA));
+  }
+  consume(TOKEN_CPAR, "Expecting ')' after arguments.");
+  return arg_count;
+}
+
 static ParseRule* get_rule(TokenType type) {
   return &rules[type];
 }
@@ -614,6 +636,23 @@ static void statement_if() {
   patch_jump(else_jump);
 }
 
+static void statement_return() {
+  if (current->type == TYPE_TOPLEVEL) {
+    error("Can't return from top-level code.");
+  }
+
+  // TODO: We don't want semicolons after return statements - but it's almost
+  // impossible to get rid of them here Since there literally could come
+  // anything after a return statement.
+  if (match(TOKEN_SCOLON)) {
+    emit_return();
+  } else {
+    expression();
+    consume(TOKEN_SCOLON, "Expecting ';' after return value.");
+    emit_byte(OP_RETURN);
+  }
+}
+
 static void statement_while() {
   int loop_start = current_chunk()->count;
 
@@ -685,12 +724,13 @@ static void function(FunctionType type) {
   begin_scope();
 
   if (!check(TOKEN_LAMBDA)) {
+    consume(TOKEN_ASSIGN, "Expecting '=' after function name.");
     do {
       current->function->arity++;
-      if (current->function->arity > 255) {
-        error_at_current("Can't have more than 255 parameters.");
+      if (current->function->arity > MAX_FN_ARGS) {
+        error_at_current("Can't have more than MAX_FN_ARGS parameters.");
       }
-      uint8_t constant = parse_variable("Expect parameter name.");
+      uint8_t constant = parse_variable("Expecting parameter name.");
       define_variable(constant);
     } while (match(TOKEN_COMMA));
   }
@@ -709,6 +749,8 @@ static void statement() {
     statement_print();
   } else if (match(TOKEN_IF)) {
     statement_if();
+  } else if (match(TOKEN_RETURN)) {
+    statement_return();
   } else if (match(TOKEN_WHILE)) {
     statement_while();
   } else if (match(TOKEN_FOR)) {
@@ -733,7 +775,7 @@ static void statement() {
 ObjFunction* compile(const char* source) {
   init_scanner(source);
   Compiler compiler;
-  init_compiler(&compiler, TYPE_SCRIPT);
+  init_compiler(&compiler, TYPE_TOPLEVEL);
 
   parser.had_error = false;
   parser.panic_mode = false;
