@@ -4,11 +4,8 @@
 
 #include "common.h"
 #include "compiler.h"
-#include "scanner.h"
-
-#ifdef DEBUG_PRINT_CODE
 #include "debug.h"
-#endif
+#include "scanner.h"
 
 typedef struct
 {
@@ -153,6 +150,42 @@ static void emit_bytes(uint8_t byte1, uint8_t byte2)
 {
     emit_byte(byte1);
     emit_byte(byte2);
+}
+
+static void emit_loop(int loop_start)
+{
+    emit_byte(OP_LOOP);
+
+    int offset = current_chunk()->count - loop_start + 2;
+    if (offset > UINT16_MAX)
+    {
+        error("Loop body too large.");
+    }
+
+    emit_byte((offset >> 8) & 0xff);
+    emit_byte(offset & 0xff);
+}
+
+static int emit_jump(uint8_t instruction)
+{
+    emit_byte(instruction);
+    emit_byte(0xff);
+    emit_byte(0xff);
+    return current_chunk()->count - 2;
+}
+
+static void patch_jump(int offset)
+{
+    // -2 to adjust for the bytecode for the jump offset itself.
+    int jump = current_chunk()->count - offset - 2;
+
+    if (jump > UINT16_MAX)
+    {
+        error("Too much code to jump over.");
+    }
+
+    current_chunk()->code[offset] = (jump >> 8) & 0xff;
+    current_chunk()->code[offset + 1] = jump & 0xff;
 }
 
 static uint8_t make_constant(Value value)
@@ -356,6 +389,28 @@ static void variable(bool can_assign)
     named_variable(parser.previous, can_assign);
 }
 
+static void and_(bool can_assign)
+{
+    int end_jump = emit_jump(OP_JUMP_IF_FALSE);
+    emit_byte(OP_POP);
+
+    parse_precedence(PREC_AND);
+
+    patch_jump(end_jump);
+}
+
+static void or_(bool canAssign)
+{
+    int else_jump = emit_jump(OP_JUMP_IF_FALSE);
+    int end_jump = emit_jump(OP_JUMP);
+
+    patch_jump(else_jump);
+    emit_byte(OP_POP);
+
+    parse_precedence(PREC_OR);
+    patch_jump(end_jump);
+}
+
 ParseRule rules[] = {
     [TOKEN_OPAR] = {grouping, NULL, PREC_NONE},
     [TOKEN_CPAR] = {NULL, NULL, PREC_NONE},
@@ -378,7 +433,7 @@ ParseRule rules[] = {
     [TOKEN_ID] = {variable, NULL, PREC_NONE},
     [TOKEN_STRING] = {string, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
-    [TOKEN_AND] = {NULL, NULL, PREC_NONE},
+    [TOKEN_AND] = {NULL, and_, PREC_AND},
     [TOKEN_CLASS] = {NULL, NULL, PREC_NONE},
     [TOKEN_ELSE] = {NULL, NULL, PREC_NONE},
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
@@ -387,7 +442,7 @@ ParseRule rules[] = {
     [TOKEN_LAMBDA] = {NULL, NULL, PREC_NONE},
     [TOKEN_IF] = {NULL, NULL, PREC_NONE},
     [TOKEN_NIL] = {literal, NULL, PREC_NONE},
-    [TOKEN_OR] = {NULL, NULL, PREC_NONE},
+    [TOKEN_OR] = {NULL, or_, PREC_OR},
     [TOKEN_PRINT] = {NULL, NULL, PREC_NONE},
     [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
     [TOKEN_SUPER] = {NULL, NULL, PREC_NONE},
@@ -562,7 +617,7 @@ static void expression()
     parse_precedence(PREC_ASSIGN);
 }
 
-static void declaration_let()
+static void statement_declaration_let()
 {
     uint8_t global = parse_variable("Expecting variable name.");
 
@@ -590,6 +645,93 @@ static void statement_expression()
     emit_byte(OP_POP);
 }
 
+static void statement_if()
+{
+    expression();
+
+    int then_jump = emit_jump(OP_JUMP_IF_FALSE);
+    emit_byte(OP_POP);
+
+    statement();
+
+    int else_jump = emit_jump(OP_JUMP);
+
+    patch_jump(then_jump);
+    emit_byte(OP_POP);
+
+    if (match(TOKEN_ELSE))
+    {
+        statement();
+    }
+
+    patch_jump(else_jump);
+}
+
+static void statement_while()
+{
+    int loop_start = current_chunk()->count;
+
+    expression();
+
+    int exit_jump = emit_jump(OP_JUMP_IF_FALSE);
+    emit_byte(OP_POP);
+
+    statement();
+    emit_loop(loop_start);
+
+    patch_jump(exit_jump);
+    emit_byte(OP_POP);
+}
+
+static void statement_for()
+{
+    begin_scope();
+
+    if (match(TOKEN_LET))
+    {
+        statement_declaration_let();
+    }
+    else
+    {
+        statement_expression();
+    }
+
+    int loop_start = current_chunk()->count;
+
+    int exit_jump = -1;
+    if (match(TOKEN_SCOLON))
+    {
+        expression();
+
+        // Jump out of the loop if the condition is false.
+        exit_jump = emit_jump(OP_JUMP_IF_FALSE);
+        emit_byte(OP_POP); // Discard the result of the condition expression.
+    }
+
+    if (match(TOKEN_SCOLON))
+    {
+        int body_jump = emit_jump(OP_JUMP);
+        int incrementStart = current_chunk()->count;
+        expression();
+        emit_byte(OP_POP); // Discard the result of the increment expression.
+
+        emit_loop(loop_start);
+        loop_start = incrementStart;
+        patch_jump(body_jump);
+    }
+
+    statement();
+    emit_loop(loop_start);
+
+    if (exit_jump != -1)
+    {
+        patch_jump(exit_jump);
+        emit_byte(OP_POP); // Discard the result of the condition expression.
+    }
+
+    end_scope();
+}
+
 static void block()
 {
     while (!check(TOKEN_CBRACE) && !check(TOKEN_EOF))
@@ -606,6 +748,18 @@ static void statement()
     {
         statement_print();
     }
+    else if (match(TOKEN_IF))
+    {
+        statement_if();
+    }
+    else if (match(TOKEN_WHILE))
+    {
+        statement_while();
+    }
+    else if (match(TOKEN_FOR))
+    {
+        statement_for();
+    }
     else if (match(TOKEN_OBRACE))
     {
         begin_scope();
@@ -614,7 +768,7 @@ static void statement()
     }
     else if (match(TOKEN_LET))
     {
-        declaration_let();
+        statement_declaration_let();
     }
     else
     {
