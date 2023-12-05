@@ -13,6 +13,7 @@ typedef struct
 	uint8_t *ip;
 	Value stack[STACK_MAX];
 	Value *stack_top;
+	HashTable globals;
 	HashTable strings;
 	Obj *objects;
 } Vm;

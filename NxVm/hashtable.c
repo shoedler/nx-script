@@ -16,7 +16,7 @@ void init_hashtable(HashTable *table)
 void free_hashtable(HashTable *table)
 {
   FREE_ARRAY(Entry, table->entries, table->capacity);
-  initTable(table);
+  init_hashtable(table);
 }
 
 static Entry *find_entry(Entry *entries, int capacity, ObjString *key)
@@ -132,7 +132,7 @@ void hashtable_add_all(HashTable *from, HashTable *to)
     Entry *entry = &from->entries[i];
     if (entry->key != NULL)
     {
-      tableSet(to, entry->key, entry->value);
+      hashtable_set(to, entry->key, entry->value);
     }
   }
 }

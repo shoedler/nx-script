@@ -22,17 +22,6 @@ void *reallocate(void *pointer, size_t old_size, size_t new_size)
     return result;
 }
 
-void free_objects()
-{
-    Obj *object = vm.objects;
-    while (object != NULL)
-    {
-        Obj *next = object->next;
-        freeObject(object);
-        object = next;
-    }
-}
-
 static void free_object(Obj *object)
 {
     switch (object->type)
@@ -44,5 +33,16 @@ static void free_object(Obj *object)
         FREE(ObjString, object);
         break;
     }
+    }
+}
+
+void free_objects()
+{
+    Obj* object = vm.objects;
+    while (object != NULL)
+    {
+        Obj* next = object->next;
+        free_object(object);
+        object = next;
     }
 }
