@@ -79,6 +79,11 @@ static Token make_token(TokenType type)
 	token.start = scanner.start;
 	token.length = (int)(scanner.current - scanner.start);
 	token.line = scanner.line;
+
+#ifdef DEBUG_PRINT_TOKENS
+	printf("TOKEN: %d %.*s\n", token.type, token.length, token.start);
+#endif
+
 	return token;
 }
 
@@ -237,6 +242,10 @@ static Token number()
 		}
 	}
 
+#ifdef DEBUG_PRINT_TOKENS
+	printf("NUMBER: %.*s\n", (int)(scanner.current - scanner.start), scanner.start);
+#endif
+
 	return make_token(TOKEN_NUMBER);
 }
 
@@ -257,6 +266,11 @@ static Token string()
 	}
 
 	advance(); // Consume the closing ".
+
+#ifdef DEBUG_PRINT_TOKENS
+	printf("STRING: %.*s\n", (int)(scanner.current - scanner.start), scanner.start);
+#endif
+
 	return make_token(TOKEN_STRING);
 }
 
