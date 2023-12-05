@@ -46,6 +46,24 @@ int disassemble_instruction(Chunk *chunk, int offset)
     {
     case OP_CONSTANT:
         return constant_instruction("OP_CONSTANT", chunk, offset);
+    case OP_NIL:
+        return simple_instruction("OP_NIL", offset);
+    case OP_TRUE:
+        return simple_instruction("OP_TRUE", offset);
+    case OP_FALSE:
+        return simple_instruction("OP_FALSE", offset);
+    case OP_EQ:
+        return simple_instruction("OP_EQ", offset);
+    case OP_NEQ:
+        return simple_instruction("OP_NEQ", offset);
+    case OP_GT:
+        return simple_instruction("OP_GT", offset);
+    case OP_LT:
+        return simple_instruction("OP_LT", offset);
+    case OP_GTEQ:
+        return simple_instruction("OP_GTEQ", offset);
+    case OP_LTEQ:
+        return simple_instruction("OP_LTEQ", offset);
     case OP_NEGATE:
         return simple_instruction("OP_NEGATE", offset);
     case OP_RETURN:
@@ -58,6 +76,8 @@ int disassemble_instruction(Chunk *chunk, int offset)
         return simple_instruction("OP_MULTIPLY", offset);
     case OP_DIVIDE:
         return simple_instruction("OP_DIVIDE", offset);
+    case OP_NOT:
+        return simple_instruction("OP_NOT", offset);
     default:
         INTERNAL_ERROR("Unhandled opcode: %d\n", instruction);
         return offset + 1;

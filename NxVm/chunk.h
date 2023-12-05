@@ -7,10 +7,20 @@
 typedef enum
 {
 	OP_CONSTANT,
+	OP_NIL,
+	OP_TRUE,
+	OP_FALSE,
+	OP_EQ,
+	OP_NEQ,
+	OP_GT,
+	OP_LT,
+	OP_GTEQ,
+	OP_LTEQ,
 	OP_ADD,
 	OP_SUBTRACT,
 	OP_MULTIPLY,
 	OP_DIVIDE,
+	OP_NOT,
 	OP_NEGATE,
 	OP_RETURN,
 } OpCode;

@@ -170,6 +170,24 @@ static void binary()
 
     switch (op_type)
     {
+    case TOKEN_NEQ:
+        emit_byte(OP_NEQ);
+        break;
+    case TOKEN_EQ:
+        emit_byte(OP_EQ);
+        break;
+    case TOKEN_GT:
+        emit_byte(OP_GT);
+        break;
+    case TOKEN_GTEQ:
+        emit_byte(OP_GTEQ);
+        break;
+    case TOKEN_LT:
+        emit_byte(OP_LT);
+        break;
+    case TOKEN_LTEQ:
+        emit_byte(OP_LTEQ);
+        break;
     case TOKEN_PLUS:
         emit_byte(OP_ADD);
         break;
@@ -188,6 +206,27 @@ static void binary()
     }
 }
 
+static void literal()
+{
+    TokenType op_type = parser.previous.type;
+
+    switch (op_type)
+    {
+    case TOKEN_FALSE:
+        emit_byte(OP_FALSE);
+        break;
+    case TOKEN_NIL:
+        emit_byte(OP_NIL);
+        break;
+    case TOKEN_TRUE:
+        emit_byte(OP_TRUE);
+        break;
+    default:
+        INTERNAL_ERROR("Unhandled literal: %d", op_type);
+        return;
+    }
+}
+
 static void grouping()
 {
     expression();
@@ -197,7 +236,7 @@ static void grouping()
 static void number()
 {
     double value = strtod(parser.previous.start, NULL);
-    emit_constant(value);
+    emit_constant(NUMBER_VAL(value));
 }
 
 static void unary()
@@ -210,6 +249,9 @@ static void unary()
     // Emit the operator instruction.
     switch (operator_type)
     {
+    case TOKEN_NOT:
+        emit_byte(OP_NOT);
+        break;
     case TOKEN_MINUS:
         emit_byte(OP_NEGATE);
         break;
@@ -230,31 +272,32 @@ ParseRule rules[] = {
     [TOKEN_PLUS] = {NULL, binary, PREC_TERM},
     [TOKEN_DIV] = {NULL, binary, PREC_FACTOR},
     [TOKEN_MULT] = {NULL, binary, PREC_FACTOR},
-    [TOKEN_NEQ] = {NULL, NULL, PREC_NONE},
+    [TOKEN_NOT] = {unary, NULL, PREC_NONE},
+    [TOKEN_NEQ] = {NULL, binary, PREC_EQUALITY},
     [TOKEN_ASSIGN] = {NULL, NULL, PREC_NONE},
-    [TOKEN_EQ] = {NULL, NULL, PREC_NONE},
-    [TOKEN_GT] = {NULL, NULL, PREC_NONE},
-    [TOKEN_GTEQ] = {NULL, NULL, PREC_NONE},
-    [TOKEN_LT] = {NULL, NULL, PREC_NONE},
-    [TOKEN_LTEQ] = {NULL, NULL, PREC_NONE},
+    [TOKEN_EQ] = {NULL, binary, PREC_EQUALITY},
+    [TOKEN_GT] = {NULL, binary, PREC_COMPARISON},
+    [TOKEN_GTEQ] = {NULL, binary, PREC_COMPARISON},
+    [TOKEN_LT] = {NULL, binary, PREC_COMPARISON},
+    [TOKEN_LTEQ] = {NULL, binary, PREC_COMPARISON},
     [TOKEN_ID] = {NULL, NULL, PREC_NONE},
     [TOKEN_STRING] = {NULL, NULL, PREC_NONE},
     [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
     [TOKEN_AND] = {NULL, NULL, PREC_NONE},
     [TOKEN_CLASS] = {NULL, NULL, PREC_NONE},
     [TOKEN_ELSE] = {NULL, NULL, PREC_NONE},
-    [TOKEN_FALSE] = {NULL, NULL, PREC_NONE},
+    [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
     [TOKEN_FOR] = {NULL, NULL, PREC_NONE},
     [TOKEN_FN] = {NULL, NULL, PREC_NONE},
     [TOKEN_LAMBDA] = {NULL, NULL, PREC_NONE},
     [TOKEN_IF] = {NULL, NULL, PREC_NONE},
-    [TOKEN_NIL] = {NULL, NULL, PREC_NONE},
+    [TOKEN_NIL] = {literal, NULL, PREC_NONE},
     [TOKEN_OR] = {NULL, NULL, PREC_NONE},
     [TOKEN_PRINT] = {NULL, NULL, PREC_NONE},
     [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
     [TOKEN_SUPER] = {NULL, NULL, PREC_NONE},
     [TOKEN_THIS] = {NULL, NULL, PREC_NONE},
-    [TOKEN_TRUE] = {NULL, NULL, PREC_NONE},
+    [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
     [TOKEN_LET] = {NULL, NULL, PREC_NONE},
     [TOKEN_WHILE] = {NULL, NULL, PREC_NONE},
     [TOKEN_BREAK] = {NULL, NULL, PREC_NONE},
