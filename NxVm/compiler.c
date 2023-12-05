@@ -45,8 +45,8 @@ typedef struct {
 typedef enum { TYPE_FUNCTION, TYPE_SCRIPT } FunctionType;
 
 typedef struct {
-  struct Compiler *enclosing;
-  ObjFunction *function;
+  struct Compiler* enclosing;
+  ObjFunction* function;
   FunctionType type;
 
   Local locals[UINT8_COUNT];
@@ -55,12 +55,14 @@ typedef struct {
 } Compiler;
 
 Parser parser;
-Compiler *current = NULL;
-Chunk *compiling_chunk;
+Compiler* current = NULL;
+Chunk* compiling_chunk;
 
-static Chunk *current_chunk() { return &current->function->chunk; }
+static Chunk* current_chunk() {
+  return &current->function->chunk;
+}
 
-static void error_at(Token *token, const char *message) {
+static void error_at(Token* token, const char* message) {
   if (parser.panic_mode) {
     return;
   }
@@ -80,9 +82,11 @@ static void error_at(Token *token, const char *message) {
   parser.had_error = true;
 }
 
-static void error(const char *message) { error_at(&parser.previous, message); }
+static void error(const char* message) {
+  error_at(&parser.previous, message);
+}
 
-static void error_at_current(const char *message) {
+static void error_at_current(const char* message) {
   error_at(&parser.current, message);
 }
 
@@ -100,7 +104,7 @@ static void advance() {
   }
 }
 
-static void consume(TokenType type, const char *message) {
+static void consume(TokenType type, const char* message) {
   if (parser.current.type == type) {
     advance();
     return;
@@ -109,7 +113,9 @@ static void consume(TokenType type, const char *message) {
   error_at_current(message);
 }
 
-static bool check(TokenType type) { return parser.current.type == type; }
+static bool check(TokenType type) {
+  return parser.current.type == type;
+}
 
 static bool match(TokenType type) {
   if (!check(type)) {
@@ -173,9 +179,11 @@ static void emit_constant(Value value) {
   emit_bytes(OP_CONSTANT, make_constant(value));
 }
 
-static void emit_return() { emit_byte(OP_RETURN); }
+static void emit_return() {
+  emit_byte(OP_RETURN);
+}
 
-static void init_compiler(Compiler *compiler, FunctionType type) {
+static void init_compiler(Compiler* compiler, FunctionType type) {
   compiler->enclosing = current;
   compiler->function = NULL;
   compiler->type = type;
@@ -189,15 +197,15 @@ static void init_compiler(Compiler *compiler, FunctionType type) {
         copy_string(parser.previous.start, parser.previous.length);
   }
 
-  Local *local = &current->locals[current->local_count++];
+  Local* local = &current->locals[current->local_count++];
   local->depth = 0;
   local->name.start = "";  // Not accessible.
   local->name.length = 0;
 }
 
-static ObjFunction *end_compiler() {
+static ObjFunction* end_compiler() {
   emit_return();
-  ObjFunction *function = current->function;
+  ObjFunction* function = current->function;
 
 #ifdef DEBUG_PRINT_CODE
   if (!parser.had_error) {
@@ -211,7 +219,9 @@ static ObjFunction *end_compiler() {
   return function;
 }
 
-static void begin_scope() { current->scope_depth++; }
+static void begin_scope() {
+  current->scope_depth++;
+}
 
 static void end_scope() {
   current->scope_depth--;
@@ -228,14 +238,14 @@ static void expression();
 static void statement();
 static void declaration();
 static void function(FunctionType type);
-static ParseRule *get_rule(TokenType type);
+static ParseRule* get_rule(TokenType type);
 static void parse_precedence(Precedence precedence);
-static uint8_t identifier_constant(Token *name);
-static int resolve_local(Compiler *compiler, Token *name);
+static uint8_t identifier_constant(Token* name);
+static int resolve_local(Compiler* compiler, Token* name);
 
 static void binary(bool can_assign) {
   TokenType op_type = parser.previous.type;
-  ParseRule *rule = get_rule(op_type);
+  ParseRule* rule = get_rule(op_type);
   parse_precedence((Precedence)(rule->precedence + 1));
 
   switch (op_type) {
@@ -440,11 +450,11 @@ static void parse_precedence(Precedence precedence) {
   }
 }
 
-static uint8_t identifier_constant(Token *name) {
+static uint8_t identifier_constant(Token* name) {
   return make_constant(OBJ_VAL(copy_string(name->start, name->length)));
 }
 
-static bool identifiers_equal(Token *a, Token *b) {
+static bool identifiers_equal(Token* a, Token* b) {
   if (a->length != b->length) {
     return false;
   }
@@ -452,9 +462,9 @@ static bool identifiers_equal(Token *a, Token *b) {
   return memcmp(a->start, b->start, a->length) == 0;
 }
 
-static int resolve_local(Compiler *compiler, Token *name) {
+static int resolve_local(Compiler* compiler, Token* name) {
   for (int i = compiler->local_count - 1; i >= 0; i--) {
-    Local *local = &compiler->locals[i];
+    Local* local = &compiler->locals[i];
     if (identifiers_equal(name, &local->name)) {
       if (local->depth == -1) {
         error("Can't read local variable in its own initializer.");
@@ -472,7 +482,7 @@ static void add_local(Token name) {
     return;
   }
 
-  Local *local = &current->locals[current->local_count++];
+  Local* local = &current->locals[current->local_count++];
   local->name = name;
   local->depth = -1;  // Means it is not initialized, bc it's value (rvalue) is
                       // not yet evaluated.
@@ -483,10 +493,10 @@ static void declare_local_variable() {
     return;
   }
 
-  Token *name = &parser.previous;
+  Token* name = &parser.previous;
 
   for (int i = current->local_count - 1; i >= 0; i--) {
-    Local *local = &current->locals[i];
+    Local* local = &current->locals[i];
     if (local->depth != -1 && local->depth < current->scope_depth) {
       break;
     }
@@ -498,7 +508,7 @@ static void declare_local_variable() {
   add_local(*name);
 }
 
-static uint8_t parse_variable(const char *error_message) {
+static uint8_t parse_variable(const char* error_message) {
   consume(TOKEN_ID, error_message);
 
   declare_local_variable();
@@ -525,7 +535,9 @@ static void define_variable(uint8_t global) {
   emit_bytes(OP_DEFINE_GLOBAL, global);
 }
 
-static ParseRule *get_rule(TokenType type) { return &rules[type]; }
+static ParseRule* get_rule(TokenType type) {
+  return &rules[type];
+}
 
 static void synchronize() {
   parser.panic_mode = false;
@@ -549,7 +561,9 @@ static void synchronize() {
   }
 }
 
-static void expression() { parse_precedence(PREC_ASSIGN); }
+static void expression() {
+  parse_precedence(PREC_ASSIGN);
+}
 
 static void statement_declaration_let() {
   uint8_t global = parse_variable("Expecting variable name.");
@@ -685,7 +699,7 @@ static void function(FunctionType type) {
 
   statement();
 
-  ObjFunction *function =
+  ObjFunction* function =
       end_compiler();  // Also handles end of scope. (end_scope())
   emit_bytes(OP_CONSTANT, make_constant(OBJ_VAL(function)));
 }
@@ -716,7 +730,7 @@ static void statement() {
   }
 }
 
-ObjFunction *compile(const char *source) {
+ObjFunction* compile(const char* source) {
   init_scanner(source);
   Compiler compiler;
   init_compiler(&compiler, TYPE_SCRIPT);
@@ -730,6 +744,6 @@ ObjFunction *compile(const char *source) {
     statement();
   }
 
-  ObjFunction *function = end_compiler();
+  ObjFunction* function = end_compiler();
   return parser.had_error ? NULL : function;
 }

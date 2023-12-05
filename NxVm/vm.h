@@ -9,32 +9,29 @@
 #define FRAMES_MAX 64
 #define STACK_MAX (FRAMES_MAX * UINT8_COUNT)
 
-typedef struct
-{
-	ObjFunction *function;
-	uint8_t *ip;
-	Value *slots;
+typedef struct {
+  ObjFunction* function;
+  uint8_t* ip;
+  Value* slots;
 } CallFrame;
 
-typedef struct
-{
-	CallFrame frames[FRAMES_MAX];
-	int frame_count;
+typedef struct {
+  CallFrame frames[FRAMES_MAX];
+  int frame_count;
 
-	Chunk *chunk;
-	uint8_t *ip;
-	Value stack[STACK_MAX];
-	Value *stack_top;
-	HashTable globals;
-	HashTable strings;
-	Obj *objects;
+  Chunk* chunk;
+  uint8_t* ip;
+  Value stack[STACK_MAX];
+  Value* stack_top;
+  HashTable globals;
+  HashTable strings;
+  Obj* objects;
 } Vm;
 
-typedef enum
-{
-	INTERPRET_OK,
-	INTERPRET_COMPILE_ERROR,
-	INTERPRET_RUNTIME_ERROR
+typedef enum {
+  INTERPRET_OK,
+  INTERPRET_COMPILE_ERROR,
+  INTERPRET_RUNTIME_ERROR
 } InterpretResult;
 
 extern Vm vm;
@@ -42,7 +39,7 @@ extern Vm vm;
 void init_vm();
 void free_vm();
 
-InterpretResult interpret(const char *source);
+InterpretResult interpret(const char* source);
 void push(Value value);
 Value pop();
 
