@@ -2,6 +2,8 @@
 #define nxs_vm_h
 
 #include "chunk.h"
+#include "hashtable.h"
+#include "value.h"
 
 #define STACK_MAX 256
 
@@ -11,6 +13,7 @@ typedef struct
 	uint8_t *ip;
 	Value stack[STACK_MAX];
 	Value *stack_top;
+	HashTable strings;
 	Obj *objects;
 } Vm;
 

@@ -34,10 +34,12 @@ void init_vm()
 {
     reset_stack();
     vm.objects = NULL;
+    init_hashtable(&vm.strings);
 }
 
 void free_vm()
 {
+    free_hashtable(&vm.strings);
     free_objects();
 }
 
