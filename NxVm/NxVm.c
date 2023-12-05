@@ -79,6 +79,9 @@ int main(int argc, const char *argv[])
 {
 	init_vm();
 
+	run_file("C:\\Projects\\nx-script\\NxVm\\x64\\Debug\\sample.nx");
+	return (1);
+
 	if (argc == 1)
 	{
 		repl();
@@ -89,39 +92,9 @@ int main(int argc, const char *argv[])
 	}
 	else
 	{
-		fprintf(stderr, "Usage: clox [path]\n");
+		fprintf(stderr, "Usage: nx [path]\n");
 		exit(64);
 	}
-
-	//Chunk chunk;
-
-	//init_chunk(&chunk);
-
-	//int constant = add_constant(&chunk, NUMBER_VAL(1.2));
-	//write_chunk(&chunk, OP_CONSTANT, 123);
-	//write_chunk(&chunk, constant, 123);
-
-	//constant = add_constant(&chunk, NUMBER_VAL(3.4));
-	//write_chunk(&chunk, OP_CONSTANT, 123);
-	//write_chunk(&chunk, constant, 123);
-
-	//write_chunk(&chunk, OP_ADD, 123);
-
-	//constant = add_constant(&chunk, NUMBER_VAL(5.6));
-	//write_chunk(&chunk, OP_CONSTANT, 123);
-	//write_chunk(&chunk, constant, 123);
-
-	//write_chunk(&chunk, OP_DIVIDE, 123);
-	//write_chunk(&chunk, OP_NEGATE, 123);
-
-	//write_chunk(&chunk, OP_RETURN, 123);
-
-	//disassemble_chunk(&chunk, "test chunk");
-	//interpret(&chunk);
-	//free_vm();
-	//free_chunk(&chunk);
-
-	interpret("1 + 2.3");
 
 	free_vm();
 
