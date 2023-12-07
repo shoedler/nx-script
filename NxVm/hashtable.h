@@ -1,5 +1,5 @@
-#ifndef nxs_table_h
-#define nxs_table_h
+#ifndef table_h
+#define table_h
 
 #include "common.h"
 #include "value.h"

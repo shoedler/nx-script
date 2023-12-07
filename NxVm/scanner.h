@@ -1,5 +1,5 @@
-#ifndef nxs_scanner_h
-#define nxs_scanner_h
+#ifndef scanner_h
+#define scanner_h
 
 typedef enum {
   TOKEN_OR,     // 'or'

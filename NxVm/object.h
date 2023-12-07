@@ -1,5 +1,5 @@
-#ifndef nxs_object_h
-#define nxs_object_h
+#ifndef object_h
+#define object_h
 
 #include "chunk.h"
 #include "common.h"

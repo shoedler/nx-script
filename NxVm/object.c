@@ -120,8 +120,8 @@ void print_object(Value value) {
     case OBJ_STRING:
       printf("%s", AS_CSTRING(value));
       break;
-    case OBJ_UPVALUE:
-      printf("upvalue");
-      break;
+      // case OBJ_UPVALUE:
+      //   printf("upvalue");
+      //   break;
   }
 }

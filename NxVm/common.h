@@ -1,5 +1,5 @@
-#ifndef nxs_common_h
-#define nxs_common_h
+#ifndef common_h
+#define common_h
 
 #include <stdbool.h>
 #include <stddef.h>

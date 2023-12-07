@@ -1,5 +1,5 @@
-#ifndef nxs_vm_h
-#define nxs_vm_h
+#ifndef vm_h
+#define vm_h
 
 #include "chunk.h"
 #include "hashtable.h"

@@ -1,5 +1,5 @@
-#ifndef nxs_memory_h
-#define nxs_memory_h
+#ifndef memory_h
+#define memory_h
 
 #include "common.h"
 #include "object.h"

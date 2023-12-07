@@ -1,5 +1,5 @@
-#ifndef nxs_compiler_h
-#define nxs_compiler_h
+#ifndef compiler_h
+#define compiler_h
 
 #include "object.h"
 #include "vm.h"

@@ -1,5 +1,5 @@
-#ifndef nxs_debug_h
-#define nxs_debug_h
+#ifndef debug_h
+#define debug_h
 
 #include "chunk.h"
 

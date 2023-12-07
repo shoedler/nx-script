@@ -1,5 +1,5 @@
-#ifndef nxs_chunk_h
-#define nxs_chunk_h
+#ifndef chunk_h
+#define chunk_h
 
 #include "common.h"
 #include "value.h"
