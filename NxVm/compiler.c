@@ -40,17 +40,24 @@ typedef struct {
 typedef struct {
   Token name;
   int depth;
+  bool is_captured;
 } Local;
+
+typedef struct {
+  uint8_t index;
+  bool is_local;
+} Upvalue;
 
 typedef enum { TYPE_FUNCTION, TYPE_TOPLEVEL } FunctionType;
 
-typedef struct {
+typedef struct Compiler {
   struct Compiler* enclosing;
   ObjFunction* function;
   FunctionType type;
 
   Local locals[UINT8_COUNT];
   int local_count;
+  Upvalue upvalues[UINT8_COUNT];
   int scope_depth;
 } Compiler;
 
@@ -200,6 +207,7 @@ static void init_compiler(Compiler* compiler, FunctionType type) {
 
   Local* local = &current->locals[current->local_count++];
   local->depth = 0;
+  local->is_captured = false;
   local->name.start = "";  // Not accessible.
   local->name.length = 0;
 }
@@ -230,7 +238,14 @@ static void end_scope() {
   while (current->local_count > 0 &&
          current->locals[current->local_count - 1].depth >
              current->scope_depth) {
-    emit_byte(OP_POP);
+    // Since we're leaving the scope, we don't need the local variables anymore.
+    // The ones who got captured by a closure are still needed, and are
+    // going to need to live on the heap.
+    if (current->locals[current->local_count - 1].is_captured) {
+      emit_byte(OP_CLOSE_UPVALUE);
+    } else {
+      emit_byte(OP_POP);
+    }
     current->local_count--;
   }
 }
@@ -244,6 +259,8 @@ static ParseRule* get_rule(TokenType type);
 static void parse_precedence(Precedence precedence);
 static uint8_t identifier_constant(Token* name);
 static int resolve_local(Compiler* compiler, Token* name);
+static int resolve_upvalue(Compiler* compiler, Token* name);
+static int add_upvalue(Compiler* compiler, uint8_t index, bool is_local);
 
 static void binary(bool can_assign) {
   TokenType op_type = parser.previous.type;
@@ -352,6 +369,9 @@ static void named_variable(Token name, bool can_assign) {
   if (arg != -1) {
     get_op = OP_GET_LOCAL;
     set_op = OP_SET_LOCAL;
+  } else if ((arg = resolve_upvalue(current, &name)) != -1) {
+    get_op = OP_GET_UPVALUE;
+    set_op = OP_SET_UPVALUE;
   } else {
     arg = identifier_constant(&name);
     get_op = OP_GET_GLOBAL;
@@ -479,6 +499,23 @@ static int resolve_local(Compiler* compiler, Token* name) {
       return i;
     }
   }
+}
+
+static int resolve_upvalue(Compiler* compiler, Token* name) {
+  if (compiler->enclosing == NULL)
+    return -1;
+
+  int local = resolve_local(compiler->enclosing, name);
+  if (local != -1) {
+    compiler->enclosing->locals[local].is_captured = true;
+    return add_upvalue(compiler, (uint8_t)local, true);
+  }
+
+  // Recurse on outer scopes (compilers) to maybe find the variable there
+  int upvalue = resolve_upvalue(compiler->enclosing, name);
+  if (upvalue != -1) {
+    return add_upvalue(compiler, (uint8_t)upvalue, false);
+  }
 
   return -1;
 }
@@ -493,6 +530,27 @@ static void add_local(Token name) {
   local->name = name;
   local->depth = -1;  // Means it is not initialized, bc it's value (rvalue) is
                       // not yet evaluated.
+  local->is_captured = false;
+}
+
+static int add_upvalue(Compiler* compiler, uint8_t index, bool is_local) {
+  int upvalue_count = compiler->function->upvalue_count;
+
+  for (int i = 0; i < upvalue_count; i++) {
+    Upvalue* upvalue = &compiler->upvalues[i];
+    if (upvalue->index == index && upvalue->is_local == is_local) {
+      return i;
+    }
+  }
+
+  if (upvalue_count == UINT8_COUNT) {
+    error("Too many closure variables in function.");
+    return 0;
+  }
+
+  compiler->upvalues[upvalue_count].is_local = is_local;
+  compiler->upvalues[upvalue_count].index = index;
+  return compiler->function->upvalue_count++;
 }
 
 static void declare_local_variable() {
@@ -741,7 +799,12 @@ static void function(FunctionType type) {
 
   ObjFunction* function =
       end_compiler();  // Also handles end of scope. (end_scope())
-  emit_bytes(OP_CONSTANT, make_constant(OBJ_VAL(function)));
+
+  emit_bytes(OP_CLOSURE, make_constant(OBJ_VAL(function)));
+  for (int i = 0; i < function->upvalue_count; i++) {
+    emit_byte(compiler.upvalues[i].is_local ? 1 : 0);
+    emit_byte(compiler.upvalues[i].index);
+  }
 }
 
 static void statement() {

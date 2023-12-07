@@ -18,6 +18,8 @@ static Value native_clock(int argCount, Value* args) {
 
 static void reset_stack() {
   vm.stack_top = vm.stack;
+  vm.frame_count = 0;
+  vm.open_upvalues = NULL;
 }
 
 static void runtime_error(const char* format, ...) {
@@ -30,7 +32,7 @@ static void runtime_error(const char* format, ...) {
   // Stacktrace
   for (int i = vm.frame_count - 1; i >= 0; i--) {
     CallFrame* frame = &vm.frames[i];
-    ObjFunction* function = frame->function;
+    ObjFunction* function = frame->closure->function;
     size_t instruction = frame->ip - function->chunk.code - 1;
     fprintf(stderr, "[line %d] in ", function->chunk.lines[instruction]);
     if (function->name == NULL) {
@@ -40,10 +42,6 @@ static void runtime_error(const char* format, ...) {
     }
   }
 
-  CallFrame* frame = &vm.frames[vm.frame_count - 1];
-  size_t instruction = frame->ip - frame->function->chunk.code - 1;
-  int line = frame->function->chunk.lines[instruction];
-  fprintf(stderr, "[line %d] in toplevel\n", line);
   reset_stack();
 }
 
@@ -85,9 +83,9 @@ static Value peek(int distance) {
   return vm.stack_top[-1 - distance];
 }
 
-static bool call(ObjFunction* function, int arg_count) {
-  if (arg_count != function->arity) {
-    runtime_error("Expected %d arguments but got %d.", function->arity,
+static bool call(ObjClosure* closure, int arg_count) {
+  if (arg_count != closure->function->arity) {
+    runtime_error("Expected %d arguments but got %d.", closure->function->arity,
                   arg_count);
     return false;
   }
@@ -98,8 +96,8 @@ static bool call(ObjFunction* function, int arg_count) {
   }
 
   CallFrame* frame = &vm.frames[vm.frame_count++];
-  frame->function = function;
-  frame->ip = function->chunk.code;
+  frame->closure = closure;
+  frame->ip = closure->function->chunk.code;
   frame->slots = vm.stack_top - arg_count - 1;
   return true;
 }
@@ -107,6 +105,8 @@ static bool call(ObjFunction* function, int arg_count) {
 static bool call_value(Value callee, int arg_count) {
   if (IS_OBJ(callee)) {
     switch (OBJ_TYPE(callee)) {
+      case OBJ_CLOSURE:
+        return call(AS_CLOSURE(callee), arg_count);
       case OBJ_FUNCTION:
         return call(AS_FUNCTION(callee), arg_count);
       case OBJ_NATIVE: {
@@ -122,6 +122,47 @@ static bool call_value(Value callee, int arg_count) {
   }
   runtime_error("Can only call functions and classes.");
   return false;
+}
+
+static ObjUpvalue* capture_upvalue(Value* local) {
+  ObjUpvalue* prev_upvalue = NULL;
+  ObjUpvalue* upvalue = vm.open_upvalues;
+
+  // Are there any open upvalues from start (actually, start = the top of the
+  // list, e.g. "last" in terms of reading a file with your eyes) to local?
+  while (upvalue != NULL && upvalue->location > local) {
+    prev_upvalue = upvalue;
+    upvalue = upvalue->next;
+  }
+
+  // If there is one, return it
+  if (upvalue != NULL && upvalue->location == local) {
+    return upvalue;
+  }
+
+  // Otherwise, create one and insert it into the list
+  ObjUpvalue* created_upvalue = new_upvalue(local);
+  created_upvalue->next = upvalue;
+
+  if (prev_upvalue == NULL) {
+    vm.open_upvalues = created_upvalue;
+  } else {
+    prev_upvalue->next = created_upvalue;
+  }
+
+  return created_upvalue;
+}
+
+// Closing upvalues moves them from the stack to the heap.
+static void close_upvalues(Value* last) {
+  while (vm.open_upvalues != NULL && vm.open_upvalues->location >= last) {
+    ObjUpvalue* upvalue = vm.open_upvalues;
+    upvalue->closed =
+        *upvalue->location;  // Move the value (via location pointer) from the
+                             // stack to the heap
+    upvalue->location = &upvalue->closed;  // Point to ourselves for the value
+    vm.open_upvalues = upvalue->next;
+  }
 }
 
 static bool is_falsey(Value value) {
@@ -148,8 +189,9 @@ static InterpretResult run() {
 #define READ_BYTE() (*frame->ip++)
 #define READ_SHORT() \
   (frame->ip += 2, (uint16_t)((frame->ip[-2] << 8) | frame->ip[-1]))
-#define READ_CONSTANT() (frame->function->chunk.constants.values[READ_BYTE()])
 #define READ_STRING() AS_STRING(READ_CONSTANT())
+#define READ_CONSTANT() \
+  (frame->closure->function->chunk.constants.values[READ_BYTE()])
 #define BINARY_OP(value_type, op)                     \
   do {                                                \
     if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) { \
@@ -172,8 +214,9 @@ static InterpretResult run() {
 
     printf("\n");
 
-    disassemble_instruction(&frame->function->chunk,
-                            (int)(frame->ip - frame->function->chunk.code));
+    disassemble_instruction(
+        &frame->closure->function->chunk,
+        (int)(frame->ip - frame->closure->function->chunk.code));
 #endif
 
     uint8_t instruction;
@@ -210,24 +253,38 @@ static InterpretResult run() {
         push(value);
         break;
       }
+      case OP_GET_UPVALUE: {
+        uint8_t slot = READ_BYTE();
+        push(*frame->closure->upvalues[slot]->location);
+        break;
+      }
       case OP_DEFINE_GLOBAL: {
         ObjString* name = READ_STRING();
-        hashtable_set(&vm.globals, name, peek(0));
+        hashtable_set(&vm.globals, name,
+                      peek(0));  // peek, because assignment is an expression!
         pop();
         break;
       }
       case OP_SET_LOCAL: {
         uint8_t slot = READ_BYTE();
-        vm.stack[slot] = peek(0);
+        vm.stack[slot] = peek(0);  // peek, because assignment is an expression!
         break;
       }
       case OP_SET_GLOBAL: {
         ObjString* name = READ_STRING();
-        if (hashtable_set(&vm.globals, name, peek(0))) {
+        if (hashtable_set(
+                &vm.globals, name,
+                peek(0))) {  // peek, because assignment is an expression!
           hashtable_delete(&vm.globals, name);
           runtime_error("Undefined variable '%s'.", name->chars);
           return INTERPRET_RUNTIME_ERROR;
         }
+        break;
+      }
+      case OP_SET_UPVALUE: {
+        uint8_t slot = READ_BYTE();
+        *frame->closure->upvalues[slot]->location =
+            peek(0);  // peek, because assignment is an expression!
         break;
       }
       case OP_EQ: {
@@ -315,8 +372,30 @@ static InterpretResult run() {
         frame = &vm.frames[vm.frame_count - 1];
         break;
       }
+      case OP_CLOSURE: {
+        ObjFunction* function = AS_FUNCTION(READ_CONSTANT());
+        ObjClosure* closure = new_closure(function);
+        push(OBJ_VAL(closure));
+
+        // Bring closure to life
+        for (int i = 0; i < closure->upvalue_count; i++) {
+          uint8_t is_local = READ_BYTE();
+          uint8_t index = READ_BYTE();
+          if (is_local) {
+            closure->upvalues[i] = capture_upvalue(frame->slots + index);
+          } else {
+            closure->upvalues[i] = frame->closure->upvalues[index];
+          }
+        }
+        break;
+      }
+      case OP_CLOSE_UPVALUE:
+        close_upvalues(vm.stack_top - 1);
+        pop();
+        break;
       case OP_RETURN: {
         Value result = pop();
+        close_upvalues(frame->slots);
         vm.frame_count--;
         if (vm.frame_count == 0) {
           pop();
@@ -344,12 +423,10 @@ InterpretResult interpret(const char* source) {
     return INTERPRET_COMPILE_ERROR;
 
   push(OBJ_VAL(function));
-  call(function, 0);
-
-  CallFrame* frame = &vm.frames[vm.frame_count++];
-  frame->function = function;
-  frame->ip = function->chunk.code;
-  frame->slots = vm.stack;
+  ObjClosure* closure = new_closure(function);
+  pop();
+  push(OBJ_VAL(closure));
+  call(closure, 0);
 
   return run();
 }
