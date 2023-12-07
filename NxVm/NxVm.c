@@ -70,7 +70,7 @@ int main(int argc, const char* argv[]) {
 
   // TODO: Remove this
   run_file("C:\\Projects\\nx-script\\NxVm\\sample.nx");
-  return (1);
+  return (0);
 
   if (argc == 1) {
     repl();

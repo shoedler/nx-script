@@ -27,6 +27,12 @@ typedef struct {
   HashTable strings;
   ObjUpvalue* open_upvalues;
   Obj* objects;
+
+  size_t bytes_allocated;
+  size_t next_gc;
+  int gray_count;
+  int gray_capacity;
+  Obj** gray_stack;
 } Vm;
 
 typedef enum {

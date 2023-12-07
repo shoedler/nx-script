@@ -27,5 +27,7 @@ ObjString* hashtable_find_string(HashTable* table,
                                  const char* chars,
                                  int length,
                                  uint32_t hash);
+void hashtable_remove_white(HashTable* table);
+void mark_hashtable(HashTable* table);
 
 #endif

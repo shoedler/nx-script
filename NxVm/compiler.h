@@ -7,5 +7,6 @@
 #define MAX_FN_ARGS 255
 
 ObjFunction* compile(const char* source);
+void mark_compiler_roots();
 
 #endif

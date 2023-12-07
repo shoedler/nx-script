@@ -142,3 +142,20 @@ ObjString* hashtable_find_string(HashTable* table,
     index = (index + 1) % table->capacity;
   }
 }
+
+void hashtable_remove_white(HashTable* table) {
+  for (int i = 0; i < table->capacity; i++) {
+    Entry* entry = &table->entries[i];
+    if (entry->key != NULL && !entry->key->obj.is_marked) {
+      hashtable_delete(table, entry->key);
+    }
+  }
+}
+
+void mark_hashtable(HashTable* table) {
+  for (int i = 0; i < table->capacity; i++) {
+    Entry* entry = &table->entries[i];
+    mark_obj((Obj*)entry->key);
+    mark_value(entry->value);
+  }
+}

@@ -17,6 +17,9 @@
 #define FREE_ARRAY(type, pointer, old_count) \
   reallocate(pointer, sizeof(type) * (old_count), 0)
 
+#define GC_HEAP_GROW_FACTOR 2
+#define GC_DEFAULT_THRESHOLD 1024 * 1024
+
 /**
  * @brief Reallocates memory.
  * If old_size == 0 and new_size != 0, then the function allocates memory.
@@ -29,6 +32,9 @@
  * @return void* Pointer to the reallocated memory.
  */
 void* reallocate(void* pointer, size_t old_size, size_t new_size);
+void collect_garbage();
+void mark_value(Value value);
+void mark_obj(Obj* object);
 void free_objects();
 
 #endif

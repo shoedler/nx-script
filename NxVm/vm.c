@@ -57,6 +57,12 @@ void init_vm() {
   reset_stack();
   vm.objects = NULL;
 
+  vm.bytes_allocated = 0;
+  vm.next_gc = GC_DEFAULT_THRESHOLD;
+  vm.gray_count = 0;
+  vm.gray_capacity = 0;
+  vm.gray_stack = NULL;
+
   init_hashtable(&vm.globals);
   init_hashtable(&vm.strings);
 
@@ -170,8 +176,8 @@ static bool is_falsey(Value value) {
 }
 
 static void concatenate() {
-  ObjString* b = AS_STRING(pop());
-  ObjString* a = AS_STRING(pop());
+  ObjString* b = AS_STRING(peek(0));  // Peek, so it doesn't get freed by the GC
+  ObjString* a = AS_STRING(peek(1));  // Peek, so it doesn't get freed by the GC
 
   int length = a->length + b->length;
   char* chars = ALLOCATE(char, length + 1);
@@ -180,6 +186,8 @@ static void concatenate() {
   chars[length] = '\0';
 
   ObjString* result = take_string(chars, length);
+  pop();  // Pop, because we peeked
+  pop();  // Pop, because we peeked
   push(OBJ_VAL(result));
 }
 

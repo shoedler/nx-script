@@ -6,6 +6,7 @@
 
 #include "common.h"
 #include "debug.h"
+#include "memory.h"
 #include "scanner.h"
 
 typedef struct {
@@ -850,4 +851,12 @@ ObjFunction* compile(const char* source) {
 
   ObjFunction* function = end_compiler();
   return parser.had_error ? NULL : function;
+}
+
+void mark_compiler_roots() {
+  Compiler* compiler = current;
+  while (compiler != NULL) {
+    mark_obj((Obj*)compiler->function);
+    compiler = compiler->enclosing;
+  }
 }
