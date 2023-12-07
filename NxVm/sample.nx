@@ -1,0 +1,40 @@
+
+// for let i = 0; i<10; i=i+1 if i == 5 print "five" else print i
+
+// print "hello world! this is a long string!"
+// let fib = fn n ->
+//   if n <= 1
+//     ret n;
+//   else
+//     ret (fib(n-1) + fib(n-2));
+
+// let start = clock()
+// print "Let's calculate fib(35)!"
+// let result = fib(35)
+// print clock() - start
+
+// print result
+
+// let outer = fn -> {
+//   let x = "outside"
+//   let inner = fn -> {
+//     print x
+//   }
+//   inner()
+// }
+// outer()
+
+// fn closure -> outer()
+
+// closure()
+
+let outer = fn -> {
+  let x = "outside"
+  let inner = fn -> {
+    print x
+  }
+  ret inner;
+}
+
+let closure = outer()
+closure()

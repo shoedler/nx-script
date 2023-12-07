@@ -68,7 +68,8 @@ static void run_file(const char* path) {
 int main(int argc, const char* argv[]) {
   init_vm();
 
-  run_file("C:\\Projects\\nx-script\\NxVm\\x64\\Debug\\sample.nx");
+  // TODO: Remove this
+  run_file("C:\\Projects\\nx-script\\NxVm\\sample.nx");
   return (1);
 
   if (argc == 1) {
