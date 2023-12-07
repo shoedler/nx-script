@@ -121,16 +121,19 @@ int disassemble_instruction(Chunk* chunk, int offset) {
     case OP_CLOSURE: {
       offset++;
       uint8_t constant = chunk->code[offset++];
-      printf("%-16s %4d ", "OP_CLOSURE", constant);
+      PRINT_OPCODE("OP_CLOSURE");
+      PRINT_INT(constant);
+      printf(" ");
       print_value(chunk->constants.values[constant]);
-      printf("\n");
 
       ObjFunction* function = AS_FUNCTION(chunk->constants.values[constant]);
       for (int j = 0; j < function->upvalue_count; j++) {
         int is_local = chunk->code[offset++];
         int index = chunk->code[offset++];
-        printf("%04d      |                     %s %d\n", offset - 2,
-               is_local ? "local" : "upvalue", index);
+        printf("\n");
+        printf(ANSI_MAGENTA_STR("%04d "), offset - 2);
+        printf(ANSI_BLUE_STR("   |                       "));
+        printf("%s %d", is_local ? "local" : "upvalue", index);
       }
 
       return offset;

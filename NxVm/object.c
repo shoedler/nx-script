@@ -100,7 +100,7 @@ ObjString* copy_string(const char* chars, int length) {
 
 static void print_function(ObjFunction* function) {
   if (function->name == NULL) {
-    printf("[TopLevel Fn]");
+    printf("[Toplevel Fn]");
     return;
   }
   printf("[Fn %s, arity %d]", function->name->chars, function->arity);
