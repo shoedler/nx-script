@@ -100,10 +100,10 @@ ObjString* copy_string(const char* chars, int length) {
 
 static void print_function(ObjFunction* function) {
   if (function->name == NULL) {
-    printf("<toplevel>");
+    printf("[TopLevel Fn]");
     return;
   }
-  printf("<fn %s, arity %d>", function->name->chars, function->arity);
+  printf("[Fn %s, arity %d]", function->name->chars, function->arity);
 }
 
 void print_object(Value value) {
@@ -115,13 +115,13 @@ void print_object(Value value) {
       print_function(AS_FUNCTION(value));
       break;
     case OBJ_NATIVE:
-      printf("<native fn>");
+      printf("[Native Fn]");
       break;
     case OBJ_STRING:
       printf("%s", AS_CSTRING(value));
       break;
-      // case OBJ_UPVALUE:
-      //   printf("upvalue");
-      //   break;
+    case OBJ_UPVALUE:
+      printf("[Upvalue]");
+      break;
   }
 }

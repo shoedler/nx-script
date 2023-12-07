@@ -12,7 +12,7 @@
 
 Vm vm;
 
-static Value native_clock(int argCount, Value* args) {
+static Value native_clock(int arg_count, Value* args) {
   return NUMBER_VAL((double)clock() / CLOCKS_PER_SEC);
 }
 
@@ -205,18 +205,19 @@ static InterpretResult run() {
 
   for (;;) {
 #ifdef DEBUG_TRACE_EXECUTION
-    printf("          STACKTRACE          ");
-    for (Value* slot = vm.stack; slot < vm.stack_top; slot++) {
-      printf("[ ");
-      print_value(*slot);
-      printf(" ]");
-    }
-
-    printf("\n");
-
+#ifdef DEBUG_TRACE_EXECUTION
     disassemble_instruction(
         &frame->closure->function->chunk,
         (int)(frame->ip - frame->closure->function->chunk.code));
+
+    printf(ANSI_CYAN_STR(" \t \t \t Stack "));
+    for (Value* slot = vm.stack; slot < vm.stack_top; slot++) {
+      printf(ANSI_CYAN_STR("["));
+      print_value(*slot);
+      printf(ANSI_CYAN_STR("]"));
+    }
+    printf("\n");
+#endif
 #endif
 
     uint8_t instruction;

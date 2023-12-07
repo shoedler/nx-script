@@ -221,6 +221,10 @@ static ObjFunction* end_compiler() {
     disassemble_chunk(current_chunk(), function->name != NULL
                                            ? function->name->chars
                                            : "<toplevel>");
+
+    if (current->enclosing == NULL) {
+      printf("\n== End of compilation ==\n\n");
+    }
   }
 #endif
   current = current->enclosing;
@@ -839,6 +843,10 @@ ObjFunction* compile(const char* source) {
   init_scanner(source);
   Compiler compiler;
   init_compiler(&compiler, TYPE_TOPLEVEL);
+
+#ifdef DEBUG_PRINT_CODE
+  printf("== Begin compilation ==\n");
+#endif
 
   parser.had_error = false;
   parser.panic_mode = false;
