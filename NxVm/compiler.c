@@ -220,7 +220,7 @@ static ObjFunction* end_compiler() {
   if (!parser.had_error) {
     disassemble_chunk(current_chunk(), function->name != NULL
                                            ? function->name->chars
-                                           : "<toplevel>");
+                                           : "[Toplevel]");
 
     if (current->enclosing == NULL) {
       printf("\n== End of compilation ==\n\n");
@@ -256,15 +256,16 @@ static void end_scope() {
 
 static void expression();
 static void statement();
-static void declaration();
+
 static uint8_t argument_list();
-static void function(FunctionType type);
 static ParseRule* get_rule(TokenType type);
 static void parse_precedence(Precedence precedence);
 static uint8_t identifier_constant(Token* name);
 static int resolve_local(Compiler* compiler, Token* name);
 static int resolve_upvalue(Compiler* compiler, Token* name);
 static int add_upvalue(Compiler* compiler, uint8_t index, bool is_local);
+static uint8_t parse_variable(const char* error_message);
+static void define_variable(uint8_t global);
 
 static void binary(bool can_assign) {
   TokenType op_type = parser.previous.type;
@@ -394,6 +395,36 @@ static void variable(bool can_assign) {
   named_variable(parser.previous, can_assign);
 }
 
+static void function(bool can_assign) {
+  Compiler compiler;
+  init_compiler(&compiler, TYPE_FUNCTION);
+  begin_scope();
+
+  if (!check(TOKEN_LAMBDA)) {
+    do {
+      current->function->arity++;
+      if (current->function->arity > MAX_FN_ARGS) {
+        error_at_current("Can't have more than MAX_FN_ARGS parameters.");
+      }
+      uint8_t constant = parse_variable("Expecting parameter name.");
+      define_variable(constant);
+    } while (match(TOKEN_COMMA));
+  }
+
+  consume(TOKEN_LAMBDA, "Expecting '->' after parameters.");
+
+  statement();
+
+  ObjFunction* function =
+      end_compiler();  // Also handles end of scope. (end_scope())
+
+  emit_bytes(OP_CLOSURE, make_constant(OBJ_VAL(function)));
+  for (int i = 0; i < function->upvalue_count; i++) {
+    emit_byte(compiler.upvalues[i].is_local ? 1 : 0);
+    emit_byte(compiler.upvalues[i].index);
+  }
+}
+
 static void and_(bool can_assign) {
   int end_jump = emit_jump(OP_JUMP_IF_FALSE);
   emit_byte(OP_POP);
@@ -441,7 +472,7 @@ ParseRule rules[] = {
     [TOKEN_ELSE] = {NULL, NULL, PREC_NONE},
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
     [TOKEN_FOR] = {NULL, NULL, PREC_NONE},
-    [TOKEN_FN] = {NULL, NULL, PREC_NONE},
+    [TOKEN_FN] = {function, NULL, PREC_NONE},
     [TOKEN_LAMBDA] = {NULL, NULL, PREC_NONE},
     [TOKEN_IF] = {NULL, NULL, PREC_NONE},
     [TOKEN_NIL] = {literal, NULL, PREC_NONE},
@@ -661,13 +692,6 @@ static void statement_declaration_let() {
   define_variable(global);
 }
 
-static void statement_declaration_fn() {
-  uint8_t global = parse_variable("Expecting function name.");
-  mark_initialized();
-  function(TYPE_FUNCTION);
-  define_variable(global);
-}
-
 static void statement_print() {
   expression();
   emit_byte(OP_PRINT);
@@ -780,37 +804,6 @@ static void block() {
   consume(TOKEN_CBRACE, "Expecting '}' after block.");
 }
 
-static void function(FunctionType type) {
-  Compiler compiler;
-  init_compiler(&compiler, type);
-  begin_scope();
-
-  if (!check(TOKEN_LAMBDA)) {
-    consume(TOKEN_ASSIGN, "Expecting '=' after function name.");
-    do {
-      current->function->arity++;
-      if (current->function->arity > MAX_FN_ARGS) {
-        error_at_current("Can't have more than MAX_FN_ARGS parameters.");
-      }
-      uint8_t constant = parse_variable("Expecting parameter name.");
-      define_variable(constant);
-    } while (match(TOKEN_COMMA));
-  }
-
-  consume(TOKEN_LAMBDA, "Expecting '->' after parameters.");
-
-  statement();
-
-  ObjFunction* function =
-      end_compiler();  // Also handles end of scope. (end_scope())
-
-  emit_bytes(OP_CLOSURE, make_constant(OBJ_VAL(function)));
-  for (int i = 0; i < function->upvalue_count; i++) {
-    emit_byte(compiler.upvalues[i].is_local ? 1 : 0);
-    emit_byte(compiler.upvalues[i].index);
-  }
-}
-
 static void statement() {
   if (match(TOKEN_PRINT)) {
     statement_print();
@@ -828,8 +821,6 @@ static void statement() {
     end_scope();
   } else if (match(TOKEN_LET)) {
     statement_declaration_let();
-  } else if (match(TOKEN_FN)) {
-    statement_declaration_fn();
   } else {
     statement_expression();
   }
