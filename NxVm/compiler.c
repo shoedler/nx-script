@@ -589,7 +589,7 @@ static int add_upvalue(Compiler* compiler, uint8_t index, bool is_local) {
   return compiler->function->upvalue_count++;
 }
 
-static void declare_local_variable() {
+static void declare_local() {
   if (current->scope_depth == 0) {
     return;
   }
@@ -612,7 +612,7 @@ static void declare_local_variable() {
 static uint8_t parse_variable(const char* error_message) {
   consume(TOKEN_ID, error_message);
 
-  declare_local_variable();
+  declare_local();
   if (current->scope_depth > 0) {
     return 0;
   }
@@ -691,6 +691,18 @@ static void statement_declaration_let() {
   }
 
   define_variable(global);
+}
+
+static void statement_declaration_class() {
+  consume(TOKEN_ID, "Expect class name.");
+  uint8_t name_constant = identifier_constant(&parser.previous);
+  declare_local();
+
+  emit_bytes(OP_CLASS, name_constant);
+  define_variable(name_constant);
+
+  consume(TOKEN_OBRACE, "Expecting'{' before class body.");
+  consume(TOKEN_CBRACE, "Expecting'}' after class body.");
 }
 
 static void statement_print() {
@@ -808,6 +820,8 @@ static void block() {
 static void statement() {
   if (match(TOKEN_PRINT)) {
     statement_print();
+  } else if (match(TOKEN_CLASS)) {
+    statement_declaration_class();
   } else if (match(TOKEN_IF)) {
     statement_if();
   } else if (match(TOKEN_RETURN)) {

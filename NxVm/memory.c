@@ -88,6 +88,11 @@ static void blacken_object(Obj* object) {
 #endif
 
   switch (object->type) {
+    case OBJ_CLASS: {
+      ObjClass* klass = (ObjClass*)object;
+      mark_obj((Obj*)klass->name);
+      break;
+    }
     case OBJ_CLOSURE: {
       ObjClosure* closure = (ObjClosure*)object;
       mark_obj((Obj*)closure->function);
@@ -119,6 +124,10 @@ static void free_object(Obj* object) {
 #endif
 
   switch (object->type) {
+    case OBJ_CLASS: {
+      FREE(ObjClass, object);
+      break;
+    }
     case OBJ_CLOSURE: {
       ObjClosure* closure = (ObjClosure*)object;
       FREE_ARRAY(ObjUpvalue*, closure->upvalues, closure->upvalue_count);
