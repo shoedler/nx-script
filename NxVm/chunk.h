@@ -17,6 +17,8 @@ typedef enum {
   OP_SET_LOCAL,
   OP_SET_GLOBAL,
   OP_SET_UPVALUE,
+  OP_GET_PROPERTY,
+  OP_SET_PROPERTY,
   OP_EQ,
   OP_NEQ,
   OP_GT,

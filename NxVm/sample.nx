@@ -28,25 +28,32 @@ class Foo {}
 
 print Foo
 
-for let i = 0 ; i < 100 ; i = i + 1 {
-  let outer = fn -> {
-    let x = "outside"
-    let inner = fn -> {
-      print x
-    }
-    ret inner;
-  }
+class Pair {}
 
-  for let y = 0; y < 100; y = y + 1 {
-    let x = fn -> {
-      print "Hello World"
-    }
-    x()
-  }
-  let closure = outer()
-  closure()
-  print i
-}
+let pair = Pair()
+pair.first = 1
+pair.second = 2
+print pair.first + pair.last // 3.
+
+// for let i = 0 ; i < 100 ; i = i + 1 {
+//   let outer = fn -> {
+//     let x = "outside"
+//     let inner = fn -> {
+//       print x
+//     }
+//     ret inner;
+//   }
+
+//   for let y = 0; y < 100; y = y + 1 {
+//     let x = fn -> {
+//       print "Hello World"
+//     }
+//     x()
+//   }
+//   let closure = outer()
+//   closure()
+//   print i
+// }
 
 // TODO: Add support for pure objs
 

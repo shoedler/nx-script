@@ -50,6 +50,13 @@ ObjClass* new_class(ObjString* name) {
   return klass;
 }
 
+ObjInstance* new_instance(ObjClass* klass) {
+  ObjInstance* instance = ALLOCATE_OBJ(ObjInstance, OBJ_INSTANCE);
+  instance->klass = klass;
+  init_hashtable(&instance->fields);
+  return instance;
+}
+
 ObjUpvalue* new_upvalue(Value* slot) {
   ObjUpvalue* upvalue = ALLOCATE_OBJ(ObjUpvalue, OBJ_UPVALUE);
   upvalue->closed = NIL_VAL;
@@ -137,6 +144,9 @@ void print_object(Value value) {
       break;
     case OBJ_FUNCTION:
       print_function(AS_FUNCTION(value));
+      break;
+    case OBJ_INSTANCE:
+      printf("%s instance", AS_INSTANCE(value)->klass->name->chars);
       break;
     case OBJ_NATIVE:
       printf("[Native Fn]");

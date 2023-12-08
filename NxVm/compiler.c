@@ -261,7 +261,7 @@ static void statement();
 static uint8_t argument_list();
 static ParseRule* get_rule(TokenType type);
 static void parse_precedence(Precedence precedence);
-static uint8_t identifier_constant(Token* name);
+static uint8_t string_constant(Token* name);
 static int resolve_local(Compiler* compiler, Token* name);
 static int resolve_upvalue(Compiler* compiler, Token* name);
 static int add_upvalue(Compiler* compiler, uint8_t index, bool is_local);
@@ -310,9 +310,21 @@ static void binary(bool can_assign) {
   }
 }
 
-static void call(bool canAssign) {
+static void call(bool can_assign) {
   uint8_t arg_count = argument_list();
   emit_bytes(OP_CALL, arg_count);
+}
+
+static void dot(bool can_assign) {
+  consume(TOKEN_ID, "Expecting property name after '.'.");
+  uint8_t name = string_constant(&parser.previous);
+
+  if (can_assign && match(TOKEN_ASSIGN)) {
+    expression();
+    emit_bytes(OP_SET_PROPERTY, name);
+  } else {
+    emit_bytes(OP_GET_PROPERTY, name);
+  }
 }
 
 static void literal(bool can_assign) {
@@ -379,7 +391,7 @@ static void named_variable(Token name, bool can_assign) {
     get_op = OP_GET_UPVALUE;
     set_op = OP_SET_UPVALUE;
   } else {
-    arg = identifier_constant(&name);
+    arg = string_constant(&name);
     get_op = OP_GET_GLOBAL;
     set_op = OP_SET_GLOBAL;
   }
@@ -435,7 +447,7 @@ static void and_(bool can_assign) {
   patch_jump(end_jump);
 }
 
-static void or_(bool canAssign) {
+static void or_(bool can_assign) {
   int else_jump = emit_jump(OP_JUMP_IF_FALSE);
   int end_jump = emit_jump(OP_JUMP);
 
@@ -452,7 +464,7 @@ ParseRule rules[] = {
     [TOKEN_OBRACE] = {NULL, NULL, PREC_NONE},
     [TOKEN_CBRACE] = {NULL, NULL, PREC_NONE},
     [TOKEN_COMMA] = {NULL, NULL, PREC_NONE},
-    [TOKEN_DOT] = {NULL, NULL, PREC_NONE},
+    [TOKEN_DOT] = {NULL, dot, PREC_CALL},
     [TOKEN_MINUS] = {unary, binary, PREC_TERM},
     [TOKEN_PLUS] = {NULL, binary, PREC_TERM},
     [TOKEN_DIV] = {NULL, binary, PREC_FACTOR},
@@ -513,7 +525,7 @@ static void parse_precedence(Precedence precedence) {
   }
 }
 
-static uint8_t identifier_constant(Token* name) {
+static uint8_t string_constant(Token* name) {
   return make_constant(OBJ_VAL(copy_string(name->start, name->length)));
 }
 
@@ -617,7 +629,7 @@ static uint8_t parse_variable(const char* error_message) {
     return 0;
   }
 
-  return identifier_constant(&parser.previous);
+  return string_constant(&parser.previous);
 }
 
 static void mark_initialized() {
@@ -695,7 +707,7 @@ static void statement_declaration_let() {
 
 static void statement_declaration_class() {
   consume(TOKEN_ID, "Expect class name.");
-  uint8_t name_constant = identifier_constant(&parser.previous);
+  uint8_t name_constant = string_constant(&parser.previous);
   declare_local();
 
   emit_bytes(OP_CLASS, name_constant);
