@@ -24,16 +24,19 @@
 
 // closure()
 
-class Foo {}
+class Scone {
+  fn topping = first, second -> {
+    print "scone with " + first + " and " + second
+    ret 1;
+  }
+}
 
-print Foo
+let scone = Scone()
+let r = scone.topping("berries", "cream")
+print r
 
-class Pair {}
-
-let pair = Pair()
-pair.first = 1
-pair.second = 2
-print pair.first + pair.last // 3.
+let a = fn -> print a
+a()
 
 // for let i = 0 ; i < 100 ; i = i + 1 {
 //   let outer = fn -> {

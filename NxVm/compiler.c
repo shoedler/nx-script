@@ -381,6 +381,8 @@ static void unary(bool can_assign) {
   }
 }
 
+/// @brief Generates Bytecode to load a variable with the given name onto the
+/// stack.
 static void named_variable(Token name, bool can_assign) {
   uint8_t get_op, set_op;
   int arg = resolve_local(current, &name);
@@ -436,6 +438,16 @@ static void function(bool can_assign) {
     emit_byte(compiler.upvalues[i].is_local ? 1 : 0);
     emit_byte(compiler.upvalues[i].index);
   }
+}
+
+static void method() {
+  consume(TOKEN_FN, "Expecting method initializer.");
+  consume(TOKEN_ID, "Expecting method name.");
+  uint8_t constant = string_constant(&parser.previous);
+  consume(TOKEN_ASSIGN, "Expecting '=' after method name.");
+  FunctionType type = TYPE_FUNCTION;
+  function(true /* does not matter */);
+  emit_bytes(OP_METHOD, constant);
 }
 
 static void and_(bool can_assign) {
@@ -547,6 +559,8 @@ static int resolve_local(Compiler* compiler, Token* name) {
       return i;
     }
   }
+
+  return -1;
 }
 
 static int resolve_upvalue(Compiler* compiler, Token* name) {
@@ -705,16 +719,26 @@ static void statement_declaration_let() {
   define_variable(global);
 }
 
+// static void statement_declaration_function() {
+//   method()
+// }
+
 static void statement_declaration_class() {
   consume(TOKEN_ID, "Expect class name.");
+  Token class_name = parser.previous;
   uint8_t name_constant = string_constant(&parser.previous);
   declare_local();
 
   emit_bytes(OP_CLASS, name_constant);
   define_variable(name_constant);
 
+  named_variable(class_name, false);
   consume(TOKEN_OBRACE, "Expecting'{' before class body.");
+  while (!check(TOKEN_CBRACE) && !check(TOKEN_EOF)) {
+    method();
+  }
   consume(TOKEN_CBRACE, "Expecting'}' after class body.");
+  emit_byte(OP_POP);
 }
 
 static void statement_print() {
