@@ -6,6 +6,6 @@ def fib(n):
     return (fib(n-1) + fib(n-2))
 
 start = time.time()
-print(fib(40))
+print(fib(35))
 print(time.time()-start)
 

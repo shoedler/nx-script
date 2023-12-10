@@ -69,7 +69,7 @@ int main(int argc, const char* argv[]) {
   init_vm();
 
   // TODO: Remove this
-  run_file("C:\\Projects\\nx-script\\NxVm\\sample.nx");
+  run_file("C:\\Projects\\nx-script\\NxVm\\script_sample.nx");
   return (0);
 
   if (argc == 1) {

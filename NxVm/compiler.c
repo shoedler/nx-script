@@ -192,7 +192,9 @@ static void emit_return() {
   emit_byte(OP_RETURN);
 }
 
-static void init_compiler(Compiler* compiler, FunctionType type) {
+static void init_compiler(Compiler* compiler,
+                          FunctionType type,
+                          ObjString* name) {
   compiler->enclosing = current;
   compiler->function = NULL;
   compiler->type = type;
@@ -202,8 +204,7 @@ static void init_compiler(Compiler* compiler, FunctionType type) {
   current = compiler;
 
   if (type != TYPE_TOPLEVEL) {
-    current->function->name =
-        copy_string(parser.previous.start, parser.previous.length);
+    current->function->name = name;
   }
 
   Local* local = &current->locals[current->local_count++];
@@ -410,9 +411,9 @@ static void variable(bool can_assign) {
   named_variable(parser.previous, can_assign);
 }
 
-static void function(bool can_assign) {
+static void function(bool can_assign, ObjString* name) {
   Compiler compiler;
-  init_compiler(&compiler, TYPE_FUNCTION);
+  init_compiler(&compiler, TYPE_FUNCTION, name);
   begin_scope();
 
   if (!check(TOKEN_LAMBDA)) {
@@ -440,13 +441,20 @@ static void function(bool can_assign) {
   }
 }
 
+static void anonymous_function(bool can_assign) {
+  function(can_assign, copy_string("<Anon>", 9));
+}
+
 static void method() {
   consume(TOKEN_FN, "Expecting method initializer.");
   consume(TOKEN_ID, "Expecting method name.");
   uint8_t constant = string_constant(&parser.previous);
-  consume(TOKEN_ASSIGN, "Expecting '=' after method name.");
-  FunctionType type = TYPE_FUNCTION;
-  function(true /* does not matter */);
+  ObjString* method_name = AS_STRING(
+      current_chunk()
+          ->constants.values[constant]);  // TODO: Optimize to directly get it
+                                          // from string_constant()
+  match(TOKEN_ASSIGN);                    // Just ignore it.
+  function(true /* does not matter */, method_name);
   emit_bytes(OP_METHOD, constant);
 }
 
@@ -497,7 +505,7 @@ ParseRule rules[] = {
     [TOKEN_ELSE] = {NULL, NULL, PREC_NONE},
     [TOKEN_FALSE] = {literal, NULL, PREC_NONE},
     [TOKEN_FOR] = {NULL, NULL, PREC_NONE},
-    [TOKEN_FN] = {function, NULL, PREC_NONE},
+    [TOKEN_FN] = {anonymous_function, NULL, PREC_NONE},
     [TOKEN_LAMBDA] = {NULL, NULL, PREC_NONE},
     [TOKEN_IF] = {NULL, NULL, PREC_NONE},
     [TOKEN_NIL] = {literal, NULL, PREC_NONE},
@@ -719,9 +727,16 @@ static void statement_declaration_let() {
   define_variable(global);
 }
 
-// static void statement_declaration_function() {
-//   method()
-// }
+static void statement_declaration_function() {
+  uint8_t global = parse_variable("Expecting variable name.");
+  ObjString* fn_name = AS_STRING(
+      current_chunk()
+          ->constants.values[global]);  // TODO: Optimize to directly get it
+                                        // from string_constant()
+  match(TOKEN_ASSIGN);                  // Just ignore it.
+  function(false /* can't assign */, fn_name);
+  define_variable(global);
+}
 
 static void statement_declaration_class() {
   consume(TOKEN_ID, "Expect class name.");
@@ -870,6 +885,8 @@ static void statement() {
     begin_scope();
     block();
     end_scope();
+  } else if (match(TOKEN_FN)) {
+    statement_declaration_function();
   } else if (match(TOKEN_LET)) {
     statement_declaration_let();
   } else {
@@ -884,7 +901,7 @@ static void statement() {
 ObjFunction* compile(const char* source) {
   init_scanner(source);
   Compiler compiler;
-  init_compiler(&compiler, TYPE_TOPLEVEL);
+  init_compiler(&compiler, TYPE_TOPLEVEL, NULL);
 
 #ifdef DEBUG_PRINT_CODE
   printf("== Begin compilation ==\n");
