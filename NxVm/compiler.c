@@ -5,7 +5,6 @@
 #include <string.h>
 
 #include "common.h"
-#include "debug.h"
 #include "memory.h"
 #include "scanner.h"
 
@@ -76,7 +75,7 @@ static void error_at(Token* token, const char* message) {
   }
 
   parser.panic_mode = true;
-  fprintf(stderr, "[line %d] ERROR", token->line);
+  fprintf(stderr, "ERROR at [line %d]", token->line);
 
   if (token->type == TOKEN_EOF) {
     fprintf(stderr, " at end");
