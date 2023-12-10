@@ -1,0 +1,18 @@
+fn outer -> {
+  let x = "value"
+  fn middle -> {
+    let inner = fn -> { // TODO: Fix this. access violation when declared as function (fn inner -> { ... })
+      print x
+    }
+
+    print "create inner closure"
+    ret inner;
+  }
+
+  print "return from outer"
+  ret middle;
+}
+
+let mid = outer()
+let in = mid()
+in()

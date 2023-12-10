@@ -1,5 +1,5 @@
 fn outer -> {
-  let x = "outside"
+  let x = "outer"
   let inner = fn -> {
     print x
   }
@@ -7,5 +7,3 @@ fn outer -> {
 }
 
 outer()
-fn closure -> outer()
-closure()

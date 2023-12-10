@@ -8,4 +8,5 @@ let fib = fn n ->
 let start = clock()
 print "Let's calculate fib(10)!"
 let result = fib(10)
+print result
 print clock() - start

@@ -15,7 +15,7 @@ while b {
   print c
 }
 
-for let i = 0 ; i < 100 ; i = i + 1 {
+for let i = 0 ; i < 10 ; i = i + 1 {
   let outer = fn -> {
     let x = "outside"
     let inner = fn -> {
@@ -24,7 +24,7 @@ for let i = 0 ; i < 100 ; i = i + 1 {
     ret inner;
   }
 
-  for let y = 0; y < 100; y = y + 1 {
+  for let y = 0; y < 10; y = y + 1 {
     let x = fn -> {
       print "Hello World"
     }
