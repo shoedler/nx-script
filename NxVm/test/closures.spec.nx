@@ -1,0 +1,11 @@
+fn outer -> {
+  let x = "outside"
+  let inner = fn -> {
+    print x
+  }
+  inner()
+}
+
+outer()
+fn closure -> outer()
+closure()
