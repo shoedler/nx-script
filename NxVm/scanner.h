@@ -48,6 +48,7 @@ typedef enum {
   TOKEN_FN,        // 'fn'
   TOKEN_RETURN,    // 'ret'
   TOKEN_LET,       // 'let'
+  TOKEN_CTOR,      // 'ctor'
 
   TOKEN_ID,      // [a-zA-Z_] [a-zA-Z_0-9]*
   TOKEN_NUMBER,  // [0-9]+  or [0-9]+ '.' [0-9]* | '.' [0-9]+

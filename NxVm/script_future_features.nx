@@ -4,7 +4,10 @@
 
 // TODO: Add support for pure objs
 // TODO: Add support for sequences
+// TODO: Add support for match
+// TODO: Add support for tuples
 
+// Seq
 [] + "Strtoseq" = ["S", "t", "r", "t", "o", "s", "e", "q"]
 [] // <- Seq
 [1,2,3] + [4,5,6] = [1,2,3,4,5,6]
@@ -12,6 +15,7 @@
 
 let u = [1,2,3] each(print) map(fn x -> x = x+1) tap(let x) map(fn x -> x = x+1)
 
+// Match
 let i = match [1,2,3] {
   [1,2,3] -> "In match context, we don't really compare references",
   [_,2,3] -> "Don't care about the first value, but it is followed by 2,3",
@@ -28,3 +32,7 @@ let i = match [1,2,3] {
   some(@str) -> "Some element is a string",
   _ -> "Default case"
 }
+
+// Tuples
+let t = (1,2,3) // <- Tuple
+fn x -> q = ret (q, q+1) // <- Tuple

@@ -134,6 +134,8 @@ static TokenType identifier_type() {
             return check_keyword(2, 1, "s", TOKEN_CLASS);
           case 'o':
             return check_keyword(2, 6, "ntinue", TOKEN_CONTINUE);
+          case 't':
+            return check_keyword(2, 2, "or", TOKEN_CTOR);
         }
       }
     }

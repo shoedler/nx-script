@@ -55,15 +55,15 @@
 // -----------------------------------------
 // Functions
 // -----------------------------------------
-let a = fn -> print "a" // Anonymous Fn
-let a_args = fn x,y,z -> print x + y + z // Anonymous Fn
-fn b -> print "b" // Named Fn
-fn b_args x,y,z -> print x + y + z // Named Fn
+// let a = fn -> print "a" // Anonymous Fn
+// let a_args = fn x,y,z -> print x + y + z // Anonymous Fn
+// fn b -> print "b" // Named Fn
+// fn b_args x,y,z -> print x + y + z // Named Fn
 
-print a
-print a_args
-print b
-print b_args
+// print a
+// print a_args
+// print b
+// print b_args
 
 // // -----------------------------------------
 // // Functions can be recursive
@@ -117,3 +117,31 @@ print b_args
 // let res = scone.topping("berries", "cream")
 // print res
 // print scone.topping
+
+cls Nested {
+  fn method -> {
+    let function = fn -> {
+      print this
+    }
+
+    function()
+  }
+}
+
+Nested().method()
+
+cls CoffeeMaker {
+  ctor = coffee -> {
+    this.coffee = coffee
+  }
+
+  fn brew -> {
+    print "Enjoy your cup of " + this.coffee
+
+    // No reusing the grounds!
+    this.coffee = nil
+  }
+}
+
+let maker = CoffeeMaker("coffee and chicory")
+maker.brew()

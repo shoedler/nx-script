@@ -64,12 +64,19 @@ void init_vm() {
   init_hashtable(&vm.globals);
   init_hashtable(&vm.strings);
 
+  vm.init_string = NULL;
+  vm.init_string = copy_string(
+      CLASS_CONSTRUCTOR_KEYWORD,
+      CLASS_CONSTRUCTOR_KEYWORD_LENGTH);  // Might trigger GC, that's why we
+                                          // need to initialize it to NULL first
+
   define_native("clock", native_clock);
 }
 
 void free_vm() {
   free_hashtable(&vm.globals);
   free_hashtable(&vm.strings);
+  vm.init_string = NULL;
   free_objects();
 }
 
@@ -111,11 +118,21 @@ static bool call_value(Value callee, int arg_count) {
     switch (OBJ_TYPE(callee)) {
       case OBJ_BOUND_METHOD: {
         ObjBoundMethod* bound = AS_BOUND_METHOD(callee);
+        // Put the receiver in slot 0, so we can access "this"
+        vm.stack_top[-arg_count - 1] = bound->receiver;
         return call(bound->method, arg_count);
       }
       case OBJ_CLASS: {
         ObjClass* klass = AS_CLASS(callee);
         vm.stack_top[-arg_count - 1] = OBJ_VAL(new_instance(klass));
+        Value initializer;
+
+        if (hashtable_get(&klass->methods, vm.init_string, &initializer)) {
+          return call(AS_CLOSURE(initializer), arg_count);
+        } else if (arg_count != 0) {
+          runtime_error("Expected 0 arguments but got %d.", arg_count);
+          return false;
+        }
         return true;
       }
       case OBJ_CLOSURE:

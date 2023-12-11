@@ -8,6 +8,8 @@
 
 #define FRAMES_MAX 64
 #define STACK_MAX (FRAMES_MAX * UINT8_COUNT)
+#define CLASS_CONSTRUCTOR_KEYWORD "ctor"
+#define CLASS_CONSTRUCTOR_KEYWORD_LENGTH (sizeof(CLASS_CONSTRUCTOR_KEYWORD) - 1)
 
 typedef struct {
   ObjClosure* closure;
@@ -25,6 +27,7 @@ typedef struct {
   Value* stack_top;
   HashTable globals;
   HashTable strings;
+  ObjString* init_string;
   ObjUpvalue* open_upvalues;
   Obj* objects;
 

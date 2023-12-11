@@ -47,7 +47,12 @@ typedef struct {
   bool is_local;
 } Upvalue;
 
-typedef enum { TYPE_FUNCTION, TYPE_TOPLEVEL } FunctionType;
+typedef enum {
+  TYPE_FUNCTION,
+  TYPE_CONSTRUCTOR,
+  TYPE_METHOD,
+  TYPE_TOPLEVEL
+} FunctionType;
 
 typedef struct Compiler {
   struct Compiler* enclosing;
@@ -60,8 +65,13 @@ typedef struct Compiler {
   int scope_depth;
 } Compiler;
 
+typedef struct ClassCompiler {
+  struct ClassCompiler* enclosing;
+} ClassCompiler;
+
 Parser parser;
 Compiler* current = NULL;
+ClassCompiler* current_class = NULL;
 Chunk* compiling_chunk;
 
 static Chunk* current_chunk() {
@@ -186,7 +196,12 @@ static void emit_constant(Value value) {
 }
 
 static void emit_return() {
-  emit_byte(OP_NIL);
+  if (current->type == TYPE_CONSTRUCTOR) {
+    emit_bytes(OP_GET_LOCAL, 0);  // Return class instance, e.g. 'this'.
+  } else {
+    emit_byte(OP_NIL);
+  }
+
   emit_byte(OP_RETURN);
 }
 
@@ -208,8 +223,14 @@ static void init_compiler(Compiler* compiler,
   Local* local = &current->locals[current->local_count++];
   local->depth = 0;
   local->is_captured = false;
-  local->name.start = "";  // Not accessible.
-  local->name.length = 0;
+
+  if (type != TYPE_FUNCTION) {
+    local->name.start = "this";
+    local->name.length = 4;
+  } else {
+    local->name.start = "";  // Not accessible.
+    local->name.length = 0;
+  }
 }
 
 static ObjFunction* end_compiler() {
@@ -409,9 +430,9 @@ static void variable(bool can_assign) {
   named_variable(parser.previous, can_assign);
 }
 
-static void function(bool can_assign, ObjString* name) {
+static void function(bool can_assign, FunctionType type, ObjString* name) {
   Compiler compiler;
-  init_compiler(&compiler, TYPE_FUNCTION, name);
+  init_compiler(&compiler, type, name);
   begin_scope();
 
   if (!check(TOKEN_LAMBDA)) {
@@ -440,7 +461,8 @@ static void function(bool can_assign, ObjString* name) {
 }
 
 static void anonymous_function(bool can_assign) {
-  function(can_assign, copy_string("<Anon>", 9));
+  function(can_assign /* does not matter */, TYPE_FUNCTION,
+           copy_string("<Anon>", 9));
 }
 
 static void method() {
@@ -449,8 +471,23 @@ static void method() {
   uint8_t constant = string_constant(&parser.previous);
   ObjString* method_name =
       copy_string(parser.previous.start, parser.previous.length);
+
   match(TOKEN_ASSIGN);  // Just ignore it.
-  function(true /* does not matter */, method_name);
+
+  function(false /* does not matter */, TYPE_METHOD, method_name);
+  emit_bytes(OP_METHOD, constant);
+}
+
+static void constructor() {
+  consume(TOKEN_CTOR, "Expecting constructor.");
+  uint8_t constant = string_constant(&parser.previous);
+  ObjString* ctor_name =
+      copy_string(parser.previous.start,
+                  parser.previous.length);  // TODO: Maybe preload this?
+
+  match(TOKEN_ASSIGN);  // Just ignore it.
+
+  function(false /* does not matter */, TYPE_CONSTRUCTOR, ctor_name);
   emit_bytes(OP_METHOD, constant);
 }
 
@@ -472,6 +509,15 @@ static void or_(bool can_assign) {
 
   parse_precedence(PREC_OR);
   patch_jump(end_jump);
+}
+
+static void this_(bool can_assign) {
+  if (current_class == NULL) {
+    error("Can't use 'this' outside of a class.");
+    return;
+  }
+
+  variable(false);  // Can't assign to 'this'.
 }
 
 ParseRule rules[] = {
@@ -509,7 +555,7 @@ ParseRule rules[] = {
     [TOKEN_PRINT] = {NULL, NULL, PREC_NONE},
     [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
     [TOKEN_SUPER] = {NULL, NULL, PREC_NONE},
-    [TOKEN_THIS] = {NULL, NULL, PREC_NONE},
+    [TOKEN_THIS] = {this_, NULL, PREC_NONE},
     [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
     [TOKEN_LET] = {NULL, NULL, PREC_NONE},
     [TOKEN_WHILE] = {NULL, NULL, PREC_NONE},
@@ -729,7 +775,7 @@ static void statement_declaration_function() {
       copy_string(parser.previous.start, parser.previous.length);
 
   match(TOKEN_ASSIGN);  // Just ignore it.
-  function(false /* can't assign */, fn_name);
+  function(false /* does not matter */, TYPE_FUNCTION, fn_name);
   define_variable(global);
 }
 
@@ -742,10 +788,25 @@ static void statement_declaration_class() {
   emit_bytes(OP_CLASS, name_constant);
   define_variable(name_constant);
 
+  ClassCompiler class_compiler;
+  class_compiler.enclosing = current_class;
+  current_class = &class_compiler;
+
   named_variable(class_name, false);
+
+  // Body
+  bool has_ctor = false;
   consume(TOKEN_OBRACE, "Expecting'{' before class body.");
   while (!check(TOKEN_CBRACE) && !check(TOKEN_EOF)) {
-    method();
+    if (check(TOKEN_CTOR)) {
+      if (has_ctor) {
+        error("Can't have more than one constructor.");
+      }
+      constructor();
+      has_ctor = true;
+    } else {
+      method();
+    }
   }
   consume(TOKEN_CBRACE, "Expecting'}' after class body.");
   emit_byte(OP_POP);
@@ -792,6 +853,10 @@ static void statement_return() {
   if (match(TOKEN_SCOLON)) {
     emit_return();
   } else {
+    if (current->type == TYPE_CONSTRUCTOR) {
+      error("Can't return a value from a constructor.");
+    }
+
     expression();
     consume(TOKEN_SCOLON, "Expecting ';' after return value.");
     emit_byte(OP_RETURN);
