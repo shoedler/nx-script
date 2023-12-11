@@ -134,7 +134,7 @@
     <ClCompile Include="debug.c" />
     <ClCompile Include="hashtable.c" />
     <ClCompile Include="memory.c" />
-    <ClCompile Include="NxVm.c" />
+    <ClCompile Include="main.c" />
     <ClCompile Include="object.c" />
     <ClCompile Include="scanner.c" />
     <ClCompile Include="test.c" />
