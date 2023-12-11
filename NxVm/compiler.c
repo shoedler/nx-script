@@ -448,11 +448,9 @@ static void method() {
   consume(TOKEN_FN, "Expecting method initializer.");
   consume(TOKEN_ID, "Expecting method name.");
   uint8_t constant = string_constant(&parser.previous);
-  ObjString* method_name = AS_STRING(
-      current_chunk()
-          ->constants.values[constant]);  // TODO: Optimize to directly get it
-                                          // from string_constant()
-  match(TOKEN_ASSIGN);                    // Just ignore it.
+  ObjString* method_name =
+      copy_string(parser.previous.start, parser.previous.length);
+  match(TOKEN_ASSIGN);  // Just ignore it.
   function(true /* does not matter */, method_name);
   emit_bytes(OP_METHOD, constant);
 }
@@ -728,11 +726,10 @@ static void statement_declaration_let() {
 
 static void statement_declaration_function() {
   uint8_t global = parse_variable("Expecting variable name.");
-  ObjString* fn_name = AS_STRING(
-      current_chunk()
-          ->constants.values[global]);  // TODO: Optimize to directly get it
-                                        // from string_constant()
-  match(TOKEN_ASSIGN);                  // Just ignore it.
+  ObjString* fn_name =
+      copy_string(parser.previous.start, parser.previous.length);
+
+  match(TOKEN_ASSIGN);  // Just ignore it.
   function(false /* can't assign */, fn_name);
   define_variable(global);
 }
