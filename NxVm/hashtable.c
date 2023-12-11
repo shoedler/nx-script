@@ -1,9 +1,5 @@
-#include <stdlib.h>
-#include <string.h>
-
 #include "hashtable.h"
 #include "memory.h"
-#include "object.h"
 #include "value.h"
 
 void init_hashtable(HashTable* table) {

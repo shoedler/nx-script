@@ -1,7 +1,6 @@
 #include "object.h"
 
 #include <stdio.h>
-#include <string.h>
 
 #include "hashtable.h"
 #include "memory.h"
@@ -157,7 +156,7 @@ void print_object(Value value) {
       print_function(AS_FUNCTION(value));
       break;
     case OBJ_INSTANCE:
-      printf("%s instance", AS_INSTANCE(value)->klass->name->chars);
+      printf("[%s Instance]", AS_INSTANCE(value)->klass->name->chars);
       break;
     case OBJ_NATIVE:
       printf("[Native Fn]");
