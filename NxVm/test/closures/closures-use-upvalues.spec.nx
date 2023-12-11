@@ -1,7 +1,7 @@
 fn outer -> {
   let x = "value"
   fn middle -> {
-    let inner = fn -> { // TODO: Fix this. access violation when declared as function (fn inner -> { ... })
+    fn inner -> { 
       print x
     }
 

@@ -43,7 +43,7 @@
             "patterns": [
                 {
                     "name": "constant.language.NxScript",
-                    "match": "\\b(nil|true|false)\\b"
+                    "match": "\\b(nil|true|false|this)\\b"
                 }
             ]
         },
@@ -51,7 +51,7 @@
             "patterns": [
                 {
                     "name": "keyword.control.NxScript",
-                    "match": "\\b(if|for|else|while|fn|ret|print|or|and|cls)\\b"
+                    "match": "\\b(if|for|else|while|fn|ret|print|or|and|cls|ctor)\\b"
                 },
                 {
                     "name": "storage.type.NxScript",

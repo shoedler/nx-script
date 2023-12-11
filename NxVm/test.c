@@ -133,7 +133,7 @@ const char** compare_strings_by_line(const char* a,
   const char** diff = malloc(sizeof(char*) * (line_count_a + 1));
   if (diff == NULL) {
     INTERNAL_ERROR("Not enough memory to allocate diff array");
-    exit(74);
+    exit(70);
   }
 
   // Start tokenizing and comparing
@@ -141,9 +141,6 @@ const char** compare_strings_by_line(const char* a,
   line_a = strtok_s(temp_a, "\r\n", &context_a);
   line_b = strtok_s(temp_b, "\r\n", &context_b);
   int line_no = 0;
-
-  // TODO: Add warning if b has more lines than a
-  // TODO: Add warning a has no lines
 
   while (line_a != NULL) {
     line_no++;
@@ -158,7 +155,7 @@ const char** compare_strings_by_line(const char* a,
           1024);  // Allocating a fixed size, should be enough for most lines
       if (diff_line == NULL) {
         INTERNAL_ERROR("Not enough memory to allocate diff line");
-        exit(74);
+        exit(70);
       }
       sprintf(diff_line,
               "on line %d " ANSI_GREEN_STR("%s") " was " ANSI_RED_STR("%s"),
@@ -171,8 +168,20 @@ const char** compare_strings_by_line(const char* a,
     line_b = strtok_s(NULL, "\r\n", &context_b);
   }
 
-  // Finalize the array
-  diff[diff_count] = NULL;
+  // Warn if b has more lines than a
+  if (line_b != NULL) {
+    printf(ANSI_YELLOW_STR("[OutfileIsLonger] "));
+  }
+
+  // Warn if a is empty
+  if (line_count_a == 0 && _strcmpi(a, "") == 0) {
+    printf(ANSI_YELLOW_STR("[ExpectFileEmpty] "));
+  }
+
+  if (line_no)
+
+    // Finalize the array
+    diff[diff_count] = NULL;
   *num_diff = diff_count;
 
   // Clean up
@@ -259,19 +268,33 @@ bool run_test(const wchar_t* path) {
     return passed;
   }
 
+  bool allow_runtime_errors = wcsstr(path, L".ire.") != NULL;
+  bool allow_compile_errors = wcsstr(path, L".ice.") != NULL;
+
   switch (result) {
     case INTERPRET_OK:
       printf(ANSI_GREEN_STR("Passed!\n"));
       break;
-    case INTERPRET_COMPILE_ERROR:
+    case INTERPRET_COMPILE_ERROR: {
+      if (allow_compile_errors) {
+        printf(ANSI_GREEN_STR("Passed with Compile Error!\n"));
+        break;
+      }
       passed = false;
-      printf(ANSI_RED_STR("Failed: Compile Error!\n"));
+      printf(ANSI_RED_STR("Failed with Compile Error!\n"));
       break;
-    case INTERPRET_RUNTIME_ERROR:
+    }
+    case INTERPRET_RUNTIME_ERROR: {
+      if (allow_runtime_errors) {
+        printf(ANSI_GREEN_STR("Passed with Runtime Error!\n"));
+        break;
+      }
       passed = false;
-      printf(ANSI_RED_STR("Failed: Runtime Error!\n"));
+      printf(ANSI_RED_STR("Failed with Runtime Error!\n"));
       break;
+    }
     default:
+      passed = false;
       printf(ANSI_RED_STR("Failed: Internal Error!\n"));
       INTERNAL_ERROR("Unhandled InterpretResult");
       break;
@@ -294,13 +317,13 @@ void run_tests(const wchar_t* path) {
 
   if (count == 0) {
     WINTERNAL_ERROR(L"No test files found in \"%s\"", path);
-    exit(74);
+    exit(70);
   }
 
   if (count >= max_files) {
     WINTERNAL_ERROR(L"Limit of %d test files reached",
                     max_files);  // TODO: Make warning instead of error
-    exit(74);
+    exit(70);
   }
 
   printf("Running %d tests\n", count);
