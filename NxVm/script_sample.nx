@@ -128,7 +128,7 @@ cls Nested {
   }
 }
 
-Nested().method()
+Nested().method() // Prints "Nested Instance"
 
 cls CoffeeMaker {
   ctor = coffee -> {
@@ -144,4 +144,5 @@ cls CoffeeMaker {
 }
 
 let maker = CoffeeMaker("coffee and chicory")
-maker.brew()
+maker.brew() 
+// maker.brew() // Error

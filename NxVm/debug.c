@@ -59,6 +59,16 @@ static int constant_instruction(const char* name, Chunk* chunk, int offset) {
   return offset + 2;
 }
 
+static int invoke_instruction(const char* name, Chunk* chunk, int offset) {
+  uint8_t constant = chunk->code[offset + 1];
+  uint8_t arg_count = chunk->code[offset + 2];
+  printf("%-16s (%d args) %4d '", name, arg_count, constant);
+  print_value(chunk->constants.values[constant]);
+  printf("'\n");
+
+  return offset + 3;
+}
+
 int disassemble_instruction(Chunk* chunk, int offset) {
   printf(ANSI_MAGENTA_STR("%04d "), offset);
 
