@@ -1,9 +1,8 @@
-#include "object.h"
-
 #include <stdio.h>
 
 #include "hashtable.h"
 #include "memory.h"
+#include "object.h"
 #include "value.h"
 #include "vm.h"
 

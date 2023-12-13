@@ -28,7 +28,7 @@ static void debug_print_function(ObjFunction* function) {
     PRINT_VALUE_STR("Toplevel");
     return;
   }
-  char* fn_str[VALUE_STR_LEN];
+  const char* fn_str[VALUE_STR_LEN];
   sprintf(fn_str, "Fn %s, arity %d", function->name->chars, function->arity);
   PRINT_VALUE_STR(fn_str);
 }
@@ -128,6 +128,7 @@ static int jump_instruction(const char* name,
   PRINT_OPCODE(name);
   PRINT_NO_INT();
   PRINT_VALUE_STR(jmp_str);
+  return offset + 3;
 }
 
 static int constant_instruction(const char* name, Chunk* chunk, int offset) {

@@ -32,7 +32,6 @@ void scan_tests_dir(const wchar_t* path,
 
   // Find the first file in the directory.
   find_handle = FindFirstFile(search_path, &find_file_data);
-
   if (find_handle == INVALID_HANDLE_VALUE) {
     return;  // Directory not found or empty
   }
@@ -67,6 +66,7 @@ void scan_tests_dir(const wchar_t* path,
             (*count)++;
           }
         } else {
+          FindClose(find_handle);
           WINTERNAL_ERROR(
               L"Could not find corresponding .expect.nx file for \"%s\". "
               L"Ignoring test.",
@@ -115,12 +115,22 @@ const char** compare_strings_by_line(const char* a,
                                      const char* b,
                                      int* num_diff) {
   // Temporary variables for processing
-  char* temp_a = strdup(a);
-  char* temp_b = strdup(b);
   char* line_a;
   char* line_b;
   char* context_a = NULL;
   char* context_b = NULL;
+
+  char* temp_a = strdup(a);
+  if (temp_a == NULL) {
+    INTERNAL_ERROR("Not enough memory to allocate temp_a");
+    exit(70);
+  }
+
+  char* temp_b = strdup(b);
+  if (temp_b == NULL) {
+    INTERNAL_ERROR("Not enough memory to allocate temp_b");
+    exit(70);
+  }
 
   // Count the number of lines in a for allocating the array
   int line_count_a = 0;
@@ -240,7 +250,7 @@ bool run_test(const wchar_t* path) {
   // Compare output with expect
   wchar_t expect_filepath[MAX_PATH];
   _stprintf(expect_filepath, _T("%s%s"), path, L".expect");
-  wchar_t* out_filepath[MAX_PATH];
+  wchar_t out_filepath[MAX_PATH];
   _stprintf(out_filepath, _T("%s%s"), path, L".out");
 
   char* expect = read_file(expect_filepath);
