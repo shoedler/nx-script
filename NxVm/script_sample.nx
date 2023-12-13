@@ -147,25 +147,61 @@
 // maker.brew() 
 // // maker.brew() // Error
 
+// // -----------------------------------------
+// // Base Classes
+// // -----------------------------------------
+// cls A {
+//   fn method -> {
+//     print "A"
+//   }
+// }
+
+// while false {
+//   let a = nil
+// }
+
+// cls B : A {
+//   fn method -> {
+//     let closure = base.method
+//     closure() // Prints "A"
+//   }
+// }
+
+// let b = B()
+// b.method()
+
 // -----------------------------------------
-// Base Classes
+// Benchmarks
 // -----------------------------------------
-cls A {
-  fn method -> {
-    print "A"
+cls Zoo {
+  ctor -> {
+    this.aardvark = 1
+    this.baboon   = 1
+    this.cat      = 1
+    this.donkey   = 1
+    this.elephant = 1
+    this.fox      = 1
   }
+  fn ant    -> { ret this.aardvark; }
+  fn banana -> { ret this.baboon; }
+  fn tuna   -> { ret this.cat; }
+  fn hay    -> { ret this.donkey; }
+  fn grass  -> { ret this.elephant; }
+  fn mouse  -> { ret this.fox; }
 }
 
-while false {
-  let a = nil
+let zoo = Zoo()
+let sum = 0
+let start = clock()
+
+while (sum < 100000000) {
+  sum = sum + zoo.ant()
+            + zoo.banana()
+            + zoo.tuna()
+            + zoo.hay()
+            + zoo.grass()
+            + zoo.mouse()
 }
 
-cls B : A {
-  fn method -> {
-    let closure = base.method
-    closure() // Prints "A"
-  }
-}
-
-let b = B()
-b.method()
+print clock() - start
+print sum
