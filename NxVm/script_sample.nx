@@ -192,11 +192,12 @@ cls Zoo {
 
 let zoo = Zoo()
 let sum = 0
+let duration = 5
 let batches = 0
 
 let start = clock()
 let i = 0
-while clock() < start + 5 {
+while clock() < start + duration {
   while i < 10000 {
     sum = sum + zoo.ant()
             + zoo.banana()
@@ -205,9 +206,8 @@ while clock() < start + 5 {
             + zoo.grass()
             + zoo.mouse()
     i = i + 1
-    batches = batches + 1
   }
-
+  batches = batches + 1
   i = 0
 }
 
@@ -215,3 +215,6 @@ print "Sum: "
 print sum
 print "Batches of 10000: "
 print batches
+print "In"
+print duration
+print "seconds"
