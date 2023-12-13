@@ -129,9 +129,9 @@ static TokenType identifier_type() {
       if (scanner.current - scanner.start > 1) {
         switch (scanner.start[1]) {
           case 'a':
-            return check_keyword(2, 3, "se", TOKEN_BASE);
+            return check_keyword(2, 2, "se", TOKEN_BASE);
           case 'r':
-            return check_keyword(2, 2, "eak", TOKEN_BREAK);
+            return check_keyword(2, 3, "eak", TOKEN_BREAK);
         }
       }
     }
