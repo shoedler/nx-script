@@ -135,12 +135,10 @@ ObjString* copy_string(const char* chars, int length) {
 
 static void print_function(ObjFunction* function) {
   if (function->name == NULL) {
-    printf("Toplevel Fn");
+    printf("[Toplevel Fn]");
     return;
   }
-  char* fn_str[25];
-  sprintf(fn_str, "Fn %s, arity %d", function->name->chars, function->arity);
-  printf("%-25.25s", fn_str);
+  printf("[Fn %s, arity %d]", function->name->chars, function->arity);
 }
 
 void print_object(Value value) {
@@ -158,16 +156,16 @@ void print_object(Value value) {
       print_function(AS_FUNCTION(value));
       break;
     case OBJ_INSTANCE:
-      printf("%s Instance", AS_INSTANCE(value)->klass->name->chars);
+      printf("[Instance of %s]", AS_INSTANCE(value)->klass->name->chars);
       break;
     case OBJ_NATIVE:
-      printf("Native Fn");
+      printf("[Native Fn]");
       break;
     case OBJ_STRING:
       printf("%s", AS_CSTRING(value));
       break;
     case OBJ_UPVALUE:
-      printf("Upvalue");
+      printf("[Upvalue]");
       break;
   }
 }

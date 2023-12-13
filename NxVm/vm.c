@@ -290,7 +290,7 @@ static InterpretResult run() {
         &frame->closure->function->chunk,
         (int)(frame->ip - frame->closure->function->chunk.code));
 
-    printf(ANSI_CYAN_STR("Stack "));
+    printf(ANSI_CYAN_STR(" Stack "));
     for (Value* slot = vm.stack; slot < vm.stack_top; slot++) {
       printf(ANSI_CYAN_STR("["));
       print_value(*slot);

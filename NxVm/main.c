@@ -39,6 +39,7 @@ static void run_file(const wchar_t* path) {
       exit(65);
       break;
     case INTERPRET_RUNTIME_ERROR:
+        free_vm();
       exit(70);
       break;
     default:

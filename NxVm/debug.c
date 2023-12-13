@@ -1,25 +1,95 @@
 #include "debug.h"
-
 #include <stdio.h>
 #include "object.h"
 #include "value.h"
 
+#define VALUE_STR_LEN 25
+
 // 5 chars wide
 #define PRINT_OFFSET(_offset) printf(ANSI_MAGENTA_STR("%04d "), _offset)
+
 // 5 chars wide
 #define PRINT_LINE(_line) printf(ANSI_BLUE_STR("%04d "), _line)
 #define PRINT_SAME_LINE() printf(ANSI_BLUE_STR("   | "))
+
 // 16 chars wide
 #define PRINT_OPCODE(_name) printf(ANSI_GREEN_STR("%-16.16s"), _name)
+
 // 6 chars wide
 #define PRINT_INT(_int) printf(ANSI_RED_STR(" %4d "), _int)
 #define PRINT_NO_INT() printf(ANSI_RED_STR("      "))
-// 36 chars wide
-#define PRINT_VALUE_STR(_str) printf("%-36.36s", _str)
 
-COMBAK: We need to be able to be able to get the value string via e.g. "value_to_string".
-Then use this function within print_value, _object, _function etc. to get a nice readout for the vms internal print statement.
-Then use value_to_string in here in combination with PRINT_VALUE_STR to get a nicely indented and truncated readout for the debugger
+// VALUE_STR_LEN chars wide
+#define PRINT_VALUE_STR(_str) \
+  printf("%-*.*s", VALUE_STR_LEN, VALUE_STR_LEN, _str)
+
+static void debug_print_function(ObjFunction* function) {
+  if (function->name == NULL) {
+    PRINT_VALUE_STR("Toplevel");
+    return;
+  }
+  char* fn_str[VALUE_STR_LEN];
+  sprintf(fn_str, "Fn %s, arity %d", function->name->chars, function->arity);
+  PRINT_VALUE_STR(fn_str);
+}
+
+static void debug_print_object(Value value) {
+  switch (OBJ_TYPE(value)) {
+    case OBJ_BOUND_METHOD:
+      debug_print_function(AS_BOUND_METHOD(value)->method->function);
+      break;
+    case OBJ_CLASS:
+      const char* class_str[VALUE_STR_LEN];
+      sprintf(class_str, "Cls %s", AS_CLASS(value)->name->chars);
+      PRINT_VALUE_STR(class_str);
+      break;
+    case OBJ_CLOSURE:
+      debug_print_function(AS_CLOSURE(value)->function);
+      break;
+    case OBJ_FUNCTION:
+      debug_print_function(AS_FUNCTION(value));
+      break;
+    case OBJ_INSTANCE:
+      const char* instance_str[VALUE_STR_LEN];
+      sprintf(instance_str, "Instance %s",
+              AS_INSTANCE(value)->klass->name->chars);
+      PRINT_VALUE_STR(instance_str);
+      break;
+    case OBJ_NATIVE:
+      PRINT_VALUE_STR("Native Fn");
+      break;
+    case OBJ_STRING:
+      const char* str_str[VALUE_STR_LEN];
+      sprintf(str_str, "%s", AS_CSTRING(value));
+      PRINT_VALUE_STR(str_str);
+      break;
+    case OBJ_UPVALUE:
+      PRINT_VALUE_STR("Upvalue");
+      break;
+  }
+}
+
+void debug_print_value(Value value) {
+  switch (value.type) {
+    case VAL_BOOL:
+      AS_BOOL(value) ? PRINT_VALUE_STR("true") : PRINT_VALUE_STR("false");
+      break;
+    case VAL_NIL:
+      PRINT_VALUE_STR("nil");
+      break;
+    case VAL_NUMBER: {
+      static char str[VALUE_STR_LEN];
+      sprintf(str, "%g", AS_NUMBER(value));
+      PRINT_VALUE_STR(str);
+      break;
+    }
+    case VAL_OBJ:
+      return debug_print_object(value);
+    default:
+      INTERNAL_ERROR("Unhandled value type: %d", value.type);
+      break;
+  }
+}
 
 void disassemble_chunk(Chunk* chunk, const char* name) {
   printf("\n== Chunk: %s ==\n", name);
@@ -64,7 +134,7 @@ static int constant_instruction(const char* name, Chunk* chunk, int offset) {
   uint8_t constant = chunk->code[offset + 1];
   PRINT_OPCODE(name);
   PRINT_INT(constant);
-  print_value(chunk->constants.values[constant]);
+  debug_print_value(chunk->constants.values[constant]);
   return offset + 2;
 }
 
@@ -73,13 +143,13 @@ static int closure_instruction(const char* name, Chunk* chunk, int offset) {
   uint8_t constant = chunk->code[offset++];
   PRINT_OPCODE(name);
   PRINT_INT(constant);
-  print_value(chunk->constants.values[constant]);
+  debug_print_value(chunk->constants.values[constant]);
 
   ObjFunction* function = AS_FUNCTION(chunk->constants.values[constant]);
   for (int j = 0; j < function->upvalue_count; j++) {
     int is_local = chunk->code[offset++];
     int index = chunk->code[offset++];
-    char* upval_str[20];
+    char* upval_str[VALUE_STR_LEN];
     sprintf(upval_str, "%s %d", is_local ? "local" : "upvalue", index);
 
     printf("\n");
@@ -98,8 +168,10 @@ static int invoke_instruction(const char* name, Chunk* chunk, int offset) {
   uint8_t arg_count = chunk->code[offset + 2];
   PRINT_OPCODE(name);
   PRINT_INT(constant);
-  print_value(chunk->constants.values[constant]);
-  printf(", %d args", arg_count);
+  const char* method_str[VALUE_STR_LEN];
+  sprintf(method_str, "%s, %d args",
+          AS_STRING(chunk->constants.values[constant])->chars, arg_count);
+  PRINT_VALUE_STR(method_str);
 
   return offset + 3;
 }

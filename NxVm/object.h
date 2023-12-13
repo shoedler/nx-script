@@ -104,8 +104,9 @@ ObjFunction* new_function();
 ObjNative* new_native(NativeFn function);
 ObjUpvalue* new_upvalue(Value* slot);
 ObjString* copy_string(const char* chars, int length);
-void print_object(Value value);
 ObjString* take_string(char* chars, int length);
+
+void print_object(Value value);
 
 static inline bool is_obj_type(Value value, ObjType type) {
   return IS_OBJ(value) && AS_OBJ(value)->type == type;
