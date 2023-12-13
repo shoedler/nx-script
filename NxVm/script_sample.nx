@@ -118,31 +118,54 @@
 // print res
 // print scone.topping
 
-cls Nested {
+// cls Nested {
+//   fn method -> {
+//     let function = fn -> {
+//       print this
+//     }
+
+//     function()
+//   }
+// }
+
+// Nested().method() // Prints "Nested Instance"
+
+// cls CoffeeMaker {
+//   ctor = coffee -> {
+//     this.coffee = coffee
+//   }
+
+//   fn brew -> {
+//     print "Enjoy your cup of " + this.coffee
+
+//     // No reusing the grounds!
+//     this.coffee = nil
+//   }
+// }
+
+// let maker = CoffeeMaker("coffee and chicory")
+// maker.brew() 
+// // maker.brew() // Error
+
+// -----------------------------------------
+// Base Classes
+// -----------------------------------------
+cls A {
   fn method -> {
-    let function = fn -> {
-      print this
-    }
-
-    function()
+    print "A"
   }
 }
 
-Nested().method() // Prints "Nested Instance"
+while false {
+  let a = nil
+}
 
-cls CoffeeMaker {
-  ctor = coffee -> {
-    this.coffee = coffee
-  }
-
-  fn brew -> {
-    print "Enjoy your cup of " + this.coffee
-
-    // No reusing the grounds!
-    this.coffee = nil
+cls B : A {
+  fn method -> {
+    let closure = base.method
+    closure() // Prints "A"
   }
 }
 
-let maker = CoffeeMaker("coffee and chicory")
-maker.brew() 
-// maker.brew() // Error
+let b = B()
+b.method()

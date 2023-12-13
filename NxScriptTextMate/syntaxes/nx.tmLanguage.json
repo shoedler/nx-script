@@ -43,7 +43,7 @@
             "patterns": [
                 {
                     "name": "constant.language.NxScript",
-                    "match": "\\b(nil|true|false|this)\\b"
+                    "match": "\\b(nil|true|false|this|base)\\b"
                 }
             ]
         },

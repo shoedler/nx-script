@@ -61,10 +61,10 @@ void usage() {
 int wmain(int argc, wchar_t* argv[]) {
   // TODO: Remove this
   argc = 3;
-  argv[1] = L"test";
-  argv[2] = L"C:\\Projects\\nx-script\\NxVm\\test";
-  // argv[1] = L"run";
-  // argv[2] = L"C:\\Projects\\nx-script\\NxVm\\script_sample.nx";
+  // argv[1] = L"test";
+  // argv[2] = L"C:\\Projects\\nx-script\\NxVm\\test";
+  argv[1] = L"run";
+  argv[2] = L"C:\\Projects\\nx-script\\NxVm\\script_sample.nx";
 
   if (argc == 2 && wcscmp(argv[1], L"repl") == 0) {
     repl();

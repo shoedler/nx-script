@@ -10,6 +10,7 @@
 #define STACK_MAX (FRAMES_MAX * UINT8_COUNT)
 #define CLASS_CONSTRUCTOR_KEYWORD "ctor"
 #define CLASS_CONSTRUCTOR_KEYWORD_LENGTH (sizeof(CLASS_CONSTRUCTOR_KEYWORD) - 1)
+#define BASE_CLASS_KEYWORD "base"
 
 typedef struct {
   ObjClosure* closure;

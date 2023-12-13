@@ -290,7 +290,7 @@ static InterpretResult run() {
         &frame->closure->function->chunk,
         (int)(frame->ip - frame->closure->function->chunk.code));
 
-    printf(ANSI_CYAN_STR(" \t \t \t Stack "));
+    printf(ANSI_CYAN_STR("Stack "));
     for (Value* slot = vm.stack; slot < vm.stack_top; slot++) {
       printf(ANSI_CYAN_STR("["));
       print_value(*slot);
@@ -403,6 +403,15 @@ static InterpretResult run() {
         push(value);
         break;
       }
+      case OP_GET_BASE_CLASS: {
+        ObjString* name = READ_STRING();
+        ObjClass* baseclass = AS_CLASS(pop());
+
+        if (!bind_method(baseclass, name)) {
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        break;
+      }
       case OP_EQ: {
         Value b = pop();
         Value a = pop();
@@ -497,6 +506,16 @@ static InterpretResult run() {
         frame = &vm.frames[vm.frame_count - 1];
         break;
       }
+      case OP_BASE_INVOKE: {
+        ObjString* method = READ_STRING();
+        int arg_count = READ_BYTE();
+        ObjClass* baseclass = AS_CLASS(pop());
+        if (!invoke_from_class(baseclass, method, arg_count)) {
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        frame = &vm.frames[vm.frame_count - 1];
+        break;
+      }
       case OP_CLOSURE: {
         ObjFunction* function = AS_FUNCTION(READ_CONSTANT());
         ObjClosure* closure = new_closure(function);
@@ -535,6 +554,17 @@ static InterpretResult run() {
       case OP_CLASS:
         push(OBJ_VAL(new_class(READ_STRING())));
         break;
+      case OP_INHERIT: {
+        Value baseclass = peek(1);
+        ObjClass* subclass = AS_CLASS(peek(0));
+        if (!IS_CLASS(baseclass)) {
+          runtime_error("Base class must be a class.");
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        hashtable_add_all(&AS_CLASS(baseclass)->methods, &subclass->methods);
+        pop();  // Subclass.
+        break;
+      }
       case OP_METHOD:
         define_method(READ_STRING());
         break;

@@ -67,6 +67,7 @@ typedef struct Compiler {
 
 typedef struct ClassCompiler {
   struct ClassCompiler* enclosing;
+  bool has_baseclass;
 } ClassCompiler;
 
 Parser parser;
@@ -434,6 +435,36 @@ static void variable(bool can_assign) {
   named_variable(parser.previous, can_assign);
 }
 
+static Token synthetic_token(const char* text) {
+  Token token;
+  token.start = text;
+  token.length = (int)strlen(text);
+  return token;
+}
+
+static void base_(bool can_assign) {
+  if (current_class == NULL) {
+    error("Can't use '" BASE_CLASS_KEYWORD "' outside of a class.");
+  } else if (!current_class->has_baseclass) {
+    error("Can't use '" BASE_CLASS_KEYWORD "' in a class with no base class.");
+  }
+
+  consume(TOKEN_DOT, "Expecting '.' after '" BASE_CLASS_KEYWORD "'.");
+  consume(TOKEN_ID, "Expecting base class method name.");
+  uint8_t name = string_constant(&parser.previous);
+
+  named_variable(synthetic_token("this"), false);
+  if (match(TOKEN_OPAR)) {
+    uint8_t arg_count = argument_list();
+    named_variable(synthetic_token(BASE_CLASS_KEYWORD), false);
+    emit_bytes(OP_BASE_INVOKE, name);
+    emit_byte(arg_count);
+  } else {
+    named_variable(synthetic_token(BASE_CLASS_KEYWORD), false);
+    emit_bytes(OP_GET_BASE_CLASS, name);
+  }
+}
+
 static void function(bool can_assign, FunctionType type, ObjString* name) {
   Compiler compiler;
   init_compiler(&compiler, type, name);
@@ -558,7 +589,7 @@ ParseRule rules[] = {
     [TOKEN_OR] = {NULL, or_, PREC_OR},
     [TOKEN_PRINT] = {NULL, NULL, PREC_NONE},
     [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
-    [TOKEN_SUPER] = {NULL, NULL, PREC_NONE},
+    [TOKEN_BASE] = {base_, NULL, PREC_NONE},
     [TOKEN_THIS] = {this_, NULL, PREC_NONE},
     [TOKEN_TRUE] = {literal, NULL, PREC_NONE},
     [TOKEN_LET] = {NULL, NULL, PREC_NONE},
@@ -784,7 +815,7 @@ static void statement_declaration_function() {
 }
 
 static void statement_declaration_class() {
-  consume(TOKEN_ID, "Expect class name.");
+  consume(TOKEN_ID, "Expecting class name.");
   Token class_name = parser.previous;
   uint8_t name_constant = string_constant(&parser.previous);
   declare_local();
@@ -793,8 +824,28 @@ static void statement_declaration_class() {
   define_variable(name_constant);
 
   ClassCompiler class_compiler;
+  class_compiler.has_baseclass = false;
   class_compiler.enclosing = current_class;
   current_class = &class_compiler;
+
+  if (match(TOKEN_COLON)) {
+    consume(TOKEN_ID, "Expecting base class name.");
+    variable(false);
+
+    if (identifiers_equal(&class_name, &parser.previous)) {
+      error("A class can't inherit from itself.");
+    }
+
+    begin_scope();
+    add_local(synthetic_token(
+        BASE_CLASS_KEYWORD));  // TODO: Maybe use BASE_CLASS_KEYWORD as a
+                               // lexeme, then synthetic_token is not needed.
+    define_variable(0);
+
+    named_variable(class_name, false);
+    emit_byte(OP_INHERIT);
+    class_compiler.has_baseclass = true;
+  }
 
   named_variable(class_name, false);
 
@@ -814,6 +865,12 @@ static void statement_declaration_class() {
   }
   consume(TOKEN_CBRACE, "Expecting'}' after class body.");
   emit_byte(OP_POP);
+
+  if (class_compiler.has_baseclass) {
+    end_scope();
+  }
+
+  current_class = current_class->enclosing;
 }
 
 static void statement_print() {
