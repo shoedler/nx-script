@@ -66,7 +66,6 @@ void scan_tests_dir(const wchar_t* path,
             (*count)++;
           }
         } else {
-          FindClose(find_handle);
           WINTERNAL_ERROR(
               L"Could not find corresponding .expect.nx file for \"%s\". "
               L"Ignoring test.",
