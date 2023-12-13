@@ -168,7 +168,8 @@ const char** compare_strings_by_line(const char* a,
         exit(70);
       }
       sprintf(diff_line,
-              "on line %d " ANSI_GREEN_STR("%s") " was " ANSI_RED_STR("%s"),
+              "on line %d: expected " ANSI_GREEN_STR(
+                  "%s") ", but was " ANSI_RED_STR("%s") " in outfile",
               line_no, line_a, line_b);
       diff[diff_count++] = diff_line;
     }
@@ -266,8 +267,7 @@ bool run_test(const wchar_t* path) {
     passed = false;
     printf(ANSI_RED_STR("Failed: %d lines differ!\n"), num_diff);
     for (int i = 0; i < num_diff; i++) {
-      printf("        #%d: %s", i + 1, differences[i]);
-      wprintf(L" (in %s)\n", out_filepath);
+      printf("        #%d: %s\n", i + 1, differences[i]);
       free((void*)differences[i]);
     }
   }
