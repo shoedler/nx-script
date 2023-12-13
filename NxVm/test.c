@@ -114,6 +114,7 @@ char* read_file(const wchar_t* path) {
 const char** compare_strings_by_line(const char* a,
                                      const char* b,
                                      int* num_diff) {
+#define DIFF_LINE_SIZE 1024
   // Temporary variables for processing
   char* line_a;
   char* line_b;
@@ -140,7 +141,7 @@ const char** compare_strings_by_line(const char* a,
     }
   }
 
-  const char** diff = malloc(sizeof(char*) * (line_count_a + 1));
+  const char** diff = malloc(DIFF_LINE_SIZE * (line_count_a + 1));
   if (diff == NULL) {
     INTERNAL_ERROR("Not enough memory to allocate diff array");
     exit(70);
@@ -161,8 +162,7 @@ const char** compare_strings_by_line(const char* a,
 
     if (strcmp(line_a, line_b) != 0) {
       // Lines are different, format the string and add to diff
-      char* diff_line = malloc(
-          1024);  // Allocating a fixed size, should be enough for most lines
+      char* diff_line = malloc(DIFF_LINE_SIZE);
       if (diff_line == NULL) {
         INTERNAL_ERROR("Not enough memory to allocate diff line");
         exit(70);
@@ -188,10 +188,11 @@ const char** compare_strings_by_line(const char* a,
     printf(ANSI_YELLOW_STR("[ExpectFileEmpty] "));
   }
 
-  if (line_no)
-
+  if (line_no) {
     // Finalize the array
     diff[diff_count] = NULL;
+  }
+
   *num_diff = diff_count;
 
   // Clean up
@@ -199,6 +200,7 @@ const char** compare_strings_by_line(const char* a,
   free(temp_b);
 
   return diff;
+#undef DIFF_LINE_SIZE
 }
 
 // Utility to run a test
