@@ -51,11 +51,11 @@
             "patterns": [
                 {
                     "name": "keyword.control.NxScript",
-                    "match": "\\b(if|for|else|while|fn|ret|print|or|and|cls|ctor)\\b"
+                    "match": "\\b(if|for|else|while|ret|or|and)\\b"
                 },
                 {
                     "name": "storage.type.NxScript",
-                    "match": "\\b(let|const)\\b"
+                    "match": "\\b(let|const|fn|print|cls|ctor)\\b"
                 }
             ]
         },

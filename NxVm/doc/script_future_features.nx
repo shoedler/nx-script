@@ -1,6 +1,26 @@
 // -----------------------------------------
 // Future features
 // -----------------------------------------
+cls NewFnSyntax {
+  // Named Fns
+  // No args decl 
+  ctor { }
+  fn a { }
+
+  // Args decl
+  ctor |a,b,c| { }
+  fn a |a,b,c| { }
+
+  fn method {
+    
+    // Anon / Lambda Fns
+    // No args decl
+    let a = -> { }
+    // Args decl
+    let a = a,b,c -> { }
+  }
+}
+
 
 // TODO: Add support for pure objs
 // TODO: Add support for sequences
