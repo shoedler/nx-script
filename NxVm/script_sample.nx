@@ -190,15 +190,15 @@ cls Zoo {
   fn mouse  -> { ret this.fox; }
 }
 
-let zoo = Zoo()
 let sum = 0
-let duration = 5
+let duration = 1
 let batches = 0
 
 let start = clock()
 let i = 0
 while clock() < start + duration {
   while i < 10000 {
+    let zoo = Zoo()
     sum = sum + zoo.ant()
             + zoo.banana()
             + zoo.tuna()

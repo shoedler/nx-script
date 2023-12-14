@@ -27,11 +27,10 @@ void* reallocate(void* pointer, size_t old_size, size_t new_size) {
   }
 
   void* result = realloc(pointer, new_size);
-
   if (result == NULL) {
     // TODO: Handle out of memory
-    printf(ANSI_RED_STR("GC: Out of memory -- ABORT \n"));
-    exit(1);
+    INTERNAL_ERROR("Not enough memory to reallocate");
+    exit(70);
   }
 
   return result;
@@ -46,7 +45,8 @@ void mark_obj(Obj* object) {
   }
 
 #ifdef DEBUG_LOG_GC
-  printf(ANSI_RED_STR("GC: %p mark "), (void*)object);
+  printf(ANSI_RED_STR("[GC] ") ANSI_YELLOW_STR("[MARK] ") "%p, ",
+         (void*)object);
   print_value(OBJ_VAL(object));
   printf("\n");
 #endif
@@ -60,8 +60,8 @@ void mark_obj(Obj* object) {
 
     // TODO: Handle out of memory
     if (vm.gray_stack == NULL) {
-      printf(ANSI_RED_STR("GC: Out of memory -- ABORT \n"));
-      exit(1);
+      INTERNAL_ERROR("Not enough memory to reallocate gray stack");
+      exit(70);
     }
   }
 
@@ -82,7 +82,8 @@ void mark_array(ValueArray* array) {
 
 static void blacken_object(Obj* object) {
 #ifdef DEBUG_LOG_GC
-  printf(ANSI_RED_STR("GC: %p blacken "), (void*)object);
+  printf(ANSI_RED_STR("[GC] ") ANSI_BLUE_STR("[BLACKEN] ") "%p, ",
+         (void*)object);
   print_value(OBJ_VAL(object));
   printf("\n");
 #endif
@@ -132,7 +133,8 @@ static void blacken_object(Obj* object) {
 
 static void free_object(Obj* object) {
 #ifdef DEBUG_LOG_GC
-  printf(ANSI_RED_STR("GC: %p free type %d\n"), (void*)object, object->type);
+  printf(ANSI_RED_STR("[GC] ") ANSI_GREEN_STR("[FREE] ") "%p, type %d\n",
+         (void*)object, object->type);
 #endif
 
   switch (object->type) {
@@ -258,7 +260,7 @@ processing that object.
 */
 void collect_garbage() {
 #ifdef DEBUG_LOG_GC
-  printf(ANSI_RED_STR("GC: begin\n"));
+  printf("== Gc begin collect ==\n");
   size_t before = vm.bytes_allocated;
 #endif
 
@@ -270,9 +272,10 @@ void collect_garbage() {
   vm.next_gc = vm.bytes_allocated * GC_HEAP_GROW_FACTOR;
 
 #ifdef DEBUG_LOG_GC
-  printf(ANSI_RED_STR("GC: end\n"));
   printf(
-      ANSI_RED_STR("GC: collected %zu bytes (from %zu to %zu) next at %zu\n"),
+      ANSI_RED_STR(
+          "[GC] ") "Done. collected %zu bytes (from %zu to %zu) next at %zu\n",
       before - vm.bytes_allocated, before, vm.bytes_allocated, vm.next_gc);
+  printf("== Gc end collect ==\n");
 #endif
 }

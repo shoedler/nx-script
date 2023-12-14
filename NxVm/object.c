@@ -21,9 +21,10 @@ static Obj* allocate_object(size_t size, ObjType type) {
   object->next = vm.objects;
   vm.objects = object;
 
-#ifdef DEBUG_LOG_GC_ALLOCATION
-  printf(ANSI_RED_STR("GC: %p allocate %zu for %d\n"), (void*)object, size,
-         type);
+#ifdef DEBUG_LOG_GC_ALLOCATIONS
+  printf(ANSI_RED_STR("[GC] ")
+             ANSI_MAGENTA_STR("[ALLOC] ") "%p allocate %zu for %d\n",
+         (void*)object, size, type);
 #endif
 
   return object;
