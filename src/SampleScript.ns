@@ -80,11 +80,9 @@ while b <= 3 {
 }
 print();
 
+print("File IO:");
 print("Write file:");
-write(cwd + "/src/Test.txt", "Hello World!");
-
+print(write(cwd + "\Test.txt", "Hello World!"));
 print("Read file:");
-read = read(cwd + "/src/Test.txt");
-print(read);
+print(read(cwd + "\Test.txt"));
 print();
-

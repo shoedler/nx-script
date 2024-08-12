@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Interpret Sample Script": {
+      "commandName": "Project",
+      "commandLineArgs": "../../../src/SampleScript.ns"
+    }
+  }
+}
