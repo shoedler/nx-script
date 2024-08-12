@@ -4,20 +4,20 @@ namespace NxScriptTest;
 
 public abstract class ToTypeTestsBase : IClassFixture<NxEvalFixture>
 {
-    protected NxEvalFixture fixture;
+    protected NxEvalFixture Fixture;
 
     protected ToTypeTestsBase(NxEvalFixture fixture)
     {
-        this.fixture = fixture;
+        this.Fixture = fixture;
     }
 
     public NxValue TypeConversion_Works(string expression, dynamic expectedInternalResult, Type expectedInternalType, NxValueType expectedNxValueType)
     {
         // Arrange
-        var prog = $"a = {expression};";
+        var program = $"let a = {expression}";
 
         // Act
-        var result = this.fixture.CleanRun(prog);
+        var result = this.Fixture.CleanRun(program);
 
         // Assert
         Assert.Empty(result.ParseErrors);
@@ -26,17 +26,17 @@ public abstract class ToTypeTestsBase : IClassFixture<NxEvalFixture>
         Assert.NotNull(a);
         Assert.Equal(a.Type, expectedNxValueType);
 
-        var aValue = a.GetInternalValue(expectedNxValueType);
+        var aValue = a.GetInternalValue();
         Assert.NotNull(aValue);
         Assert.IsType(expectedInternalType, aValue);
 
-        if (expectedInternalResult is List<NxValue>) // Arrays
+        if (expectedInternalResult is List<NxValue> l) // Arrays
         {
-            this.AssertByValueEquals(new NxValue(expectedInternalResult), a);
+            this.AssertByValueEquals(new NxValueSeq(l), a);
         }
-        else if (expectedInternalResult is Dictionary<NxValue, NxValue>) // Objs
+        else if (expectedInternalResult is Dictionary<NxValue, NxValue> d) // Objs
         {
-            this.AssertByValueEquals(new NxValue(expectedInternalResult), a);
+            this.AssertByValueEquals(new NxValueObj(d), a);
         }
         else
         {
@@ -53,8 +53,8 @@ public abstract class ToTypeTestsBase : IClassFixture<NxEvalFixture>
 
         if (expected.Type == NxValueType.Seq)
         {
-            List<NxValue> expectedArray = expected.GetInternalValue(NxValueType.Seq)!;
-            List<NxValue>? actualArray = actual.GetInternalValue(NxValueType.Seq);
+            List<NxValue> expectedArray = expected.GetInternalValue()!;
+            List<NxValue>? actualArray = actual.GetInternalValue();
 
             var length = Math.Max(expectedArray.Count, actualArray?.Count ?? 0);
 
@@ -68,8 +68,8 @@ public abstract class ToTypeTestsBase : IClassFixture<NxEvalFixture>
 
         if (expected.Type == NxValueType.Obj)
         {
-            Dictionary<NxValue, NxValue> expectedDict = expected.GetInternalValue(NxValueType.Obj)!;
-            Dictionary<NxValue, NxValue>? actualDict = actual.GetInternalValue(NxValueType.Obj);
+            Dictionary<NxValue, NxValue> expectedDict = expected.GetInternalValue()!;
+            Dictionary<NxValue, NxValue>? actualDict = actual.GetInternalValue();
 
             var length = Math.Max(expectedDict.Count, actualDict?.Count ?? 0);
 
@@ -84,7 +84,7 @@ public abstract class ToTypeTestsBase : IClassFixture<NxEvalFixture>
         }
 
         Assert.Equal(expected.Type, actual.Type);
-        Assert.Equal(expected.GetInternalValue(expected.Type), actual.GetInternalValue(actual.Type));
+        Assert.Equal(expected.GetInternalValue(), actual.GetInternalValue());
     }
 }
 

@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace NxScript;
 
 public abstract class NxValue
@@ -148,40 +150,66 @@ public abstract class NxValue
     {
         if (left is NxValueNumber numVal)
         {
-            numVal.numberValue = right.AsNumber();
+            numVal.NumberValue = right.AsNumber();
             return left;
         }
 
         if (left is NxValueBool boolVal)
         {
-            boolVal.boolValue = right.AsBool();
+            boolVal.BoolValue = right.AsBool();
             return left;
         }
 
         if (left is NxValueString strVal)
         {
-            strVal.stringValue = right.AsString();
+            strVal.StringValue = right.AsString();
             return left;
         }
 
         if (left is NxValueSeq seqVal)
         {
-            seqVal.seqValue = right.AsSeq();
+            seqVal.SeqValue = right.AsSeq();
             return left;
         }
 
         if (left is NxValueObj objVal)
         {
-            objVal.objValue = right.AsObj();
+            objVal.ObjValue = right.AsObj();
             return left;
         }
 
         if (left is NxValueFn fnVal)
         {
-            fnVal.fnValue = right.AsFn();
+            fnVal.FnValue = right.AsFn();
             return left;
         }
 
         throw new NotSupportedException("Cannot assign to value of type " + left.Type + ".");
+    }
+
+    public static NxValue Infer(dynamic value)
+    {
+        switch (value)
+        {
+            case float f:
+                return new NxValueNumber(f);
+            case bool b:
+                return new NxValueBool(b);
+            case string s:
+                return new NxValueString(s);
+            case Func<List<NxValue>, NxValue> fn:
+                return new NxValueFn(fn);
+            case IEnumerable<(NxValue, NxValue)> o:
+                return new NxValueObj(o);
+            case List<NxValue> a:
+                return new NxValueSeq(a);
+        }
+
+        if (value == null)
+        {
+            return new NxValueNil();
+        }
+
+        throw new NotSupportedException($"Cannot infer NxValue form anonymous value of type {value.GetType().Name}");
     }
 }

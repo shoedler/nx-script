@@ -152,7 +152,7 @@ let _nested = {1:2, 3:4, 5:6}
 
 let obj = {
     1: "Key is number",
-    1.1111112: "Key is precise number",
+    1.1111112: "Key is decimal number",
     1.1111111: "Key is a whole different number",
     true: "Key is boolean",
     "foo": "Key is string",

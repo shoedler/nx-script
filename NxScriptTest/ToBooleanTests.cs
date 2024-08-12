@@ -15,7 +15,7 @@ public class ToBoolTests : ToTypeTestsBase
     public void True_IsTrue()
     {
         // Act
-        var result = this.fixture.CleanRun("foo = true;");
+        var result = this.Fixture.CleanRun("let foo = true");
 
         // Assert
         Assert.Empty(result.ParseErrors);
@@ -24,7 +24,7 @@ public class ToBoolTests : ToTypeTestsBase
         Assert.NotNull(foo);
         Assert.True(foo.IsBool);
 
-        var fooValue = foo.GetInternalValue(NxValueType.Bool);
+        var fooValue = foo.GetInternalValue();
         Assert.IsType(this.BoolType, fooValue);
         Assert.True(fooValue);
     }
@@ -33,7 +33,7 @@ public class ToBoolTests : ToTypeTestsBase
     public void False_IsFalse()
     {
         // Act
-        var result = this.fixture.CleanRun("foo = false;");
+        var result = this.Fixture.CleanRun("let foo = false");
 
         // Assert
         Assert.Empty(result.ParseErrors);
@@ -42,7 +42,7 @@ public class ToBoolTests : ToTypeTestsBase
         Assert.NotNull(foo);
         Assert.True(foo.IsBool);
 
-        var fooValue = foo.GetInternalValue(NxValueType.Bool);
+        var fooValue = foo.GetInternalValue();
         Assert.IsType(this.BoolType, fooValue);
         Assert.False(fooValue);
     }

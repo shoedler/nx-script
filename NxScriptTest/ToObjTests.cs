@@ -16,7 +16,7 @@ public class ToObjTests : ToTypeTestsBase
     public void Obj_IsObj()
     {
         // Act
-        var result = this.fixture.CleanRun("foo = {};");
+        var result = this.Fixture.CleanRun("let foo = {}");
 
         // Assert
         Assert.Empty(result.ParseErrors);
@@ -25,9 +25,9 @@ public class ToObjTests : ToTypeTestsBase
         Assert.NotNull(foo);
         Assert.True(foo.IsObj);
 
-        var fooValue = foo.GetInternalValue(NxValueType.Obj);
+        var fooValue = foo.GetInternalValue();
         Assert.IsType(this.ObjType, fooValue);
-        Assert.Same(fooValue, foo.GetInternalValue(NxValueType.Obj));
+        Assert.Same(fooValue, foo.GetInternalValue());
     }
 
 
@@ -81,7 +81,13 @@ public class ToObjTests : ToTypeTestsBase
     private void ToObj_Works(string expression, params dynamic[]? expectedInternalResult)
     {
         // Arrange
-        var expectedObjContent = expectedInternalResult.ToDictionary(pair => new NxValue(pair[0]), pair => new NxValue(pair[1]));
+        Dictionary<NxValue, NxValue> expectedObjContent = new();
+        foreach (var kvp in expectedInternalResult)
+        {
+            var key = NxValue.Infer(kvp[0]);
+            var val = NxValue.Infer(kvp[1]);
+            expectedObjContent.Add(key, val);
+        }
 
         // Act, Assert
         this.TypeConversion_Works(expression, expectedObjContent, this.ObjType, this.NxType);

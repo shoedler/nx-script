@@ -1,7 +1,7 @@
 
 namespace NxScript;
 
-public partial class NxValueNil : NxValue
+public class NxValueNil : NxValue
 {
     public override bool IsNil => true;
     public override NxValueType Type => NxValueType.Nil;

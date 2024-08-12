@@ -2,22 +2,22 @@ using System.Globalization;
 
 namespace NxScript;
 
-public partial class NxValueString : NxValue
+public class NxValueString : NxValue
 {
-    public string stringValue;
+    public string StringValue;
     public override bool IsString => true;
     public override NxValueType Type => NxValueType.String;
 
     public NxValueString(string value)
     {
-        this.stringValue = value;
+        this.StringValue = value;
     }
 
     public NxValueString(NxParser.StringAtomContext context)
     {
         if (context.STRING() is not null)
         {
-            this.stringValue = context.STRING().GetText().Trim('"');
+            this.StringValue = context.STRING().GetText().Trim('"');
         }
         else
         {
@@ -25,7 +25,7 @@ public partial class NxValueString : NxValue
         }
     }
 
-    public override int GetHashCode() => this.stringValue!.GetHashCode();
+    public override int GetHashCode() => this.StringValue!.GetHashCode();
 
     public override bool Equals(object? obj)
     {
@@ -36,34 +36,34 @@ public partial class NxValueString : NxValue
 
         if (obj is NxValueString other)
         {
-            return this.stringValue == other.stringValue;
+            return this.StringValue == other.StringValue;
         }
 
 
         return false;
     }
 
-    public override dynamic GetInternalValue() => this.stringValue;
+    public override dynamic GetInternalValue() => this.StringValue;
 
     public override float AsNumber()
     {
-        float.TryParse(this.stringValue, CultureInfo.InvariantCulture, out var ret);
+        float.TryParse(this.StringValue, CultureInfo.InvariantCulture, out var ret);
         return ret;
     }
 
-    public override string AsString() => this.stringValue;
+    public override string AsString() => this.StringValue;
 
     public override bool AsBool()
     {
-        return this.stringValue is "false" ? false :
-            this.stringValue.Length > 0;
+        return this.StringValue is "false" ? false :
+            this.StringValue.Length > 0;
     }
 
     public override List<NxValue> AsSeq()
     {
         var ret = new List<NxValue>();
 
-        foreach (var c in this.stringValue)
+        foreach (var c in this.StringValue)
         {
             ret.Add(new NxValueString(c.ToString()));
         }
@@ -73,7 +73,7 @@ public partial class NxValueString : NxValue
 
     public override Dictionary<NxValue, NxValue> AsObj() => new Dictionary<NxValue, NxValue>
         {
-            { this, new NxValueString(this.stringValue) }
+            { this, new NxValueString(this.StringValue) }
         };
 
     public override Func<List<NxValue>, NxValue> AsFn() => new Func<List<NxValue>, NxValue>((List<NxValue> Args) => this);

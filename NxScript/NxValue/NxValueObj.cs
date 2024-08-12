@@ -1,24 +1,24 @@
 namespace NxScript;
 
-public partial class NxValueObj : NxValue
+public class NxValueObj : NxValue
 {
-    public Dictionary<NxValue, NxValue> objValue;
+    public Dictionary<NxValue, NxValue> ObjValue;
     public override bool IsObj => true;
     public override NxValueType Type => NxValueType.Obj;
 
     public NxValueObj(IEnumerable<(NxValue, NxValue)> value)
     {
 
-        this.objValue = new();
+        this.ObjValue = new();
 
         foreach (var (key, val) in value)
         {
 #if DEBUG_LOG
             Console.WriteLine($"Adding '{key.AsString()}' with Hashcode {key.GetHashCode()}");
 #endif
-            if (!this.objValue.TryAdd(key, val))
+            if (!this.ObjValue.TryAdd(key, val))
             {
-                this.objValue[key] = val;
+                this.ObjValue[key] = val;
             }
         }
     }
@@ -26,16 +26,16 @@ public partial class NxValueObj : NxValue
     public NxValueObj(IEnumerable<KeyValuePair<NxValue, NxValue>> value)
     {
 
-        this.objValue = new();
+        this.ObjValue = new();
 
         foreach (var (key, val) in value)
         {
 #if DEBUG_LOG
             Console.WriteLine($"Adding '{key.AsString()}' with Hashcode {key.GetHashCode()}");
 #endif
-            if (!this.objValue.TryAdd(key, val))
+            if (!this.ObjValue.TryAdd(key, val))
             {
-                this.objValue[key] = val;
+                this.ObjValue[key] = val;
             }
         }
     }
@@ -50,13 +50,13 @@ public partial class NxValueObj : NxValue
         return this == obj;
     }
 
-    public override dynamic GetInternalValue() => this.objValue;
+    public override dynamic GetInternalValue() => this.ObjValue;
 
-    public override float AsNumber() => this.objValue.Count;
+    public override float AsNumber() => this.ObjValue.Count;
 
     public override string AsString()
     {
-        var items = this.objValue.Select((pair) => $"{pair.Key.AsString()}: {pair.Value.AsString()}");
+        var items = this.ObjValue.Select((pair) => $"{pair.Key.AsString()}: {pair.Value.AsString()}");
         var objString = "{" + string.Join(", ", items) + "}";
         return objString.Length > 100 ? "[Object]" : objString;
     }
@@ -65,7 +65,7 @@ public partial class NxValueObj : NxValue
 
     public override List<NxValue> AsSeq()
     {
-        return this.objValue.Select(x =>
+        return this.ObjValue.Select(x =>
         {
             var pairList = new List<NxValue>()
             {
@@ -77,7 +77,7 @@ public partial class NxValueObj : NxValue
         }).ToList();
     }
 
-    public override Dictionary<NxValue, NxValue> AsObj() => this.objValue;
+    public override Dictionary<NxValue, NxValue> AsObj() => this.ObjValue;
 
     public override Func<List<NxValue>, NxValue> AsFn() => new Func<List<NxValue>, NxValue>((List<NxValue> Args) => this);
 }

@@ -1,25 +1,25 @@
 namespace NxScript;
 
-public partial class NxValueNumber : NxValue
+public class NxValueNumber : NxValue
 {
-    public float numberValue;
+    public float NumberValue;
     public override bool IsNumber => true;
     public override NxValueType Type => NxValueType.Number;
 
     public NxValueNumber(float value)
     {
-        this.numberValue = value;
+        this.NumberValue = value;
     }
 
     public NxValueNumber(NxParser.NumberAtomContext context)
     {
         if (context.FLOAT() is not null)
         {
-            this.numberValue = float.Parse(context.FLOAT().GetText());
+            this.NumberValue = float.Parse(context.FLOAT().GetText());
         }
         else if (context.INT() is not null)
         {
-            this.numberValue = int.Parse(context.INT().GetText());
+            this.NumberValue = int.Parse(context.INT().GetText());
         }
         else
         {
@@ -27,7 +27,7 @@ public partial class NxValueNumber : NxValue
         }
     }
 
-    public override int GetHashCode() => this.numberValue.GetHashCode();
+    public override int GetHashCode() => this.NumberValue.GetHashCode();
 
     public override bool Equals(object? obj)
     {
@@ -38,25 +38,25 @@ public partial class NxValueNumber : NxValue
 
         if (obj is NxValueNumber other)
         {
-            return this.numberValue.GetHashCode() == other.numberValue.GetHashCode();
+            return this.NumberValue.GetHashCode() == other.NumberValue.GetHashCode();
         }
 
         return false;
     }
 
-    public override dynamic GetInternalValue() => this.numberValue;
+    public override dynamic GetInternalValue() => this.NumberValue;
 
-    public override float AsNumber() => this.numberValue;
+    public override float AsNumber() => this.NumberValue;
 
-    public override string AsString() => this.numberValue.ToString();
+    public override string AsString() => this.NumberValue.ToString();
 
-    public override bool AsBool() => this.numberValue != 0;
+    public override bool AsBool() => this.NumberValue != 0;
 
-    public override List<NxValue> AsSeq() => new List<NxValue> { new NxValueNumber(this.numberValue) };
+    public override List<NxValue> AsSeq() => new List<NxValue> { new NxValueNumber(this.NumberValue) };
 
     public override Dictionary<NxValue, NxValue> AsObj() => new Dictionary<NxValue, NxValue>
         {
-            { this, new NxValueNumber(this.numberValue) }
+            { this, new NxValueNumber(this.NumberValue) }
         };
 
     public override Func<List<NxValue>, NxValue> AsFn() => new Func<List<NxValue>, NxValue>((List<NxValue> Args) => this);

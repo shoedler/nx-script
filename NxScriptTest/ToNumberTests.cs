@@ -15,7 +15,7 @@ public class ToNumberTests : ToTypeTestsBase
     public void Zero_IsNumber()
     {
         // Act
-        var result = this.fixture.CleanRun("foo = 0;");
+        var result = this.Fixture.CleanRun("let foo = 0");
 
         // Assert
         Assert.Empty(result.ParseErrors);
@@ -24,7 +24,7 @@ public class ToNumberTests : ToTypeTestsBase
         Assert.NotNull(foo);
         Assert.True(foo.IsNumber);
 
-        var fooValue = foo.GetInternalValue(NxValueType.Number);
+        var fooValue = foo.GetInternalValue();
         Assert.IsType(this.FloatType, fooValue);
         Assert.Equal(0f, fooValue);
     }

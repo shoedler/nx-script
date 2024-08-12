@@ -15,7 +15,7 @@ public class ToStringTests : ToTypeTestsBase
     public void String_IsString()
     {
         // Act
-        var result = this.fixture.CleanRun("foo = \"foo\";");
+        var result = this.Fixture.CleanRun("let foo = \"foo\"");
 
         // Assert
         Assert.Empty(result.ParseErrors);
@@ -24,7 +24,7 @@ public class ToStringTests : ToTypeTestsBase
         Assert.NotNull(foo);
         Assert.True(foo.IsString);
 
-        var fooValue = foo.GetInternalValue(NxValueType.String);
+        var fooValue = foo.GetInternalValue();
         Assert.IsType(this.StringType, fooValue);
         Assert.Equal("foo", fooValue);
     }

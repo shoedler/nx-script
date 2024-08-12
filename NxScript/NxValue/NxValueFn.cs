@@ -1,14 +1,14 @@
 namespace NxScript;
 
-public partial class NxValueFn : NxValue
+public class NxValueFn : NxValue
 {
-    public Func<List<NxValue>, NxValue> fnValue;
+    public Func<List<NxValue>, NxValue> FnValue;
     public override bool IsFn => true;
     public override NxValueType Type => NxValueType.Fn;
 
     public NxValueFn(Func<List<NxValue>, NxValue> value)
     {
-        this.fnValue = value;
+        this.FnValue = value;
     }
 
     public override int GetHashCode()
@@ -21,7 +21,7 @@ public partial class NxValueFn : NxValue
         return this == obj;
     }
 
-    public override dynamic GetInternalValue() => this.fnValue;
+    public override dynamic GetInternalValue() => this.FnValue;
 
     public override float AsNumber() => 0f; // TODO: Move to Constants
 
@@ -29,12 +29,12 @@ public partial class NxValueFn : NxValue
 
     public override bool AsBool() => true; // TODO: Move to Constants
 
-    public override List<NxValue> AsSeq() => new List<NxValue> { new NxValueFn(this.fnValue) };
+    public override List<NxValue> AsSeq() => new List<NxValue> { new NxValueFn(this.FnValue) };
 
     public override Dictionary<NxValue, NxValue> AsObj() => new Dictionary<NxValue, NxValue>
         {
-            { this, new NxValueFn(this.fnValue) }
+            { this, new NxValueFn(this.FnValue) }
         };
 
-    public override Func<List<NxValue>, NxValue> AsFn() => this.fnValue;
+    public override Func<List<NxValue>, NxValue> AsFn() => this.FnValue;
 }

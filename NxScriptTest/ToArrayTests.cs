@@ -16,7 +16,7 @@ public class ToArrayTests : ToTypeTestsBase
     public void Array_IsArray()
     {
         // Act
-        var result = this.fixture.CleanRun("foo = [];");
+        var result = this.Fixture.CleanRun("let foo = []");
 
         // Assert
         Assert.Empty(result.ParseErrors);
@@ -79,16 +79,17 @@ public class ToArrayTests : ToTypeTestsBase
             return;
         }
 
-        List<NxValue> expectedInternalResultArray = expectedInternalResult.Select(pair =>
+        var expectedInternalResultArray = new List<NxValue>();
+        foreach (var kvp in expectedInternalResult)
         {
             var pairArrayContent = new List<NxValue>
             {
-                new NxValue(pair[0]),
-                new NxValue(pair[1])
+                NxValue.Infer(kvp[0]),
+                NxValue.Infer(kvp[1])
             };
 
-            return new NxValue(pairArrayContent);
-        }).ToList();
+            expectedInternalResultArray.Add(new NxValueSeq(pairArrayContent));
+        }
 
         this.TypeConversion_Works(expression, expectedInternalResultArray, this.ArrayType, this.NxType);
     }
@@ -97,7 +98,7 @@ public class ToArrayTests : ToTypeTestsBase
     {
         // Arrange
         var arrayContent = expectedInternalResult ?? Array.Empty<dynamic>();
-        var expectedArray = arrayContent.Select(value => new NxValue(value)).ToList();
+        var expectedArray = arrayContent.Select(value => NxValue.Infer(value)).ToList();
 
         // Act, Assert
         this.TypeConversion_Works(expression, expectedArray, this.ArrayType, this.NxType);

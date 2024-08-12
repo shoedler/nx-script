@@ -7,7 +7,6 @@ using System.Diagnostics;
 // TODO: Add type inference examples with l/r associativity, e.g. true + 0 vs. 0 + true
 // TODO: Add type specific intrinsic stuff, like "length" for strings, arrays, etc.
 // TODO: Add string interpolation
-// TODO: Decide if we want static typing or not
 
 #if true
 args = new[] { "watch", "..\\..\\..\\SampleScript.nx" };
