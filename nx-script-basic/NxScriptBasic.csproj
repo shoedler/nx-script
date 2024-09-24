@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>nxsb</AssemblyName>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <AppDesignerFolder>props</AppDesignerFolder>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
