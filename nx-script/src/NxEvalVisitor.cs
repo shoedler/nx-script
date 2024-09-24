@@ -182,7 +182,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         while (this.Visit(context.expr()).AsBool())
         {
             lastValue = this.Visit(context.stat_block());
-            if (panic++ <= Constants.Limits.MaxLoopIter)
+            if (panic++ > Constants.Limits.MaxLoopIter)
             {
                 throw NxEvalException.FromContext($"Panic! Loop did not finish after {panic} iterations", context);
             }
