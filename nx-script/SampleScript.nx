@@ -279,7 +279,7 @@ ret 1
 //     ret (0+str_no) // str to num
 // }
 
-// let lines = split_by_newline(read(cwd + "/input.txt"))
+// let lines = split_by_newline(read(cwd + "/SampleInput.txt"))
 // let sum = 0
 // let i = 0
 

@@ -12,6 +12,8 @@ if (args.Length != 1)
     Abort("IO ERROR", "Missing path to source file.");
 if (!File.Exists(args[0]))
     Abort("IO ERROR", $"File {args[0]} does not exist.");
+if (Path.GetExtension(args[0]) != ".nxb")
+    Abort("IO ERROR", "File must have .nxb extension.");
 
 var input = File.ReadAllText(args[0]);
 var stream = CharStreams.fromString(input);
