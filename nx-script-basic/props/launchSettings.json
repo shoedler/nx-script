@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "NxScriptBasic: Run Sample": {
+      "commandName": "Project",
+      "commandLineArgs": "./src/SampleScript.ns",
+      "workingDirectory": "$(ProjectDir)"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "NxScript: Run Sample": {
+      "commandName": "Project",
+      "commandLineArgs": "run ./src/SampleScript.nx",
+      "workingDirectory": "$(ProjectDir)"
+    },
+    "NxScript: Watch Sample": {
+      "commandName": "Project",
+      "commandLineArgs": "watch ./src/SampleScript.nx",
+      "workingDirectory": "$(ProjectDir)"
+    }
+  }
+}
