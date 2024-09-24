@@ -2,6 +2,8 @@
 
 A simple scripting language, written in C# with ANTLR4.
 
+![image](https://github.com/user-attachments/assets/ee244615-9a5e-4d42-a6df-69844b8b309d)
+
 ---
 
 This project was built to showcase how easy it can be to build your own scripting language with ANTLR4.
