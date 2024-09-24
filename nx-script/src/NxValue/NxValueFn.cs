@@ -1,15 +1,10 @@
 namespace NxScript;
 
-public class NxValueFn : NxValue
+public class NxValueFn(Func<List<NxValue>, NxValue> value) : NxValue
 {
-    public Func<List<NxValue>, NxValue> FnValue;
+    public Func<List<NxValue>, NxValue> FnValue = value;
     public override bool IsFn => true;
     public override NxValueType Type => NxValueType.Fn;
-
-    public NxValueFn(Func<List<NxValue>, NxValue> value)
-    {
-        this.FnValue = value;
-    }
 
     public override int GetHashCode()
     {
@@ -29,12 +24,12 @@ public class NxValueFn : NxValue
 
     public override bool AsBool() => true; // TODO: Move to Constants
 
-    public override List<NxValue> AsSeq() => new List<NxValue> { new NxValueFn(this.FnValue) };
+    public override List<NxValue> AsSeq() => [ new NxValueFn(this.FnValue) ];
 
-    public override Dictionary<NxValue, NxValue> AsObj() => new Dictionary<NxValue, NxValue>
-        {
-            { this, new NxValueFn(this.FnValue) }
-        };
+    public override Dictionary<NxValue, NxValue> AsObj() => new()
+    {
+        { this, new NxValueFn(this.FnValue) }
+    };
 
     public override Func<List<NxValue>, NxValue> AsFn() => this.FnValue;
 }

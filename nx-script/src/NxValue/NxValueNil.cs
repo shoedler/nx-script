@@ -6,8 +6,6 @@ public class NxValueNil : NxValue
     public override bool IsNil => true;
     public override NxValueType Type => NxValueType.Nil;
 
-    public NxValueNil() { }
-
     public override int GetHashCode()
     {
         return base.GetHashCode();
@@ -15,17 +13,12 @@ public class NxValueNil : NxValue
 
     public override bool Equals(object? obj)
     {
-        if (obj == null || GetType() != obj.GetType())
+        if (obj == null || this.GetType() != obj.GetType())
         {
             return false;
         }
 
-        if (obj is NxValueNil)
-        {
-            return true;
-        }
-
-        return false;
+        return obj is NxValueNil;
     }
 
     public override dynamic GetInternalValue() => null;
@@ -36,9 +29,9 @@ public class NxValueNil : NxValue
 
     public override bool AsBool() => false;
 
-    public override List<NxValue> AsSeq() => new();
+    public override List<NxValue> AsSeq() => [];
 
     public override Dictionary<NxValue, NxValue> AsObj() => new();
 
-    public override Func<List<NxValue>, NxValue> AsFn() => new((List<NxValue> args) => this);
+    public override Func<List<NxValue>, NxValue> AsFn() => _ => this;
 }

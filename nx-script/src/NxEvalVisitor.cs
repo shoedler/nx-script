@@ -6,7 +6,7 @@ namespace NxScript;
 
 public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxValue>
 {
-    public readonly Dictionary<string, NxValue> Variables = new();
+    public readonly Dictionary<string, NxValue> Variables = [];
 
     protected NxEvalVisitor? Upper = null;
     protected NxEvalVisitor? Fn = null;
@@ -40,7 +40,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
             });
 
             Console.WriteLine();
-            return DefaultResult;
+            return this.DefaultResult;
         }));
 
         // Preload "read" function - read files from disk
@@ -63,16 +63,13 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
             Console.WriteLine("Variables in current scope:");
             this.Variables.AsEnumerable().ToList()
                 .ForEach((pair) => Console.WriteLine($"{pair.Key}:\t{pair.Value.AsString()}"));
-            return DefaultResult;
+            return this.DefaultResult;
         }));
 
         // Preload "typeof" function - show type of value
-        this.Variables.Add("typeof", new NxValueFn(args =>
-        {
-            return new NxValueString(Enum.GetName(args[0].Type));
-        }));
+        this.Variables.Add("typeof", new NxValueFn(args => new NxValueString(Enum.GetName(args[0].Type) ?? "<Unknown>")));
 
-        // Preload "len" function - show lenght of array
+        // Preload "len" function - show length of array
         this.Variables.Add("len", new NxValueFn(args =>
         {
             var arg = args[0] ?? new NxValueNil();
@@ -82,7 +79,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         // Preload "split" function - split string into array (default is \r\n
         this.Variables.Add("split_by_newline", new NxValueFn(args =>
         {
-            var arg = args[0] ?? DefaultResult;
+            var arg = args[0] ?? this.DefaultResult;
             var strings = arg.AsString().Split(Environment.NewLine).Select(str => new NxValueString(str) as NxValue).ToList();
             return new NxValueSeq(strings);
         }));
@@ -124,7 +121,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
 
     public NxValue VisitParse([NotNull] NxParser.ParseContext context)
     {
-        return VisitChildren(context);
+        return this.VisitChildren(context);
     }
 
     public NxValue VisitBlock([NotNull] NxParser.BlockContext context)
@@ -135,7 +132,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
 
     public NxValue VisitStat_block([NotNull] NxParser.Stat_blockContext context)
     {
-        return VisitChildren(context);
+        return this.VisitChildren(context);
     }
 
     ///
@@ -144,12 +141,12 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
     public NxValue VisitStat([NotNull] NxParser.StatContext context)
     {
 
-       return VisitChildren(context);;
+       return this.VisitChildren(context);;
     }
 
     public NxValue VisitVar_declaration([NotNull] NxParser.Var_declarationContext context)
     {
-        var value = Visit(context.expr());
+        var value = this.Visit(context.expr());
         this.DeclareVariable(context.ID().GetText(), value, context);
         return value;
     }
@@ -161,31 +158,31 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
 
         foreach (var (condition, stat) in expressions.Zip(statBlocks))
         {
-            if (!Visit(condition).AsBool())
+            if (!this.Visit(condition).AsBool())
             {
                 continue;
             }
 
-            return Visit(stat);
+            return this.Visit(stat);
         }
 
         if (statBlocks.Length > expressions.Length)
         {
-            return Visit(statBlocks.Last());
+            return this.Visit(statBlocks.Last());
         }
 
-        return DefaultResult;
+        return this.DefaultResult;
     }
 
     public NxValue VisitWhile_stat([NotNull] NxParser.While_statContext context)
     {
         var panic = 0;
-        NxValue lastValue = DefaultResult;
+        var lastValue = this.DefaultResult;
 
-        while (Visit(context.expr()).AsBool())
+        while (this.Visit(context.expr()).AsBool())
         {
-            lastValue = Visit(context.stat_block());
-            if (panic++ > 10_000_000) // TODO: Move to Constants
+            lastValue = this.Visit(context.stat_block());
+            if (panic++ <= Constants.Limits.MaxLoopIter) 
             {
                 throw NxEvalException.FromContext($"Panic! Loop did not finish after {panic} iterations", context);
             }
@@ -196,7 +193,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
 
     public NxValue VisitReturn([NotNull] NxParser.ReturnContext context)
     {
-        var ret = VisitChildren(context);
+        var ret = this.VisitChildren(context);
 
         if (this.Fn is not null)
         {
@@ -212,15 +209,15 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
     ///
     public NxValue VisitArray_literal([NotNull] NxParser.Array_literalContext context)
     {
-        var items = context.expr().Select(Visit).ToList();
+        var items = context.expr().Select(this.Visit).ToList();
 
         return new NxValueSeq(items);
     }
 
     public NxValue VisitObj_literal([NotNull] NxParser.Obj_literalContext context)
     {
-        var atoms = context.atom().Select(Visit);
-        var expressions = context.expr().Select(Visit);
+        var atoms = context.atom().Select(this.Visit);
+        var expressions = context.expr().Select(this.Visit);
 
         return new NxValueObj(atoms.Zip(expressions));
     }
@@ -250,7 +247,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
             fnVisitor.Fn = fnVisitor;
             var ret = fnVisitor.Visit(fnBody);
 
-            return fnVisitor.Fn.ReturnValue ?? ret ?? DefaultResult;
+            return fnVisitor.Fn.ReturnValue ?? ret ?? this.DefaultResult;
         });
 
         return fn;
@@ -263,22 +260,22 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
     {
         var key = context.ID().GetText();
         var function = this.GetVariable(key, context);
-        var args = context.expr().Select(Visit).ToList();
+        var args = context.expr().Select(this.Visit).ToList();
 
         return function.AsFn().Invoke(args);
     }
 
     public NxValue VisitIndexExpr([NotNull] NxParser.IndexExprContext context)
     {
-        var array = Visit(context.expr().First());
-        var index = Visit(context.expr().Last());
+        var array = this.Visit(context.expr().First());
+        var index = this.Visit(context.expr().Last());
 
         return NxValue.Index(array, index);
     }
 
     public NxValue VisitMemberExpr([NotNull] NxParser.MemberExprContext context)
     {
-        var obj = Visit(context.expr());
+        var obj = this.Visit(context.expr());
         var member = new NxValueString(context.ID().GetText());
 
         return NxValue.Member(obj, member);
@@ -286,45 +283,45 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
 
     public NxValue VisitArrayExpr([NotNull] NxParser.ArrayExprContext context)
     {
-        return Visit(context.array_literal()); // Just pluck the literal, could also just return the default base.VisitChildren() but this is quicker
+        return this.Visit(context.array_literal()); // Just pluck the literal, could also just return the default base.VisitChildren() but this is quicker
     }
 
     public NxValue VisitObjExpr([NotNull] NxParser.ObjExprContext context)
     {
-        return Visit(context.obj_literal()); // Just pluck the literal, could also just return the default VisitChildren() but this is quicker
+        return this.Visit(context.obj_literal()); // Just pluck the literal, could also just return the default VisitChildren() but this is quicker
     }
 
     public NxValue VisitFnExpr([NotNull] NxParser.FnExprContext context)
     {
-        return Visit(context.fn_literal()); // Just pluck the literal, could also just return the default VisitChildren() but this is quicker
+        return this.Visit(context.fn_literal()); // Just pluck the literal, could also just return the default VisitChildren() but this is quicker
     }
 
     public NxValue VisitPowExpr([NotNull] NxParser.PowExprContext context)
     {
-        var right = Visit(context.expr()[1]);
-        var left = Visit(context.expr()[0]);
+        var right = this.Visit(context.expr()[1]);
+        var left = this.Visit(context.expr()[0]);
 
         return new NxValueNumber((float)Math.Pow(left.AsNumber(), right.AsNumber()));
     }
 
     public NxValue VisitUnaryMinusExpr([NotNull] NxParser.UnaryMinusExprContext context)
     {
-        var right = Visit(context.expr());
+        var right = this.Visit(context.expr());
 
         return new NxValueNumber(-right.AsNumber());
     }
 
     public NxValue VisitNotExpr([NotNull] NxParser.NotExprContext context)
     {
-        var right = Visit(context.expr());
+        var right = this.Visit(context.expr());
 
         return new NxValueBool(!right.AsBool());
     }
 
     public NxValue VisitMultiplicationExpr([NotNull] NxParser.MultiplicationExprContext context)
     {
-        var left = Visit(context.expr()[0]);
-        var right = Visit(context.expr()[1]);
+        var left = this.Visit(context.expr()[0]);
+        var right = this.Visit(context.expr()[1]);
 
         return context.op.Type switch
         {
@@ -337,8 +334,8 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
 
     public NxValue VisitAdditiveExpr([NotNull] NxParser.AdditiveExprContext context)
     {
-        var left = Visit(context.expr()[0]);
-        var right = Visit(context.expr()[1]);
+        var left = this.Visit(context.expr()[0]);
+        var right = this.Visit(context.expr()[1]);
 
         return context.op.Type switch
         {
@@ -350,8 +347,8 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
 
     public NxValue VisitRelationalExpr([NotNull] NxParser.RelationalExprContext context)
     {
-        var left = Visit(context.expr()[0]);
-        var right = Visit(context.expr()[1]);
+        var left = this.Visit(context.expr()[0]);
+        var right = this.Visit(context.expr()[1]);
 
         return context.op.Type switch
         {
@@ -365,8 +362,8 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
 
     public NxValue VisitEqualityExpr([NotNull] NxParser.EqualityExprContext context)
     {
-        var left = Visit(context.expr()[0]);
-        var right = Visit(context.expr()[1]);
+        var left = this.Visit(context.expr()[0]);
+        var right = this.Visit(context.expr()[1]);
 
         return context.op.Type switch
         {
@@ -378,24 +375,24 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
 
     public NxValue VisitAndExpr([NotNull] NxParser.AndExprContext context)
     {
-        var left = Visit(context.expr()[0]);
-        var right = Visit(context.expr()[1]);
+        var left = this.Visit(context.expr()[0]);
+        var right = this.Visit(context.expr()[1]);
 
         return new NxValueBool(left.AsBool() && right.AsBool());
     }
 
     public NxValue VisitOrExpr([NotNull] NxParser.OrExprContext context)
     {
-        var left = Visit(context.expr()[0]);
-        var right = Visit(context.expr()[1]);
+        var left = this.Visit(context.expr()[0]);
+        var right = this.Visit(context.expr()[1]);
 
         return new NxValueBool(left.AsBool() || right.AsBool());
     }
 
     public NxValue VisitAssignExpr([NotNull] NxParser.AssignExprContext context)
     {
-        var right = Visit(context.expr()[1]);
-        var left = Visit(context.expr()[0]);
+        var right = this.Visit(context.expr()[1]);
+        var left = this.Visit(context.expr()[0]);
 
         // TODO: Decide if we want RTL From LType
         // We could also create a new Variable (Results in a new reference which doesn't really work)
@@ -408,17 +405,17 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
 
     public NxValue VisitAtomExpr([NotNull] NxParser.AtomExprContext context)
     {
-        return VisitChildren(context);
+        return this.VisitChildren(context);
     }
 
     ///
     /// Atoms
     /// 
-    public NxValue VisitParExpr([NotNull] NxParser.ParExprContext context) { return Visit(context.expr()); }
+    public NxValue VisitParExpr([NotNull] NxParser.ParExprContext context) { return this.Visit(context.expr()); }
     public NxValue VisitNumberAtom([NotNull] NxParser.NumberAtomContext context) { return new NxValueNumber(context); }
     public NxValue VisitStringAtom([NotNull] NxParser.StringAtomContext context) { return new NxValueString(context); }
     public NxValue VisitBoolAtom([NotNull] NxParser.BoolAtomContext context) { return new NxValueBool(context); }
-    public NxValue VisitNilAtom([NotNull] NxParser.NilAtomContext context) { return DefaultResult; }
+    public NxValue VisitNilAtom([NotNull] NxParser.NilAtomContext context) { return this.DefaultResult; }
     public NxValue VisitIdAtom([NotNull] NxParser.IdAtomContext context) { return this.GetVariable(context.ID().GetText(), context); }
 
     ///
@@ -427,21 +424,20 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
     public override NxValue VisitChildren(IRuleNode node)
     {
         // Don't burn your fingers - this is extremely hot!
+        var val = this.DefaultResult;
+        var childCount = node.ChildCount;
 
-        var val = DefaultResult;
-        int childCount = node.ChildCount;
-
-        for (int i = 0; i < childCount; i++)
+        for (var i = 0; i < childCount; i++)
         {
             var child = node.GetChild(i);
 
-            if (this.Fn is not null && this.Fn.ReturnValue is not null)
+            if (this.Fn?.ReturnValue != null)
             {
                 // Use return value if there is one!
                 return this.Fn.ReturnValue;
             }
 
-            val = Visit(child);
+            val = this.Visit(child);
         }
 
         return val;
@@ -452,9 +448,9 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
     /// 
     internal NxValue GetVariable(string key, ParserRuleContext context)
     {
-        if (this.Variables.ContainsKey(key))
+        if (this.Variables.TryGetValue(key, out var value))
         {
-            return this.Variables[key];
+            return value;
         }
 
         if (this.Upper is null)

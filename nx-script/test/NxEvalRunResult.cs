@@ -4,7 +4,7 @@ using NxScript;
 
 namespace NxScriptTest;
 
-public struct NxEvalRunResult
+public readonly struct NxEvalRunResult
 {
     public readonly ICharStream Stream;
     public readonly ITokenStream TokenStream;
@@ -45,7 +45,7 @@ public struct NxEvalRunResult
     {
         NxValue? result = null;
 
-        this.EvalVisitor.Scopes!.Any(scope =>
+        var _ = this.EvalVisitor.Scopes!.Any(scope =>
         {
             scope.Variables.TryGetValue(key, out result);
             return result is not null;

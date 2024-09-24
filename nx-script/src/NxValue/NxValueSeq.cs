@@ -1,15 +1,10 @@
 namespace NxScript;
 
-public class NxValueSeq : NxValue
+public class NxValueSeq(List<NxValue> value) : NxValue
 {
-    public List<NxValue> SeqValue;
+    public List<NxValue> SeqValue = value;
     public override bool IsSeq => true;
     public override NxValueType Type => NxValueType.Seq;
-
-    public NxValueSeq(List<NxValue> value)
-    {
-        this.SeqValue = value;
-    }
 
     public override int GetHashCode()
     {
@@ -41,7 +36,7 @@ public class NxValueSeq : NxValue
 
         foreach (var value in this.SeqValue)
         {
-            var valueCopy = NxValue.CopyUnknown(value);
+            var valueCopy = CopyUnknown(value);
             if (!dict.TryAdd(value, valueCopy))
             {
                 dict[value] = valueCopy;
@@ -51,8 +46,6 @@ public class NxValueSeq : NxValue
         return dict;
     }
 
-    public override Func<List<NxValue>, NxValue> AsFn()
-    {
-        return new Func<List<NxValue>, NxValue>((List<NxValue> Args) => this);
-    }
+    public override Func<List<NxValue>, NxValue> AsFn() => _ => this;
+    
 }

@@ -9,7 +9,7 @@ public class NxEvalDiagnosticVisitor : NxEvalVisitor
     public readonly List<NxEvalVisitor>? Scopes = null;
     public NxEvalDiagnosticVisitor(string path) : base(path)
     {
-        this.Scopes = new() { this };
+        this.Scopes = [this];
         
     }
 
@@ -33,7 +33,7 @@ public class NxEvalDiagnosticVisitor : NxEvalVisitor
     
     internal NxEvalDiagnosticVisitor GetRoot()
     {
-        var ptr = (NxEvalDiagnosticVisitor)this;
+        var ptr = this;
 
         while (ptr.Upper is not null)
         {

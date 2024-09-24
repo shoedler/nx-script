@@ -9,7 +9,7 @@ public class NxValueObj : NxValue
     public NxValueObj(IEnumerable<(NxValue, NxValue)> value)
     {
 
-        this.ObjValue = new();
+        this.ObjValue = [];
 
         foreach (var (key, val) in value)
         {
@@ -26,7 +26,7 @@ public class NxValueObj : NxValue
     public NxValueObj(IEnumerable<KeyValuePair<NxValue, NxValue>> value)
     {
 
-        this.ObjValue = new();
+        this.ObjValue = [];
 
         foreach (var (key, val) in value)
         {
@@ -65,7 +65,7 @@ public class NxValueObj : NxValue
 
     public override List<NxValue> AsSeq()
     {
-        return this.ObjValue.Select(x =>
+        return this.ObjValue.Select(NxValue (x) =>
         {
             var pairList = new List<NxValue>()
             {
@@ -73,11 +73,11 @@ public class NxValueObj : NxValue
                 x.Value,
             };
 
-            return new NxValueSeq(pairList) as NxValue;
+            return new NxValueSeq(pairList);
         }).ToList();
     }
 
     public override Dictionary<NxValue, NxValue> AsObj() => this.ObjValue;
 
-    public override Func<List<NxValue>, NxValue> AsFn() => new Func<List<NxValue>, NxValue>((List<NxValue> Args) => this);
+    public override Func<List<NxValue>, NxValue> AsFn() => _ => this;
 }

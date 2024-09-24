@@ -29,7 +29,7 @@ public class NxValueString : NxValue
 
     public override bool Equals(object? obj)
     {
-        if (obj == null || GetType() != obj.GetType())
+        if (obj == null || this.GetType() != obj.GetType())
         {
             return false;
         }
@@ -55,8 +55,7 @@ public class NxValueString : NxValue
 
     public override bool AsBool()
     {
-        return this.StringValue is "false" ? false :
-            this.StringValue.Length > 0;
+        return this.StringValue is not "false" && this.StringValue.Length > 0;
     }
 
     public override List<NxValue> AsSeq()
@@ -71,10 +70,10 @@ public class NxValueString : NxValue
         return ret;
     }
 
-    public override Dictionary<NxValue, NxValue> AsObj() => new Dictionary<NxValue, NxValue>
-        {
-            { this, new NxValueString(this.StringValue) }
-        };
+    public override Dictionary<NxValue, NxValue> AsObj() => new()
+    {
+        { this, new NxValueString(this.StringValue) }
+    };
 
-    public override Func<List<NxValue>, NxValue> AsFn() => new Func<List<NxValue>, NxValue>((List<NxValue> Args) => this);
+    public override Func<List<NxValue>, NxValue> AsFn() => _ => this;
 }

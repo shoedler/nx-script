@@ -97,7 +97,7 @@ public class ToArrayTests : ToTypeTestsBase
     private void ToArray_Works(string expression, params dynamic[]? expectedInternalResult)
     {
         // Arrange
-        var arrayContent = expectedInternalResult ?? Array.Empty<dynamic>();
+        var arrayContent = expectedInternalResult ?? [];
         var expectedArray = arrayContent.Select(value => NxValue.Infer(value)).ToList();
 
         // Act, Assert

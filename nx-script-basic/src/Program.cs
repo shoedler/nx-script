@@ -2,7 +2,7 @@
 using Antlr4.Runtime;
 using NxScript;
 
-void Abort(string type, string message)
+static void Abort(string type, string message)
 {
     Console.Error.WriteLine($"{type}: {message}");
     Environment.Exit(1);

@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace NxScript;
 
 public abstract class NxValue
@@ -14,7 +12,7 @@ public abstract class NxValue
 
     public abstract NxValueType Type { get; }
 
-    public NxValue() { }
+    protected NxValue() { }
 
     public abstract dynamic GetInternalValue();
 
@@ -90,7 +88,7 @@ public abstract class NxValue
     {
         return left.Type switch
         {
-            NxValueType.Number => new NxValueBool(left.AsNumber() == right.AsNumber()), // [By-Val]
+            NxValueType.Number => new NxValueBool(Math.Abs(left.AsNumber() - right.AsNumber()) < Constants.Arithmetics.Epsilon), // [By-Val]
             NxValueType.Bool => new NxValueBool(left.AsBool() == right.AsBool()), // [By-Val]
             NxValueType.String => new NxValueBool(left.AsString() == right.AsString()), // [By-Val]
             NxValueType.Seq or

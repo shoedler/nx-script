@@ -96,8 +96,7 @@ internal class NxValue
         if (this._stringValue is null)
             return null;
 
-        var ret = NilNumber;
-        float.TryParse(this._stringValue, CultureInfo.InvariantCulture, out ret);
+        float.TryParse(this._stringValue, CultureInfo.InvariantCulture, out var ret);
         return ret;
     }
 
@@ -130,9 +129,7 @@ internal class NxValue
         if (this._stringValue is null)
             return null;
 
-        return this._stringValue is "true" ? true :
-            this._stringValue is "false" ? false :
-            this._stringValue.Length > 0;
+        return this._stringValue is "true" || (this._stringValue is not "false" && this._stringValue.Length > 0);
     }
 
     private bool? NumberToBoolean()

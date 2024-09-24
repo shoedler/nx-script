@@ -27,6 +27,8 @@ if (args.Length == 2)
 
 UsageExit();
 
+return;
+
 int RunFile(string path)
 {
     WaitForFileSync(path);
@@ -82,15 +84,16 @@ int WatchFile(string path)
 
     WaitForFileSync(path);
 
-    var watcher = new FileSystemWatcher();
-
-    watcher.Path = Path.GetDirectoryName(path)!;
-    watcher.Filter = Path.GetFileName(path);
-
-    watcher.NotifyFilter = NotifyFilters.LastWrite;
+    var watcher = new FileSystemWatcher
+    {
+        EnableRaisingEvents = true,
+        Filter = Path.GetFileName(path),
+        InternalBufferSize = 0,
+        NotifyFilter = NotifyFilters.LastWrite,
+        Path = Path.GetDirectoryName(path)!,
+    };
 
     watcher.Changed += OnChanged;
-    watcher.EnableRaisingEvents = true;
 
     // Trigger initially
     OnChanged(null, new FileSystemEventArgs(WatcherChangeTypes.All, watcher.Path, watcher.Filter));
