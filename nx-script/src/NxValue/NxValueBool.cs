@@ -28,7 +28,7 @@ public class NxValueBool : NxValue
     }
 
     public override int GetHashCode() => this.BoolValue.GetHashCode();
-    
+
     public override bool Equals(object? obj)
     {
         if (obj == null || this.GetType() != obj.GetType())
@@ -52,7 +52,7 @@ public class NxValueBool : NxValue
 
     public override bool AsBool() => this.BoolValue;
 
-    public override List<NxValue> AsSeq() => [ new NxValueBool(this.BoolValue) ];
+    public override List<NxValue> AsSeq() => [new NxValueBool(this.BoolValue)];
 
     public override Dictionary<NxValue, NxValue> AsObj() => new()
     {

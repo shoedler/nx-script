@@ -47,5 +47,5 @@ public class NxValueSeq(List<NxValue> value) : NxValue
     }
 
     public override Func<List<NxValue>, NxValue> AsFn() => _ => this;
-    
+
 }

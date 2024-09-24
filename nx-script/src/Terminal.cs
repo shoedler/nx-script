@@ -40,6 +40,6 @@ internal static class Terminal
 
     public static void Separate()
     {
-        Console.WriteLine(new string('-', Console.BufferWidth -1));
+        Console.WriteLine(new string('-', Console.BufferWidth - 1));
     }
 }

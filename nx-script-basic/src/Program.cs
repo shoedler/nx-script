@@ -8,7 +8,7 @@ static void Abort(string type, string message)
     Environment.Exit(1);
 }
 
-if (args.Length != 1) 
+if (args.Length != 1)
     Abort("IO ERROR", "Missing path to source file.");
 if (!File.Exists(args[0]))
     Abort("IO ERROR", $"File {args[0]} does not exist.");

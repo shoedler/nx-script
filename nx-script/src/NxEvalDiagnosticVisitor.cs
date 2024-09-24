@@ -10,10 +10,9 @@ public class NxEvalDiagnosticVisitor : NxEvalVisitor
     public NxEvalDiagnosticVisitor(string path) : base(path)
     {
         this.Scopes = [this];
-        
     }
 
-    protected NxEvalDiagnosticVisitor(NxEvalVisitor upper) : base(upper) 
+    protected NxEvalDiagnosticVisitor(NxEvalVisitor upper) : base(upper)
     {
         // Add myself to Scopes list
         var root = this.GetRoot();
@@ -30,7 +29,7 @@ public class NxEvalDiagnosticVisitor : NxEvalVisitor
     {
         return new NxEvalDiagnosticVisitor(this);
     }
-    
+
     internal NxEvalDiagnosticVisitor GetRoot()
     {
         var ptr = this;

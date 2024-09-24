@@ -24,7 +24,7 @@ public class NxValueFn(Func<List<NxValue>, NxValue> value) : NxValue
 
     public override bool AsBool() => true; // TODO: Move to Constants
 
-    public override List<NxValue> AsSeq() => [ new NxValueFn(this.FnValue) ];
+    public override List<NxValue> AsSeq() => [new NxValueFn(this.FnValue)];
 
     public override Dictionary<NxValue, NxValue> AsObj() => new()
     {

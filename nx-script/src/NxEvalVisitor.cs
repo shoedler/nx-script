@@ -29,8 +29,8 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
                     NxValueType.String => $"{arg.AsString()}".InGreen(),
                     NxValueType.Bool => arg.AsString().InMagenta(),
                     NxValueType.Number => arg.AsString().InYellow(),
-                    NxValueType.Seq or 
-                    NxValueType.Obj or 
+                    NxValueType.Seq or
+                    NxValueType.Obj or
                     NxValueType.Fn => arg.AsString().InCyan(),
                     NxValueType.Nil => "nil".InBlue(),
                     _ => arg.AsString()
@@ -111,7 +111,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
                 scope.Variables.AsEnumerable().ToList()
                     .ForEach((pair) => Console.WriteLine($"{indent}{pair.Key}:\t{pair.Value.AsString()}"));
             }
-                
+
             return new NxValueNil();
         });
 
@@ -141,7 +141,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
     public NxValue VisitStat([NotNull] NxParser.StatContext context)
     {
 
-       return this.VisitChildren(context);;
+        return this.VisitChildren(context); ;
     }
 
     public NxValue VisitVar_declaration([NotNull] NxParser.Var_declarationContext context)
@@ -182,7 +182,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
         while (this.Visit(context.expr()).AsBool())
         {
             lastValue = this.Visit(context.stat_block());
-            if (panic++ <= Constants.Limits.MaxLoopIter) 
+            if (panic++ <= Constants.Limits.MaxLoopIter)
             {
                 throw NxEvalException.FromContext($"Panic! Loop did not finish after {panic} iterations", context);
             }
@@ -367,7 +367,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
 
         return context.op.Type switch
         {
-            NxParser.EQ => NxValue.Eq(left,right),
+            NxParser.EQ => NxValue.Eq(left, right),
             NxParser.NEQ => NxValue.Neq(left, right),
             _ => throw NxEvalException.FromContext($"Don't know this equality operator '{context.GetText()}'", context)
         };
