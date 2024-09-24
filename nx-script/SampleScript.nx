@@ -240,7 +240,7 @@ for_each([1,2,3], fn x, i, seq -> print("  value at", i, x))
 let y = [] + "Hhhh"
 print("y before mapping =",y)
 map(y, fn x, i, seq -> x + "e ")
-print("y after mapping =",y)
+print("y after mapping =", y)
 
 let str_seq = map([] + "iii", fn x, i, seq -> "h" + x)
 print("str_seq =", str_seq)
@@ -290,3 +290,74 @@ ret 1
 // }
 
 // print("Sum:", sum) // 54951 took 507ms (Debug build)
+
+
+
+
+
+
+
+
+
+
+// ---------------------------------------------------------------------------------------------------------------
+// This code is used for the README screenshot - ignore it
+// ---------------------------------------------------------------------------------------------------------------
+
+
+
+
+                                                // // Recursive functions
+                                                // let fib = fn n -> if n <= 1 ret n else ret (fib(n-1) + fib(n-2))
+
+                                                // print("fib(15) =", fib(15)) // 610
+
+                                                // // Home-brewed higher order functions like 'map' for sequences
+                                                // let map = fn seq, callback -> {
+                                                //     let i = 0
+                                                //     while i < len(seq) {
+                                                //         seq[i] = callback(seq[i], i, seq)
+                                                //         i = i + 1
+                                                //     }
+                                                //     ret seq
+                                                // }
+
+                                                // let str_seq = map([] + "iii", fn x, i, seq -> "h" + x)
+                                                // print("str_seq =", str_seq) // ["hi", "hi", "hi"]
+
+                                                // // ...or 'for_each' 
+                                                // let for_each = fn seq, callback -> {
+                                                //     let i = 0
+                                                //     while i < len(seq) {
+                                                //         callback(seq[i], i, seq)
+                                                //         i = i + 1
+                                                //     }
+                                                // }
+
+                                                // for_each([1,2,3], fn x, i, seq -> print("  value at", i, x))
+
+                                                // // Objects can be indexed with reference types!
+                                                // let nested = {1:2, 3:4, 5:6}
+                                                // let obj = {
+                                                //     1: "Key is number",
+                                                //     1.1111112: "Key is decimal number",
+                                                //     1.1111111: "Key is a whole different number",
+                                                //     true: "Key is boolean",
+                                                //     "foo": "Key is string",
+                                                //     nested: "Key is also a reference",
+                                                //     nil: "Key is nil",
+                                                //     ([1,2,3]): "Key is a seq",
+                                                // }
+
+                                                // print(obj[nested]) // Key is also a reference
+                                                // print(obj[[1,2,3]]) // nil, because [1,2,3] is a new object
+                                                // print(obj[1.1111111]) // Key is a whole different number
+
+                                                // // ...
+
+                                                // ret 1
+
+
+
+
+// ---------------------------------------------------------------------------------------------------------------
