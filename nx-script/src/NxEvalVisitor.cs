@@ -140,8 +140,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
     ///
     public NxValue VisitStat([NotNull] NxParser.StatContext context)
     {
-
-        return this.VisitChildren(context); ;
+        return this.VisitChildren(context);
     }
 
     public NxValue VisitVar_declaration([NotNull] NxParser.Var_declarationContext context)
