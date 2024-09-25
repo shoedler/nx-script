@@ -215,10 +215,13 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
 
     public NxValue VisitObj_literal([NotNull] NxParser.Obj_literalContext context)
     {
-        var atoms = context.atom().Select(this.Visit);
-        var expressions = context.expr().Select(this.Visit);
+        var pairs = context.atom().Zip(context.expr()).Select((pair) =>
+        {
+            var (key, value) = pair;
+            return (this.Visit(key), this.Visit(value));
+        });
 
-        return new NxValueObj(atoms.Zip(expressions));
+        return new NxValueObj(pairs);
     }
 
     public NxValue VisitFn_literal([NotNull] NxParser.Fn_literalContext context)
@@ -239,7 +242,7 @@ public class NxEvalVisitor : AbstractParseTreeVisitor<NxValue>, INxVisitor<NxVal
 
             foreach (var (argName, value) in argNames.Zip(args))
             {
-                // We deliberaltely set it manually here. Bc if there's a an identically named variable above, it's not gonna be fun.
+                // We deliberately set it manually here. Bc if there's an identically named variable above, it's not gonna be fun.
                 fnVisitor.Variables[argName] = value ?? throw NxEvalException.FromContext($"Missing arg {argName}", context);
             }
 
